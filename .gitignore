@@ -1,2 +1,3 @@
 data/
-__pycache__
+old_method/
+__pycache__/
