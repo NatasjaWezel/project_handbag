@@ -1,0 +1,26 @@
+class Atom:
+    """ This class holds atom objects. """ 
+
+    def __init__(self, label, atomtype, x, y, z):
+        self.label = label
+        self.type = atomtype
+
+        if not type(x) == float and "(" in x:
+            x = x.split("(")[0]
+        if not type(y) == float and "(" in y:
+            y = y.split("(")[0]
+        if not type(z) == float and "(" in z:
+            z = z.split("(")[0]
+
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+
+        self.is_part_of_target = False
+
+    def highlight(self):
+        self.is_part_of_target = True
+
+    def __str__(self):
+        return self.label + ": " + str(self.x) + ", " + str(self.y) + ", " + str(self.z)
+
