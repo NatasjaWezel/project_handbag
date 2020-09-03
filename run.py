@@ -1,5 +1,4 @@
-from Atom import Atom
-from Molecule import Molecule
+from headers import *
 
 import numpy as np
 
@@ -7,21 +6,11 @@ import copy as copy
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from rotation_helpers import rotate_molecule
+from rotation_helpers import rotate_group
 
-from tests import check_new_molecule_alignment
+from tests import check_new_group_alignment
 
-# implement bonds for nicer view when plotting
-# TODO: See if you can write a function that extracts this from the cif file
-BONDS_ABOKEJ = [["N1", "O1"], 
-                ["N1", "O2"], 
-                ["N1", "O2A"],
-                ["C5", "O6"]]
-
-BONDS_AJOWIG = [["N1", "O1"],
-                ["N1", "O2"],
-                ["N1", "O3"],
-                ["C61", "O39"]]
+from helpers import load_molecule
 
 def main():
 
@@ -33,27 +22,30 @@ def main():
 
         # center on N atom
         atom_to_center = "N1"
-        molecule.center_coordinates(atom_to_center=atom_to_center)
+
+        # for group in groups
+        group = molecule.groups[0]
+        group.center_coordinates(atom_to_center=atom_to_center)
         
         # TODO: abstract these from file so you only have to say "center on N atom"
         # now it can give a key error
         atoms_to_put_in_plane = ["O1", "O2"]
-        molecule = perform_rotations(molecule, atoms_to_put_in_plane, plot=False, bonds=bond)
+        group = perform_rotations(group, atoms_to_put_in_plane, plot=False, bonds=bond)
 
         # test if everything went right (if the math is allright)
         print(molecule.label, end=": ")
-        check_new_molecule_alignment(molecule, atom_to_center, atoms_to_put_in_plane)
+        check_new_group_alignment(group, atom_to_center, atoms_to_put_in_plane)
 
 
 
-def perform_rotations(molecule, atoms_to_put_in_plane, plot, bonds):
+def perform_rotations(group, atoms_to_put_in_plane, plot, bonds):
     """ Performs three rotations to lie three of the atoms in the xy plane, one of those
         on the x-axis. """ 
 
     print("Original coordinates")
-    print(molecule)
+    print(group)
     
-    molecules_to_plot = []
+    groups_to_plot = []
     labels = []
     # molecules_to_plot.append(copy.deepcopy(molecule))
     # labels.append("original")
@@ -61,68 +53,68 @@ def perform_rotations(molecule, atoms_to_put_in_plane, plot, bonds):
     """ First rotation: puts first atom on xy-plane if it already was on a plane, 
         and above the x-axis if it wasn't by rotating around the z-axis. """
     # if first atom doesn't lie in any plane, some extra preparation is required
-    atom = molecule.highlighted_atoms[atoms_to_put_in_plane[0]]
+    atom = group.atoms[atoms_to_put_in_plane[0]]
     
     not_in_any_plane = False
     
     if not atom.x == 0.0 and not atom.y == 0.0 and not atom.z == 0.0:
         not_in_any_plane = True
     
-    molecule = rotate_molecule(molecule=molecule, atom=atoms_to_put_in_plane[0], ax="z", not_in_any_plane=not_in_any_plane)
+    molecule = rotate_group(group=group, atom=atoms_to_put_in_plane[0], ax="z", not_in_any_plane=not_in_any_plane)
    
     print("Coordinates after first rotation")
     print(molecule)
-    # molecules_to_plot.append(copy.deepcopy(molecule))
+    # groups_to_plot.append(copy.deepcopy(molecule))
     # labels.append("rotation1")
 
     """ Second rotation: puts first atom on x-axis by rotating around y-axis. """
-    molecule = rotate_molecule(molecule=molecule, atom=atoms_to_put_in_plane[0], ax="y", not_in_any_plane=False)
+    molecule = rotate_group(group=group, atom=atoms_to_put_in_plane[0], ax="y", not_in_any_plane=False)
 
     print("Coordinates after second rotation")
     print(molecule)
-    molecules_to_plot.append(copy.deepcopy(molecule))
+    groups_to_plot.append(copy.deepcopy(molecule))
     labels.append("rotation2")
 
     """ Third rotation: puts second atom in x-y plane by rotating around the x-axis. """
-    molecule = rotate_molecule(molecule=molecule, atom=atoms_to_put_in_plane[1], ax="x", not_in_any_plane=True)
+    molecule = rotate_group(group=group, atom=atoms_to_put_in_plane[1], ax="x", not_in_any_plane=True)
 
     print("Coordinates after third rotation")
     print(molecule)
-    molecules_to_plot.append(copy.deepcopy(molecule))
+    groups_to_plot.append(copy.deepcopy(molecule))
     labels.append("rotation3")
 
     molecule.invert_if_neccessary()
 
     print("Coordinates after inversion")
     print(molecule)
-    molecules_to_plot.append(copy.deepcopy(molecule))
+    groups_to_plot.append(copy.deepcopy(molecule))
     labels.append("inversion")
 
     if plot:
-        plot_molecules(molecules_to_plot, labels=labels, bonds=bonds)
+        plot_groups(groups_to_plot, labels=labels, bonds=bonds)
 
     return molecule
 
-def plot_molecules(molecules, labels, bonds):
+def plot_groups(groups, labels, bonds):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
     colors = ["red", "gold", "green", "dodgerblue", "fuchsia"]
 
-    for i, molecule in enumerate(molecules):
+    for i, group in enumerate(groups):
 
-        atom = list(molecule.highlighted_atoms.values())[0]
+        atom = list(group.atoms.values())[0]
         ax.scatter(atom.x, atom.y, atom.z, color=colors[i], label=labels[i])
         ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black') 
         
-        for atom in list(molecule.highlighted_atoms.values())[1:]:
+        for atom in list(group.atoms.values())[1:]:
             ax.scatter(atom.x, atom.y, atom.z, color=colors[i])
             ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black')                 
         
         for bond in bonds:
-            x = [molecule.highlighted_atoms[bond[0]].x, molecule.highlighted_atoms[bond[1]].x]
-            y = [molecule.highlighted_atoms[bond[0]].y, molecule.highlighted_atoms[bond[1]].y]
-            z = [molecule.highlighted_atoms[bond[0]].z, molecule.highlighted_atoms[bond[1]].z]
+            x = [group.atoms[bond[0]].x, group.atoms[bond[1]].x]
+            y = [group.atoms[bond[0]].y, group.atoms[bond[1]].y]
+            z = [group.atoms[bond[0]].z, group.atoms[bond[1]].z]
 
             ax.plot(x, y, z, color=colors[i])
 
@@ -135,58 +127,6 @@ def plot_molecules(molecules, labels, bonds):
     ax.set_zlim(-0.2, 0.2)
     
     plt.show()
-
-
-def load_molecule(filename):
-    """ Loads a molecule from a CIF file. Filename should be provided. """  
-
-    with open(filename) as inputfile:
-        cif_file = inputfile.readlines()
-
-    reading_coordinates = False
-    reading_parameters = False
-    target_atoms = []
-
-    molecule = None
-
-    for line in cif_file:
-
-        if line.startswith("_database_code_CSD"):
-            label = line.split()[1]
-            molecule = Molecule(label)
-
-        # switch reading coordinates
-        if line.startswith("_atom_site_label"):
-            reading_coordinates = True
-
-        if reading_coordinates == True and line.startswith("loop"):
-            reading_coordinates = False
-
-        if reading_coordinates == True and not line.startswith("_"):
-            information = line.split()
-            atom = Atom(label=information[0], atomtype=information[1], x=information[2], y=information[3], z=information[4])
-            molecule.extend_molecule(atom)
-
-        # switch reading extra parameters
-        if line.startswith("_ccdc_geom_distance_query_id"):
-            reading_parameters = True
-
-        if reading_parameters and not "END" in line and not line.startswith("_"):
-            param = line.split()
-            label1 = param[5]
-            label2 = param[6]
-
-            if not label1 in target_atoms:
-                target_atoms.append(label1)
-            if not label2 in target_atoms:
-                target_atoms.append(label2)
-
-    molecule.highlight_target_atoms(target_atoms)
-    
-    return molecule
-
-
-
 
 
 if __name__ == "__main__":

@@ -18,9 +18,6 @@ class Atom:
 
         self.is_part_of_target = False
 
-    def highlight(self):
-        self.is_part_of_target = True
-
     def __str__(self):
         return self.label + ": " + str(self.x) + ", " + str(self.y) + ", " + str(self.z)
 

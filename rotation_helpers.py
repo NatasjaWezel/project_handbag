@@ -1,11 +1,11 @@
 import numpy as np
 import math
 
-def rotate_molecule(molecule, atom, ax, not_in_any_plane):
+def rotate_group(group, atom, ax, not_in_any_plane):
     """ Finds coordination vector, calculates its angle with corresponding ax and
         then rotates the molecule. Returns the molecule with it's new coordinates. """ 
 
-    atom = molecule.highlighted_atoms[atom]
+    atom = group.atoms[atom]
     coord_vector = [atom.x, atom.y, atom.z]
 
     # if the atom is not in a single plane, project it onto the xy plane for the first rotation
@@ -37,9 +37,9 @@ def rotate_molecule(molecule, atom, ax, not_in_any_plane):
         if atom.y < 0:
             angle = -alpha
 
-    molecule = calculate_rotation(molecule=molecule, angle=angle, ax=ax)
+    group = calculate_rotation(group=group, angle=angle, ax=ax)
 
-    return molecule
+    return group
 
 def find_angles(coord_vector):
     """ Rotates the molecule so that the contact group is always in the same position. 
@@ -59,9 +59,9 @@ def find_angles(coord_vector):
     return alpha, beta, gamma
 
 
-def calculate_rotation(molecule, angle, ax):
+def calculate_rotation(group, angle, ax):
     # rotate all coordinates according to the previously defined rotation matrices
-    for atom in molecule.highlighted_atoms.values():
+    for atom in group.atoms.values():
         coord_vector = np.array([atom.x, atom.y, atom.z])
 
         if ax == "x":
@@ -73,7 +73,7 @@ def calculate_rotation(molecule, angle, ax):
             
         atom.x, atom.y, atom.z = coord_vector[0], coord_vector[1], coord_vector[2]
 
-    return molecule
+    return group
 
 
 def rotate_x(angle):
