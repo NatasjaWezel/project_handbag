@@ -9,72 +9,124 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from rotation_helpers import rotate_molecule
 
+from tests import check_new_molecule_alignment
+
+# implement bonds for nicer view when plotting
+# TODO: See if you can write a function that extracts this from the cif file
 BONDS_ABOKEJ = [["N1", "O1"], 
                 ["N1", "O2"], 
                 ["N1", "O2A"],
                 ["C5", "O6"]]
 
+BONDS_AJOWIG = [["N1", "O1"],
+                ["N1", "O2"],
+                ["N1", "O3"],
+                ["C61", "O39"]]
+
 def main():
 
-    molecule = load_molecule(filename="data/NO3_CO_vdw5/ABOKEJ.CO_NO3_vdw5.cif")
+    filenames = ["data/NO3_CO_vdw5/ABOKEJ.CO_NO3_vdw5.cif", "data/NO3_CO_vdw5/AJOWIG.CO_NO3_vdw5.cif"]
+    bonds = [BONDS_ABOKEJ, BONDS_AJOWIG]
 
-    # abstract these from file so you only have to say "center on N atom"
-    atom_to_center = "N1"
-    atoms_to_put_in_plane = ["O2", "O2A"]
+    for bond, filename in zip(bonds, filenames):
+        molecule = load_molecule(filename=filename)
 
-    molecule.center_coordinates(atom_to_center=atom_to_center)
-    
-    molecule = perform_rotations(molecule, atoms_to_put_in_plane, plot=False)
+        # center on N atom
+        atom_to_center = "N1"
+        molecule.center_coordinates(atom_to_center=atom_to_center)
+        
+        # TODO: abstract these from file so you only have to say "center on N atom"
+        # now it can give a key error
+        atoms_to_put_in_plane = ["O1", "O2"]
+        molecule = perform_rotations(molecule, atoms_to_put_in_plane, plot=False, bonds=bond)
+
+        # test if everything went right (if the math is allright)
+        print(molecule.label, end=": ")
+        check_new_molecule_alignment(molecule, atom_to_center, atoms_to_put_in_plane)
 
 
-def perform_rotations(molecule, atoms_to_put_in_plane, plot):
+
+def perform_rotations(molecule, atoms_to_put_in_plane, plot, bonds):
+    """ Performs three rotations to lie three of the atoms in the xy plane, one of those
+        on the x-axis. """ 
+
     print("Original coordinates")
     print(molecule)
     
     molecules_to_plot = []
-    molecules_to_plot.append(copy.deepcopy(molecule))
+    labels = []
+    # molecules_to_plot.append(copy.deepcopy(molecule))
+    # labels.append("original")
 
-    molecule = rotate_molecule(molecule=molecule, atom=atoms_to_put_in_plane[0], ax="z", not_in_any_plane=True)
-
+    """ First rotation: puts first atom on xy-plane if it already was on a plane, 
+        and above the x-axis if it wasn't by rotating around the z-axis. """
+    # if first atom doesn't lie in any plane, some extra preparation is required
+    atom = molecule.highlighted_atoms[atoms_to_put_in_plane[0]]
+    
+    not_in_any_plane = False
+    
+    if not atom.x == 0.0 and not atom.y == 0.0 and not atom.z == 0.0:
+        not_in_any_plane = True
+    
+    molecule = rotate_molecule(molecule=molecule, atom=atoms_to_put_in_plane[0], ax="z", not_in_any_plane=not_in_any_plane)
+   
     print("Coordinates after first rotation")
     print(molecule)
-    molecules_to_plot.append(copy.deepcopy(molecule))
+    # molecules_to_plot.append(copy.deepcopy(molecule))
+    # labels.append("rotation1")
 
+    """ Second rotation: puts first atom on x-axis by rotating around y-axis. """
     molecule = rotate_molecule(molecule=molecule, atom=atoms_to_put_in_plane[0], ax="y", not_in_any_plane=False)
 
     print("Coordinates after second rotation")
     print(molecule)
     molecules_to_plot.append(copy.deepcopy(molecule))
+    labels.append("rotation2")
 
-    molecule = rotate_molecule(molecule=molecule, atom=atoms_to_put_in_plane[1], ax="x", not_in_any_plane=False)
+    """ Third rotation: puts second atom in x-y plane by rotating around the x-axis. """
+    molecule = rotate_molecule(molecule=molecule, atom=atoms_to_put_in_plane[1], ax="x", not_in_any_plane=True)
 
     print("Coordinates after third rotation")
     print(molecule)
     molecules_to_plot.append(copy.deepcopy(molecule))
+    labels.append("rotation3")
+
+    molecule.invert_if_neccessary()
+
+    print("Coordinates after inversion")
+    print(molecule)
+    molecules_to_plot.append(copy.deepcopy(molecule))
+    labels.append("inversion")
 
     if plot:
-        plot_molecules([molecule])
+        plot_molecules(molecules_to_plot, labels=labels, bonds=bonds)
 
-    return
+    return molecule
 
-def plot_molecules(molecules):
+def plot_molecules(molecules, labels, bonds):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
-    colors = ["red", "green", "blue", "purple"]
+    colors = ["red", "gold", "green", "dodgerblue", "fuchsia"]
 
     for i, molecule in enumerate(molecules):
-        for atom in molecule.highlighted_atoms.values():
+
+        atom = list(molecule.highlighted_atoms.values())[0]
+        ax.scatter(atom.x, atom.y, atom.z, color=colors[i], label=labels[i])
+        ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black') 
+        
+        for atom in list(molecule.highlighted_atoms.values())[1:]:
             ax.scatter(atom.x, atom.y, atom.z, color=colors[i])
             ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black')                 
-        for bond in BONDS_ABOKEJ:
+        
+        for bond in bonds:
             x = [molecule.highlighted_atoms[bond[0]].x, molecule.highlighted_atoms[bond[1]].x]
             y = [molecule.highlighted_atoms[bond[0]].y, molecule.highlighted_atoms[bond[1]].y]
             z = [molecule.highlighted_atoms[bond[0]].z, molecule.highlighted_atoms[bond[1]].z]
 
             ax.plot(x, y, z, color=colors[i])
 
-
+    ax.legend()
     ax.set_xlabel('X')
     ax.set_xlim(-0.2, 0.2)
     ax.set_ylabel('Y')
@@ -95,9 +147,13 @@ def load_molecule(filename):
     reading_parameters = False
     target_atoms = []
 
-    molecule = Molecule()
+    molecule = None
 
     for line in cif_file:
+
+        if line.startswith("_database_code_CSD"):
+            label = line.split()[1]
+            molecule = Molecule(label)
 
         # switch reading coordinates
         if line.startswith("_atom_site_label"):

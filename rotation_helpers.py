@@ -1,36 +1,42 @@
 import numpy as np
+import math
 
 def rotate_molecule(molecule, atom, ax, not_in_any_plane):
     """ Finds coordination vector, calculates its angle with corresponding ax and
         then rotates the molecule. Returns the molecule with it's new coordinates. """ 
 
-    coord_vector = [molecule.highlighted_atoms[atom].x, molecule.highlighted_atoms[atom].y, molecule.highlighted_atoms[atom].z]
+    atom = molecule.highlighted_atoms[atom]
+    coord_vector = [atom.x, atom.y, atom.z]
 
     # if the atom is not in a single plane, project it onto the xy plane for the first rotation
     if not_in_any_plane:
         if ax == "x":
-            pass
+            coord_vector = [0, atom.y, atom.z]
         elif ax == "y":
-            pass
+            coord_vector = [atom.x, atom.y, atom.z]
         else:
-            coord_vector = [molecule.highlighted_atoms[atom].x, molecule.highlighted_atoms[atom].y, 0]
+            coord_vector = [atom.x, atom.y, 0]
         
     # calculate angles and perform rotation
     alpha, beta, _ = find_angles(coord_vector=coord_vector)
     
     if ax == "x":
         angle = beta
+
+        if atom.z < 0:
+            angle = -beta
     elif ax == "y":
         angle = -alpha
 
-        if molecule.highlighted_atoms[atom].z < 0:
+        if atom.z < 0:
             alpha = alpha
-    else:
+
+    elif ax == "z":
         angle = alpha
 
-        if molecule.highlighted_atoms[atom].y < 0:
+        if atom.y < 0:
             angle = -alpha
-    
+
     molecule = calculate_rotation(molecule=molecule, angle=angle, ax=ax)
 
     return molecule
