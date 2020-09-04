@@ -9,7 +9,7 @@ def check_new_fragment_alignment(fragment, atom_to_center, atoms_to_put_in_plane
     print("Passed all checks, fragment's new alignment is correct.")
 
 def test_centering(fragment, atom_to_center):
-    
+
     atom = fragment.atoms[atom_to_center]
     if atom.x != 0.0 or atom.y != 0.0 or atom.z != 0.0:
         assert atom_to_center + "atom is not centered right"

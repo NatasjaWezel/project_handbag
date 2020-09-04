@@ -14,28 +14,24 @@ from helpers import load_molecule
 
 def main():
 
-    filenames = ["data/NO3_CO_vdw5/ABOKEJ.CO_NO3_vdw5.cif", "data/NO3_CO_vdw5/AJOWIG.CO_NO3_vdw5.cif"]
-    bonds = [BONDS_ABOKEJ, BONDS_AJOWIG]
+    filenames = ["data/ABOKEJ.NO3_CO_vdw5.cif", "data/AJOWIG.NO3_CO_vdw5.cif"]
 
-    for bond, filename in zip(bonds, filenames):
+    for filename in filenames:
         molecule = load_molecule(filename=filename)
 
         # center on N atom
-        atom_to_center = "N1"
+        atom_to_center = "N"
+        molecule.center_fragments(atom_to_center)
 
-        # for fragment in fragments
-        fragment = molecule.fragments[0]
-        fragment.center_coordinates(atom_to_center=atom_to_center)
-        
-        # TODO: abstract these from file so you only have to say "center on N atom"
-        # now it can give a key error
-        atoms_to_put_in_plane = ["O1", "O2"]
-        fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False, bonds=bond)
+        for fragment in molecule.fragments:
+            atoms_to_put_in_plane = fragment.find_atoms_for_plane()
+            
+            fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)
+            
+            print(molecule.label, "fragment", fragment.fragment_id, end=": ")
+            check_new_fragment_alignment(fragment, fragment.center_atom.label, atoms_to_put_in_plane)
 
-        # test if everything went right (if the math is allright)
-        print(molecule.label, end=": ")
-        check_new_fragment_alignment(fragment, atom_to_center, atoms_to_put_in_plane)
-
+            fragment.invert_if_neccessary()
 
 if __name__ == "__main__":
     main()
