@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 # needed for matrix calculations
 import numpy as np
 
+import copy
+
 class Molecule:
     """ This class can hold a molecule, which is a list of atoms. """  
 
@@ -27,7 +29,9 @@ class Molecule:
 
             for atom in self.all_atoms:
                 if atom.label in fragment_labels[fragment_id]:
-                    fragment.atoms[atom.label] = atom
+                    # this can't be a reference since atoms can be in multiple
+                    # fragments and we're gonna manipulate its coordinates
+                    fragment.atoms[atom.label] = copy.deepcopy(atom)
 
             self.fragments.append(fragment)
 
@@ -92,5 +96,9 @@ class Fragment:
             z = 0.0 if atom.z < CUT_OFF_ZERO and atom.z > -CUT_OFF_ZERO else atom.z 
 
             molecule_string += atom.label + ": " + str(x) + ", " + str(y) + ", " + str(z) + "\n"
+
+        molecule_string += "Bonds in fragment: \n"
+        for bond in self.bonds:
+            molecule_string += bond[0] + "-" + bond[1] +"\n"
 
         return molecule_string

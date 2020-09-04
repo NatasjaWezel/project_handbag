@@ -62,7 +62,6 @@ def load_molecule(filename):
 def process_bond_lines(molecule, bond_lines):
 
     for line in bond_lines:
-        print(line)
         information = line.split()
         bonded_atom1 = information[0]
         bonded_atom2 = information[1]
