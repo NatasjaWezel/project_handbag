@@ -50,11 +50,11 @@ def load_molecule(filename):
 
     # find groups
 
-    # TODO: for now add as one group
-    molecule.add_group(target_atoms)
+    # TODO: for now add as one fragment
+    molecule.add_fragment(target_atoms)
 
     return molecule
 
-def count_groups(molecule, atoms_per_group):
-    assert (type(len(molecule.highlighted_atoms) / atoms_per_group) == int), "amount of groups should be an integer"
-    return len(molecule.highlighted_atoms) / atoms_per_group
+def count_fragments(molecule, atoms_per_fragment):
+    assert (type(len(molecule.highlighted_atoms) / atoms_per_fragment) == int), "amount of fragments should be an integer"
+    return len(molecule.highlighted_atoms) / atoms_per_fragment

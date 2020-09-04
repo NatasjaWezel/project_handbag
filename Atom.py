@@ -18,6 +18,9 @@ class Atom:
 
         self.is_part_of_target = False
 
+    def add_fragment_id(self, fragment_id):
+        self.fragment_id = fragment_id
+
     def __str__(self):
         return self.label + ": " + str(self.x) + ", " + str(self.y) + ", " + str(self.z)
 

@@ -14,23 +14,23 @@ class Molecule:
         self.label = label
         
         self.all_atoms = []
-        self.groups = []
+        self.fragments = []
 
     def extend_molecule(self, atom):
         self.all_atoms.append(atom)
     
-    def add_group(self, group_labels):
+    def add_fragment(self, fragment_labels):
         """ This function adds a pair of target and coordination group. """ 
-        group = Group()
+        fragment = Fragment()
 
         for atom in self.all_atoms:
-            if atom.label in group_labels:
-                group.atoms[atom.label] = atom
+            if atom.label in fragment_labels:
+                fragment.atoms[atom.label] = atom
 
-        self.groups.append(group)
+        self.fragments.append(fragment)
 
 
-class Group:
+class Fragment:
     def __init__(self):
         self.atoms = {}
 

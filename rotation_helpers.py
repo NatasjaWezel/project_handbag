@@ -1,11 +1,11 @@
 import numpy as np
 import math
 
-def rotate_group(group, atom, ax, not_in_any_plane):
+def rotate_fragment(fragment, atom, ax, not_in_any_plane):
     """ Finds coordination vector, calculates its angle with corresponding ax and
         then rotates the molecule. Returns the molecule with it's new coordinates. """ 
 
-    atom = group.atoms[atom]
+    atom = fragment.atoms[atom]
     coord_vector = [atom.x, atom.y, atom.z]
 
     # if the atom is not in a single plane, project it onto the xy plane for the first rotation
@@ -37,12 +37,12 @@ def rotate_group(group, atom, ax, not_in_any_plane):
         if atom.y < 0:
             angle = -alpha
 
-    group = calculate_rotation(group=group, angle=angle, ax=ax)
+    fragment = calculate_rotation(fragment=fragment, angle=angle, ax=ax)
 
-    return group
+    return fragment
 
 def find_angles(coord_vector):
-    """ Rotates the molecule so that the contact group is always in the same position. 
+    """ Rotates the molecule so that the contact fragment is always in the same position. 
         Rotates only the important part of the molecule. """
 
     # x, y, z unitary row vectors:
@@ -59,9 +59,9 @@ def find_angles(coord_vector):
     return alpha, beta, gamma
 
 
-def calculate_rotation(group, angle, ax):
+def calculate_rotation(fragment, angle, ax):
     # rotate all coordinates according to the previously defined rotation matrices
-    for atom in group.atoms.values():
+    for atom in fragment.atoms.values():
         coord_vector = np.array([atom.x, atom.y, atom.z])
 
         if ax == "x":
@@ -73,7 +73,7 @@ def calculate_rotation(group, angle, ax):
             
         atom.x, atom.y, atom.z = coord_vector[0], coord_vector[1], coord_vector[2]
 
-    return group
+    return fragment
 
 
 def rotate_x(angle):
