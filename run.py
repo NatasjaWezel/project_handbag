@@ -1,10 +1,5 @@
-from headers import *
-
+import time
 import numpy as np
-
-import copy as copy
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 from rotation_helpers import perform_rotations
 
@@ -14,7 +9,9 @@ from helpers import load_molecule
 
 def main():
 
-    filenames = ["data/ABOKEJ.NO3_CO_vdw5.cif", "data/AJOWIG.NO3_CO_vdw5.cif"]
+    filenames = ["data/ABOKEJ.NO3_CO_vdw5.cif", "data/AJOWIG.NO3_CO_vdw5.cif", "data/ABINAB.NO3_CO_vdw5.cif"]
+    
+    results_file_name = "results/saved_data" + str(time.time()) + ".csv"
 
     for filename in filenames:
         molecule = load_molecule(filename=filename)
@@ -32,6 +29,11 @@ def main():
             check_new_fragment_alignment(fragment, fragment.center_atom.label, atoms_to_put_in_plane)
 
             fragment.invert_if_neccessary()
+
+        # per file save the new datapoints of each fragment
+        molecule.save_fragments_data(results_file_name)
+
+
 
 if __name__ == "__main__":
     main()

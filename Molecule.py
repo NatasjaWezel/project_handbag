@@ -1,8 +1,5 @@
 from headers import *
-
-# needed to plot the molecule (in 3D)
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
+import csv
 
 # needed for matrix calculations
 import numpy as np
@@ -39,6 +36,16 @@ class Molecule:
         for fragment in self.fragments:
             fragment.set_center(atom_to_center)
             fragment.center_coordinates()
+
+    def save_fragments_data(self, filename):
+
+        with open(filename, "a", newline="") as outputfile:
+            writer = csv.writer(outputfile)
+
+            for fragment in self.fragments:
+                for atom in fragment.atoms.values():
+                    writer.writerow([self.label, fragment.fragment_id, atom.label, atom.x, atom.y, atom.z])
+
 
     def __str__(self):
         molecule_string = "\nFragments in molecule: " + self.label + "\n"
