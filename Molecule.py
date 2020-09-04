@@ -35,6 +35,11 @@ class Molecule:
 
             self.fragments.append(fragment)
 
+    def center_fragments(self, atom_to_center):
+        for fragment in self.fragments:
+            fragment.set_center(atom_to_center)
+            fragment.center_coordinates()
+
     def __str__(self):
         molecule_string = "\nFragments in molecule: " + self.label + "\n"
 
@@ -45,9 +50,6 @@ class Molecule:
         return molecule_string
 
         
-
-
-
 class Fragment:
     def __init__(self, fragment_id):
         self.fragment_id = fragment_id
@@ -57,7 +59,26 @@ class Fragment:
     def add_bond(self, bond):
         self.bonds.append(bond)
 
+    def set_center(self, atom_type):
+        for atom in self.atoms.values():
+            if atom_type in atom.label:
+                self.center_atom = atom
+
+    def find_atoms_for_plane(self):
+        attached_atoms = []
+
+        for bond in self.bonds:
+            if bond[0] == self.center_atom.label:
+                attached_atoms.append(bond[1])
+            elif bond[1] == self.center_atom.label:
+                attached_atoms.append(bond[0])
+
+        return attached_atoms[0:2]
+
     def invert_if_neccessary(self):
+        """ Inverts the whole molecule if most of it is on the negative z-axis.
+            Does this by mirroring the sign of the z coordinate. """
+
         z_mean = 0.0
 
         for atom in self.atoms.values():
@@ -72,17 +93,15 @@ class Fragment:
                 elif atom.z > 0:
                     atom.z = atom.z - 2*atom.z
 
-    def center_coordinates(self, atom_to_center):
+    def center_coordinates(self):
         """ This is a function that puts any atom you want at the origin of the
             xyz coordinate system, and moves important atoms according to the change. """ 
 
-        atom_to_center = self.atoms[atom_to_center]
-
-        move_x, move_y, move_z = -atom_to_center.x, -atom_to_center.y, -atom_to_center.z 
-        atom_to_center.x, atom_to_center.y, atom_to_center.z = 0, 0, 0
+        move_x, move_y, move_z = -self.center_atom.x, -self.center_atom.y, -self.center_atom.z 
+        self.center_atom.x, self.center_atom.y, self.center_atom.z = 0, 0, 0
 
         for atom in self.atoms.values():
-            if not atom is atom_to_center:
+            if not atom is self.center_atom:
                 atom.x += move_x
                 atom.y += move_y
                 atom.z += move_z

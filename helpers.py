@@ -5,6 +5,39 @@ from collections import defaultdict
 from Atom import Atom
 from Molecule import Molecule
 
+def plot_fragments(fragments, labels, bonds):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    
+    colors = ["red", "gold", "green", "dodgerblue", "fuchsia"]
+
+    for i, fragment in enumerate(fragments):
+
+        atom = list(fragment.atoms.values())[0]
+        ax.scatter(atom.x, atom.y, atom.z, color=colors[i], label=labels[i])
+        ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black') 
+        
+        for atom in list(fragment.atoms.values())[1:]:
+            ax.scatter(atom.x, atom.y, atom.z, color=colors[i])
+            ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black')                 
+        
+        for bond in bonds:
+            x = [fragment.atoms[bond[0]].x, fragment.atoms[bond[1]].x]
+            y = [fragment.atoms[bond[0]].y, fragment.atoms[bond[1]].y]
+            z = [fragment.atoms[bond[0]].z, fragment.atoms[bond[1]].z]
+
+            ax.plot(x, y, z, color=colors[i])
+
+    ax.legend()
+    ax.set_xlabel('X')
+    ax.set_xlim(-0.2, 0.2)
+    ax.set_ylabel('Y')
+    ax.set_ylim(-0.2, 0.2)
+    ax.set_zlabel('Z')
+    ax.set_zlim(-0.2, 0.2)
+    
+    plt.show()
+
 def load_molecule(filename):
     """ Loads a molecule from a CIF file. Filename should be provided. """  
 
@@ -60,6 +93,8 @@ def load_molecule(filename):
     return molecule
 
 def process_bond_lines(molecule, bond_lines):
+    """ Adds bonds to each fragment in a molecule, by reading which bonds 
+        exist in the inputfile. """
 
     for line in bond_lines:
         information = line.split()
@@ -95,7 +130,3 @@ def process_parameter_lines(molecule, parameterlines):
     molecule.add_fragments(target_atoms)
 
     return molecule
-
-def count_fragments(molecule, atoms_per_fragment):
-    assert (type(len(molecule.highlighted_atoms) / atoms_per_fragment) == int), "amount of fragments should be an integer"
-    return len(molecule.highlighted_atoms) / atoms_per_fragment

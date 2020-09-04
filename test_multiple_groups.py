@@ -1,27 +1,25 @@
 from helpers import load_molecule
+from rotation_helpers import perform_rotations
+from tests import check_new_fragment_alignment
 
 def main():
     filenames = ["data/ABINAB.NO3_CO_vdw5.cif"]
 
     for filename in filenames:
         molecule = load_molecule(filename=filename)
-        print(molecule)
 
         # center on N atom
         atom_to_center = "N"
 
-        # for group in groups
-        # group = molecule.groups[0]
-        # group.center_coordinates(atom_to_center=atom_to_center)
-        
-        # TODO: abstract these from file so you only have to say "center on N atom"
-        # now it can give a key error
-        # atoms_to_put_in_plane = ["O1", "O2"]
-        # group = perform_rotations(group, atoms_to_put_in_plane, plot=False, bonds=bond)
+        molecule.center_fragments(atom_to_center)
 
-        # test if everything went right (if the math is allright)
-        # print(molecule.label, end=": ")
-        # check_new_group_alignment(group, atom_to_center, atoms_to_put_in_plane)
+        for fragment in molecule.fragments:
+            atoms_to_put_in_plane = fragment.find_atoms_for_plane()
+            
+            fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)
+            
+            print(molecule.label, " ", fragment.fragment_id, end=": ")
+            check_new_fragment_alignment(fragment, fragment.center_atom.label, atoms_to_put_in_plane)
 
 
 if __name__ == "__main__":

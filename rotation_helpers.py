@@ -1,5 +1,66 @@
 import numpy as np
 import math
+import copy
+
+from helpers import plot_fragments
+
+def perform_rotations(fragment, atoms_to_put_in_plane, plot):
+    """ Performs three rotations to lie three of the atoms in the xy plane, one of those
+        on the x-axis. """ 
+
+    # print("Original coordinates")
+    # print(fragment)
+    
+    # fragments_to_plot = []
+    # labels = []
+    # molecules_to_plot.append(copy.deepcopy(molecule))
+    # labels.append("original")
+
+    """ First rotation: puts first atom on xy-plane if it already was on a plane, 
+        and above the x-axis if it wasn't by rotating around the z-axis. """
+    # if first atom doesn't lie in any plane, some extra preparation is required
+    atom = fragment.atoms[atoms_to_put_in_plane[0]]
+    
+    not_in_any_plane = False
+    
+    if not atom.x == 0.0 and not atom.y == 0.0 and not atom.z == 0.0:
+        not_in_any_plane = True
+    
+    molecule = rotate_fragment(fragment=fragment, atom=atoms_to_put_in_plane[0], ax="z", not_in_any_plane=not_in_any_plane)
+   
+    # print("Coordinates after first rotation")
+    # print(molecule)
+    # fragments_to_plot.append(copy.deepcopy(molecule))
+    # labels.append("rotation1")
+
+    """ Second rotation: puts first atom on x-axis by rotating around y-axis. """
+    molecule = rotate_fragment(fragment=fragment, atom=atoms_to_put_in_plane[0], ax="y", not_in_any_plane=False)
+
+    # print("Coordinates after second rotation")
+    # print(molecule)
+    # fragments_to_plot.append(copy.deepcopy(molecule))
+    # labels.append("rotation2")
+
+    """ Third rotation: puts second atom in x-y plane by rotating around the x-axis. """
+    molecule = rotate_fragment(fragment=fragment, atom=atoms_to_put_in_plane[1], ax="x", not_in_any_plane=True)
+
+    # print("Coordinates after third rotation")
+    # print(molecule)
+    # fragments_to_plot.append(copy.deepcopy(molecule))
+    # labels.append("rotation3")
+
+    molecule.invert_if_neccessary()
+
+    # print("Coordinates after inversion")
+    # print(molecule)
+    # fragments_to_plot.append(copy.deepcopy(molecule))
+    # labels.append("inversion")
+
+    if plot:
+        plot_fragments(fragments_to_plot, labels=labels, bonds=fragment.bonds)
+
+    return molecule
+
 
 def rotate_fragment(fragment, atom, ax, not_in_any_plane):
     """ Finds coordination vector, calculates its angle with corresponding ax and
