@@ -44,7 +44,6 @@ class Molecule:
         molecule_string = "\nFragments in molecule: " + self.label + "\n"
 
         for fragment in self.fragments:
-            # print(type(fragment))
             molecule_string += "\n" + str(fragment)
 
         return molecule_string

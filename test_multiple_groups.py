@@ -18,9 +18,10 @@ def main():
             
             fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)
             
-            print(molecule.label, " ", fragment.fragment_id, end=": ")
+            print(molecule.label, "fragment", fragment.fragment_id, end=": ")
             check_new_fragment_alignment(fragment, fragment.center_atom.label, atoms_to_put_in_plane)
 
+            fragment.invert_if_neccessary()
 
 if __name__ == "__main__":
     main()
