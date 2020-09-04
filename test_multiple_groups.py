@@ -1,13 +1,14 @@
 from helpers import load_molecule
 
 def main():
-    filenames = ["data/NO3_CO_vdw5/ABINAB.CO_NO3_vdw5.cif"]
+    filenames = ["data/ABINAB.NO3_CO_vdw5.cif"]
 
-    for bond, filename in zip(bonds, filenames):
+    for filename in filenames:
         molecule = load_molecule(filename=filename)
+        print(molecule)
 
         # center on N atom
-        atom_to_center = "N1"
+        atom_to_center = "N"
 
         # for group in groups
         # group = molecule.groups[0]

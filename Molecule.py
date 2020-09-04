@@ -19,20 +19,39 @@ class Molecule:
     def extend_molecule(self, atom):
         self.all_atoms.append(atom)
     
-    def add_fragment(self, fragment_labels):
+    def add_fragments(self, fragment_labels):
         """ This function adds a pair of target and coordination group. """ 
-        fragment = Fragment()
+        
+        for fragment_id in fragment_labels.keys():
+            fragment = Fragment(fragment_id)
 
-        for atom in self.all_atoms:
-            if atom.label in fragment_labels:
-                fragment.atoms[atom.label] = atom
+            for atom in self.all_atoms:
+                if atom.label in fragment_labels[fragment_id]:
+                    fragment.atoms[atom.label] = atom
 
-        self.fragments.append(fragment)
+            self.fragments.append(fragment)
+
+    def __str__(self):
+        molecule_string = "\nFragments in molecule: " + self.label + "\n"
+
+        for fragment in self.fragments:
+            # print(type(fragment))
+            molecule_string += "\n" + str(fragment)
+
+        return molecule_string
+
+        
+
 
 
 class Fragment:
-    def __init__(self):
+    def __init__(self, fragment_id):
+        self.fragment_id = fragment_id
         self.atoms = {}
+        self.bonds = []
+
+    def add_bond(self, bond):
+        self.bonds.append(bond)
 
     def invert_if_neccessary(self):
         z_mean = 0.0
@@ -65,7 +84,7 @@ class Fragment:
                 atom.z += move_z
 
     def __str__(self):
-        molecule_string = ""
+        molecule_string = "Atoms in fragment: " + self.fragment_id + "\n"
 
         for atom in self.atoms.values():
             x = 0.0 if atom.x < CUT_OFF_ZERO and atom.x > -CUT_OFF_ZERO else atom.x 

@@ -1,5 +1,7 @@
 from headers import *
 
+from collections import defaultdict
+
 from Atom import Atom
 from Molecule import Molecule
 
@@ -11,8 +13,10 @@ def load_molecule(filename):
 
     reading_coordinates = False
     reading_parameters = False
+    reading_bonds = False
 
-    target_atoms = []
+    parameterlines = []
+    bond_lines = []
 
     molecule = None
 
@@ -39,19 +43,57 @@ def load_molecule(filename):
             reading_parameters = True
 
         if reading_parameters and not "END" in line and not line.startswith("_"):
-            param = line.split()
-            label1 = param[5]
-            label2 = param[6]
+            parameterlines.append(line)
 
-            if not label1 in target_atoms:
-                target_atoms.append(label1)
-            if not label2 in target_atoms:
-                target_atoms.append(label2)
+        if line.startswith("_geom_bond_atom_site_label_1"):
+            reading_bonds = True
 
-    # find groups
+        if reading_bonds == True and line.startswith("loop"):
+            reading_bonds = False
 
-    # TODO: for now add as one fragment
-    molecule.add_fragment(target_atoms)
+        if reading_bonds == True and not line.startswith("_"):
+            bond_lines.append(line)
+
+    molecule = process_parameter_lines(molecule, parameterlines)
+    molecule = process_bond_lines(molecule, bond_lines)
+
+    return molecule
+
+def process_bond_lines(molecule, bond_lines):
+
+    for line in bond_lines:
+        print(line)
+        information = line.split()
+        bonded_atom1 = information[0]
+        bonded_atom2 = information[1]
+
+        for fragment in molecule.fragments:
+            if bonded_atom1 in fragment.atoms.keys():
+                fragment.add_bond([bonded_atom1, bonded_atom2])
+
+    return molecule
+
+
+def process_parameter_lines(molecule, parameterlines):
+
+    target_atoms = defaultdict(list)
+
+    for line in parameterlines:
+        param = line.split()
+        
+        fragment_id = param[1]
+        
+        label1 = param[5]
+        label2 = param[6]
+
+        target_atoms[fragment_id].append(label1)
+        target_atoms[fragment_id].append(label2)
+
+    # make sure all labels only appear once
+    for fragment_id in target_atoms.keys():
+        target_atoms[fragment_id] = list(set(target_atoms[fragment_id]))
+
+    molecule.add_fragments(target_atoms)
 
     return molecule
 
