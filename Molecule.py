@@ -88,7 +88,7 @@ class Fragment:
         z_mean = 0.0
 
         for atom in self.atoms.values():
-            z_mean += atom.x
+            z_mean += atom.z
         z_mean = z_mean/len(self.atoms)
 
         # switch signs
@@ -113,8 +113,8 @@ class Fragment:
                 atom.z += move_z
 
     def __str__(self):
-        molecule_string = "Atoms in fragment: " + self.fragment_id + "\n"
-
+        molecule_string = "Atoms in fragment: " + str(self.fragment_id) + "\n"
+        # molecule_string = ""
         for atom in self.atoms.values():
             x = 0.0 if atom.x < CUT_OFF_ZERO and atom.x > -CUT_OFF_ZERO else atom.x 
             y = 0.0 if atom.y < CUT_OFF_ZERO and atom.y > -CUT_OFF_ZERO else atom.y 
@@ -123,7 +123,10 @@ class Fragment:
             molecule_string += atom.label + ": " + str(x) + ", " + str(y) + ", " + str(z) + "\n"
 
         molecule_string += "Bonds in fragment: \n"
-        for bond in self.bonds:
-            molecule_string += bond[0] + "-" + bond[1] +"\n"
+        if self.bonds:
+            for bond in self.bonds:
+                molecule_string += bond[0] + "-" + bond[1] +"\n"
+        else:
+            molecule_string += "None\n"
 
         return molecule_string

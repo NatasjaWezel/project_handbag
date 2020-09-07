@@ -3,8 +3,6 @@ import numpy as np
 
 from rotation_helpers import perform_rotations
 
-from tests import check_new_fragment_alignment
-
 from helpers import load_molecule
 
 def main():
@@ -24,14 +22,14 @@ def main():
             atoms_to_put_in_plane = fragment.find_atoms_for_plane()
             
             fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)
+            print(molecule.label, fragment.fragment_id, "Passed all checks. Rotation OK")
             
-            print(molecule.label, "fragment", fragment.fragment_id, end=": ")
-            check_new_fragment_alignment(fragment, fragment.center_atom.label, atoms_to_put_in_plane)
-
             fragment.invert_if_neccessary()
 
         # per file save the new datapoints of each fragment
         molecule.save_fragments_data(results_file_name)
+
+
 
 
 

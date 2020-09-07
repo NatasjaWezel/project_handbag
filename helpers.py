@@ -1,32 +1,36 @@
-from headers import *
-
 from collections import defaultdict
 
 from Atom import Atom
 from Molecule import Molecule
 
-def plot_fragments(fragments, labels, bonds):
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+def plot_fragments(fragments, labels):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
-    colors = ["red", "gold", "green", "dodgerblue", "fuchsia"]
+    colors = ["red", "sandybrown", "gold", "chartreuse", "green", 
+                "mediumturquoise", "dodgerblue", "darkblue", "slateblue",
+                "mediumorchid", "fuchsia"]
 
-    for i, fragment in enumerate(fragments):
+    for i, fragment in enumerate(fragments[:2]):
 
         atom = list(fragment.atoms.values())[0]
-        ax.scatter(atom.x, atom.y, atom.z, color=colors[i], label=labels[i])
+        ax.scatter(atom.x, atom.y, atom.z, color=colors[i % len(colors)], label=labels[i])
         ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black') 
         
         for atom in list(fragment.atoms.values())[1:]:
-            ax.scatter(atom.x, atom.y, atom.z, color=colors[i])
+            ax.scatter(atom.x, atom.y, atom.z, color=colors[i % len(colors)])
             ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black')                 
         
-        for bond in bonds:
-            x = [fragment.atoms[bond[0]].x, fragment.atoms[bond[1]].x]
-            y = [fragment.atoms[bond[0]].y, fragment.atoms[bond[1]].y]
-            z = [fragment.atoms[bond[0]].z, fragment.atoms[bond[1]].z]
+        for bond in fragment.bonds:
+            if bond[0] in fragment.atoms.keys() and bond[1] in fragment.atoms.keys():
+                x = [fragment.atoms[bond[0]].x, fragment.atoms[bond[1]].x]
+                y = [fragment.atoms[bond[0]].y, fragment.atoms[bond[1]].y]
+                z = [fragment.atoms[bond[0]].z, fragment.atoms[bond[1]].z]
 
-            ax.plot(x, y, z, color=colors[i])
+                ax.plot(x, y, z, color=colors[i])
 
     ax.legend()
     ax.set_xlabel('X')

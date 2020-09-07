@@ -3,6 +3,7 @@ import math
 import copy
 
 from helpers import plot_fragments
+from tests import test_rotation1, test_rotation2, test_rotation3
 
 def perform_rotations(fragment, atoms_to_put_in_plane, plot):
     """ Performs three rotations to lie three of the atoms in the xy plane, one of those
@@ -19,12 +20,25 @@ def perform_rotations(fragment, atoms_to_put_in_plane, plot):
         not_in_any_plane = True
     
     fragment = rotate_fragment(fragment=fragment, atom=atoms_to_put_in_plane[0], ax="z", not_in_any_plane=not_in_any_plane)
-   
+    test_rotation1(fragment, atoms_to_put_in_plane)
+
+    # fragments = []
+    # fragments.append(copy.deepcopy(fragment))
+    # print(fragment)
+    # print("Atom to put on x axis: ", atoms_to_put_in_plane[0])
     """ Second rotation: puts first atom on x-axis by rotating around y-axis. """
     fragment = rotate_fragment(fragment=fragment, atom=atoms_to_put_in_plane[0], ax="y", not_in_any_plane=False)
+    
+    # fragments.append(fragment)
+    # print(fragment)
+    # plot_fragments(fragments=fragments, labels=["before", "after"])
+
+
+    test_rotation2(fragment, atoms_to_put_in_plane)
 
     """ Third rotation: puts second atom in x-y plane by rotating around the x-axis. """
     fragment = rotate_fragment(fragment=fragment, atom=atoms_to_put_in_plane[1], ax="x", not_in_any_plane=True)
+    test_rotation3(fragment, atoms_to_put_in_plane)
 
     return fragment
 
@@ -41,7 +55,7 @@ def rotate_fragment(fragment, atom, ax, not_in_any_plane):
         if ax == "x":
             coord_vector = [0, atom.y, atom.z]
         elif ax == "y":
-            coord_vector = [atom.x, atom.y, atom.z]
+            coord_vector = [atom.x, 0, atom.z]
         else:
             coord_vector = [atom.x, atom.y, 0]
         
@@ -54,10 +68,10 @@ def rotate_fragment(fragment, atom, ax, not_in_any_plane):
         if atom.z < 0:
             angle = -beta
     elif ax == "y":
-        angle = -alpha
+        angle = alpha
 
         if atom.z < 0:
-            alpha = alpha
+            angle = -alpha
 
     elif ax == "z":
         angle = alpha
