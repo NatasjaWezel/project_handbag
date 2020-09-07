@@ -4,9 +4,28 @@ import pandas as pd
 from Atom import Atom
 from Molecule import Fragment
 
+import pickle
+
+from run import Save_molecules
+
 def main():
-    labels, fragments = read_csv(filename="results/saved_data1599472981.19713.csv")
-    plot_fragments(fragments, labels=labels)
+    # labels, fragments = read_csv(filename="results/saved_data1599472981.19713.csv")
+    # plot_fragments(fragments, labels=labels)
+
+    f = open('results/saved_data1599480077.3004494.pkl', 'rb')
+    saved_molecules = pickle.load(f)
+    f.close()
+
+    fragments = []
+    labels = []
+
+    for molecule in saved_molecules.molecules:
+        for fragment in molecule.fragments:
+            fragments.append(fragment)
+            labels.append(molecule.label + fragment.fragment_id)
+
+    amount = 5
+    plot_fragments(fragments[:amount], labels[:amount])
 
 def read_csv(filename):
     df = pd.read_csv(filename, header=None)

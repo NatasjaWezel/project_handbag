@@ -14,7 +14,7 @@ def plot_fragments(fragments, labels):
                 "mediumturquoise", "dodgerblue", "darkblue", "slateblue",
                 "mediumorchid", "fuchsia"]
 
-    for i, fragment in enumerate(fragments[:2]):
+    for i, fragment in enumerate(fragments):
 
         atom = list(fragment.atoms.values())[0]
         ax.scatter(atom.x, atom.y, atom.z, color=colors[i % len(colors)], label=labels[i])

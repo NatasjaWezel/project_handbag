@@ -36,6 +36,7 @@ def main():
 
     save_file = open(results_file_name + ".pkl", "wb")
     pickle.dump(save_molecules, save_file)
+    save_file.close()
 
 
 class Save_molecules():
