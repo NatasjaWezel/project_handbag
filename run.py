@@ -5,11 +5,15 @@ from rotation_helpers import perform_rotations
 
 from helpers import load_molecule
 
+import pickle
+
 def main():
 
     filenames = ["data/ABOKEJ.NO3_CO_vdw5.cif", "data/AJOWIG.NO3_CO_vdw5.cif", "data/ABINAB.NO3_CO_vdw5.cif"]
     
-    results_file_name = "results/saved_data" + str(time.time()) + ".csv"
+    results_file_name = "results/saved_data_NO3_CO" + str(time.time())
+
+    save_molecules = Save_molecules()
 
     for filename in filenames:
         molecule = load_molecule(filename=filename)
@@ -27,9 +31,20 @@ def main():
             fragment.invert_if_neccessary()
 
         # per file save the new datapoints of each fragment
-        molecule.save_fragments_data(results_file_name)
+        # molecule.save_fragments_data(results_file_name)
+        save_molecules.add_molecule(molecule)
+
+    save_file = open(results_file_name + ".pkl", "wb")
+    pickle.dump(save_molecules, save_file)
 
 
+class Save_molecules():
+
+    def __init__(self):
+        self.molecules = []
+
+    def add_molecule(self, molecule):
+        self.molecules.append(molecule)
 
 
 
