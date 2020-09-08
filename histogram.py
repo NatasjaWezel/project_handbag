@@ -59,7 +59,7 @@ def plot_density(df):
     
     points = df[df.amount > 0]
     
-    for index, point in points.iterrows():
+    for _, point in points.iterrows():
         plt.scatter(point.xmiddle, point.ymiddle, s=point.amount*1000, c=point.color)
 
     plt.show()
