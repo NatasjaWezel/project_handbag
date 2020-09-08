@@ -1,8 +1,4 @@
 from helpers import plot_fragments
-import pandas as pd
-
-from Atom import Atom
-from Molecule import Fragment
 
 import pickle
 
