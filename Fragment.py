@@ -1,4 +1,5 @@
-      
+from headers import CUT_OFF_ZERO
+
 class Fragment:
     def __init__(self, fragment_id):
         self.fragment_id = fragment_id
