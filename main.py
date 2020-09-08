@@ -34,8 +34,7 @@ def main():
         fragment.invert_if_neccessary()
         
     molecule.save_fragments_data(filename=outputfilename)
-
-
+    
 
 if __name__ == "__main__":
     main()

@@ -14,23 +14,21 @@ def find_maximum(df):
     maxx = df.atom_x.abs().max()
     maxy = df.atom_y.abs().max()
     maxz = df.atom_z.abs().max()
-
-    maximum = max([maxx, maxy, maxz])
-    
-    return maximum
+   
+    return maxx, maxy, maxz
 
 def prepare_df(amount_bins, bins, indices):
     df = pd.DataFrame(columns=['xstart', 'xend', 'ystart', 'yend', 'zstart', 'zend', 'amount'], index=indices)
 
     current_index = 0
     for i in range(0, amount_bins):
-        xstart, xend = bins[i], bins[i + 1]
+        xstart, xend = bins[0][i], bins[0][i + 1]
 
         for j in range(0, amount_bins):
-            ystart, yend = bins[j], bins[j + 1]
+            ystart, yend = bins[1][j], bins[1][j + 1]
 
             for k in range(0, amount_bins):
-                zstart, zend = bins[k], bins[k + 1]
+                zstart, zend = bins[2][k], bins[2][k + 1]
                 
                 amount = 0
 
@@ -39,7 +37,7 @@ def prepare_df(amount_bins, bins, indices):
     
     return df
 
-def plot_density(df, amount_bins, minimum, maximum):
+def plot_density(plotname, df, amount_bins, minx, maxx, miny, maxy, minz, maxz):
     df['ymiddle'] = (df['ystart'] + df['yend']) / 2
     df['xmiddle'] = (df['xstart'] + df['xend']) / 2
     df['zmiddle'] = (df['zstart'] + df['zend']) / 2
@@ -56,15 +54,16 @@ def plot_density(df, amount_bins, minimum, maximum):
         p = ax.scatter(point.xmiddle, point.ymiddle, point.zmiddle, s=point.amount, c=point.amount, cmap=cmap, norm=norm)
 
     ax.set_title("4D density plot\n Bins: " + str(amount_bins))
-    ax.set_xlim(minimum, maximum)
-    ax.set_ylim(minimum, maximum)
-    ax.set_zlim(minimum, maximum)
+    ax.set_xlim(minx, maxx)
+    ax.set_ylim(miny, maxy)
+    ax.set_zlim(minz, maxz)
 
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
 
     fig.colorbar(p)
+    plt.savefig(plotname)
     plt.show()
 
 def count_points_per_square(df, points_df):

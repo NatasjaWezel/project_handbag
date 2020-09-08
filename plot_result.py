@@ -2,10 +2,10 @@ from helpers import plot_fragments
 
 import pickle
 
-from run import Save_molecules
+from make_pickles import Save_molecules
 
 def main():
-    f = open('results/saved_data1599480077.3004494.pkl', 'rb')
+    f = open('results/saved_data_NO3_CO1599578281.7449667.pkl', 'rb')
     saved_molecules = pickle.load(f)
     f.close()
 
