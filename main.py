@@ -17,15 +17,6 @@ def main():
     
     filename = sys.argv[1]
     outputfilename = sys.argv[2]
-    
-    #TODO: think of a smarter way than loading/saving the class for every entry?
-    # like a csv file, but that missed the bonds?
-    try:
-        f = open(outputfilename, 'rb')
-        saved_molecules = pickle.load(f)
-        f.close()
-    except FileNotFoundError:
-        saved_molecules = Save_molecules()
 
     molecule = load_molecule(filename=filename)
 
@@ -36,26 +27,13 @@ def main():
     for fragment in molecule.fragments:
         atoms_to_put_in_plane = fragment.find_atoms_for_plane()
         
+        print(molecule.label, end=" ")
         fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)
-        print(molecule.label, fragment.fragment_id, "Passed all checks. Rotation OK")
+        print(fragment.fragment_id, "Passed all checks. Rotation OK")
         
         fragment.invert_if_neccessary()
-
-    # per file save the new datapoints of each fragment
-    saved_molecules.add_molecule(molecule)
-
-    save_file = open(outputfilename, "wb")
-    pickle.dump(saved_molecules, save_file)
-    save_file.close()
-
-
-class Save_molecules():
-
-    def __init__(self):
-        self.molecules = []
-
-    def add_molecule(self, molecule):
-        self.molecules.append(molecule)
+        
+    molecule.save_fragments_data(filename=outputfilename)
 
 
 
