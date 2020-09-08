@@ -7,35 +7,45 @@ from helpers import load_molecule
 
 import pickle
 
+import sys
+
 def main():
-
-    filenames = ["data/ABOKEJ.NO3_CO_vdw5.cif", "data/AJOWIG.NO3_CO_vdw5.cif", "data/ABINAB.NO3_CO_vdw5.cif"]
     
-    results_file_name = "results/saved_data_NO3_CO" + str(time.time())
+    if len(sys.argv) != 3:
+        print("Usage: python run.py <inputfilename> <outputfilename>")
+        sys.exit(1)
+    
+    filename = sys.argv[1]
+    outputfilename = sys.argv[2]
+    
+    #TODO: think of a smarter way than loading/saving the class for every entry?
+    # like a csv file, but that missed the bonds?
+    try:
+        f = open(outputfilename, 'rb')
+        saved_molecules = pickle.load(f)
+        f.close()
+    except FileNotFoundError:
+        saved_molecules = Save_molecules()
 
-    save_molecules = Save_molecules()
+    molecule = load_molecule(filename=filename)
 
-    for filename in filenames:
-        molecule = load_molecule(filename=filename)
+    # center on N atom
+    atom_to_center = "N"
+    molecule.center_fragments(atom_to_center)
 
-        # center on N atom
-        atom_to_center = "N"
-        molecule.center_fragments(atom_to_center)
+    for fragment in molecule.fragments:
+        atoms_to_put_in_plane = fragment.find_atoms_for_plane()
+        
+        fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)
+        print(molecule.label, fragment.fragment_id, "Passed all checks. Rotation OK")
+        
+        fragment.invert_if_neccessary()
 
-        for fragment in molecule.fragments:
-            atoms_to_put_in_plane = fragment.find_atoms_for_plane()
-            
-            fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)
-            print(molecule.label, fragment.fragment_id, "Passed all checks. Rotation OK")
-            
-            fragment.invert_if_neccessary()
+    # per file save the new datapoints of each fragment
+    saved_molecules.add_molecule(molecule)
 
-        # per file save the new datapoints of each fragment
-        # molecule.save_fragments_data(results_file_name)
-        save_molecules.add_molecule(molecule)
-
-    save_file = open(results_file_name + ".pkl", "wb")
-    pickle.dump(save_molecules, save_file)
+    save_file = open(outputfilename, "wb")
+    pickle.dump(saved_molecules, save_file)
     save_file.close()
 
 

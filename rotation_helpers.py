@@ -7,32 +7,22 @@ from tests import test_rotation1, test_rotation2, test_rotation3
 
 def perform_rotations(fragment, atoms_to_put_in_plane, plot):
     """ Performs three rotations to lie three of the atoms in the xy plane, one of those
-        on the x-axis. """ 
-
-    """ First rotation: puts first atom on xy-plane if it already was on a plane, 
+        on the x-axis. 
+        First rotation: puts first atom on xy-plane if it already was on a plane, 
         and above the x-axis if it wasn't by rotating around the z-axis. """
-    # if first atom doesn't lie in any plane, some extra preparation is required
+
     atom = fragment.atoms[atoms_to_put_in_plane[0]]
     
+    # if first atom doesn't lie in any plane, some extra preparation is required
     not_in_any_plane = False
-    
     if not atom.x == 0.0 and not atom.y == 0.0 and not atom.z == 0.0:
         not_in_any_plane = True
     
     fragment = rotate_fragment(fragment=fragment, atom=atoms_to_put_in_plane[0], ax="z", not_in_any_plane=not_in_any_plane)
     test_rotation1(fragment, atoms_to_put_in_plane)
 
-    # fragments = []
-    # fragments.append(copy.deepcopy(fragment))
-    # print(fragment)
-    # print("Atom to put on x axis: ", atoms_to_put_in_plane[0])
     """ Second rotation: puts first atom on x-axis by rotating around y-axis. """
     fragment = rotate_fragment(fragment=fragment, atom=atoms_to_put_in_plane[0], ax="y", not_in_any_plane=False)
-    
-    # fragments.append(fragment)
-    # print(fragment)
-    # plot_fragments(fragments=fragments, labels=["before", "after"])
-
 
     test_rotation2(fragment, atoms_to_put_in_plane)
 
