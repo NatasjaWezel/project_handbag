@@ -1,10 +1,15 @@
 from headers import CUT_OFF_ZERO
+import math
 
 class Fragment:
-    def __init__(self, fragment_id):
+    def __init__(self, from_entry, fragment_id):
+        self.from_entry = from_entry
         self.fragment_id = fragment_id
         self.atoms = {}
         self.bonds = []
+
+    def add_atom(self, atom):
+        self.atoms[atom.label] = atom
 
     def add_bond(self, bond):
         self.bonds.append(bond)
@@ -13,17 +18,34 @@ class Fragment:
         for atom in self.atoms.values():
             if atom_type in atom.label:
                 self.center_atom = atom
+                atom.distance_to_center = 0
 
+    def find_bonds_NO3_and_distances(self):
+        for atom in self.atoms.values():
+            
+            if not atom == self.center_atom:
+                diffx = abs(atom.x - self.center_atom.x)
+                diffy = abs(atom.y - self.center_atom.y)
+                diffz = abs(atom.z - self.center_atom.z)
+
+                distance = math.sqrt(diffx**2 + diffy**2 + diffz**2)
+                atom.distance_to_center = distance
+
+        self.attached_atoms = sorted(self.atoms.values(), key=lambda x: x.distance_to_center, reverse=False)
+        
+        # TODO: this is now NO3 CO specific. Where to get the bonds from?
+        # the first three of these are bonded to the NO3:
+        for atom in self.attached_atoms[1:4]:
+            self.add_bond([self.center_atom.label, atom.label])
+            atom.part_of = "c"
+
+        # the other two are also attached
+        self.add_bond([self.attached_atoms[4].label, self.attached_atoms[5].label])
+
+    
     def find_atoms_for_plane(self):
-        attached_atoms = []
-
-        for bond in self.bonds:
-            if bond[0] == self.center_atom.label:
-                attached_atoms.append(bond[1])
-            elif bond[1] == self.center_atom.label:
-                attached_atoms.append(bond[0])
-
-        return attached_atoms[0:2]
+        self.find_bonds_NO3_and_distances()
+        return self.attached_atoms[1:3]
 
     def invert_if_neccessary(self):
         """ Inverts the whole molecule if most of it is on the negative z-axis.

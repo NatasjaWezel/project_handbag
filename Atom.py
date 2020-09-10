@@ -1,9 +1,10 @@
 class Atom:
     """ This class holds atom objects. """ 
 
-    def __init__(self, label, atomtype, x, y, z):
+    def __init__(self, label, x, y, z):
         self.label = label
-        self.type = atomtype
+        self.distance_to_center = None
+        self.part_of = "f"
 
         if not type(x) == float and "(" in x:
             x = x.split("(")[0]

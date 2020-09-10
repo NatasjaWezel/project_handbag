@@ -11,7 +11,7 @@ def perform_rotations(fragment, atoms_to_put_in_plane, plot):
         First rotation: puts first atom on xy-plane if it already was on a plane, 
         and above the x-axis if it wasn't by rotating around the z-axis. """
 
-    atom = fragment.atoms[atoms_to_put_in_plane[0]]
+    atom = atoms_to_put_in_plane[0]
     
     # if first atom doesn't lie in any plane, some extra preparation is required
     not_in_any_plane = False
@@ -37,7 +37,6 @@ def rotate_fragment(fragment, atom, ax, not_in_any_plane):
     """ Finds coordination vector, calculates its angle with corresponding ax and
         then rotates the molecule. Returns the molecule with it's new coordinates. """ 
 
-    atom = fragment.atoms[atom]
     coord_vector = [atom.x, atom.y, atom.z]
 
     # if the atom is not in a single plane, project it onto the xy plane for the first rotation

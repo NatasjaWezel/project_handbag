@@ -34,16 +34,6 @@ class Molecule:
             fragment.set_center(atom_to_center)
             fragment.center_coordinates()
 
-    def save_fragments_data(self, filename):
-
-        with open(filename, "a", newline="") as outputfile:
-            writer = csv.writer(outputfile)
-
-            for fragment in self.fragments:
-                for atom in fragment.atoms.values():
-                    writer.writerow([self.label, fragment.fragment_id, atom.label, atom.x, atom.y, atom.z])
-
-
     def __str__(self):
         molecule_string = "\nFragments in molecule: " + self.label + "\n"
 

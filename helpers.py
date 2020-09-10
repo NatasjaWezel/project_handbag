@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from Atom import Atom
+from Fragment import Fragment
 from Molecule import Molecule
 
 import matplotlib.pyplot as plt
@@ -34,13 +35,53 @@ def plot_fragments(fragments, labels):
 
     ax.legend()
     ax.set_xlabel('X')
-    ax.set_xlim(-0.2, 0.2)
+    ax.set_xlim(-2, 6)
     ax.set_ylabel('Y')
-    ax.set_ylim(-0.2, 0.2)
+    ax.set_ylim(-2, 6)
     ax.set_zlabel('Z')
-    ax.set_zlim(-0.2, 0.2)
+    ax.set_zlim(-2, 6)
     
     plt.show()
+
+
+def load_fragments_from_coords(filename):
+    with open(filename) as inputfile:
+        lines = inputfile.readlines()
+
+    fragments = []
+    fragment = None
+
+    for line in lines:
+        if "FRAG" in line:
+            if fragment:
+                fragments.append(fragment)
+
+            information = line.split('**')
+            entry = information[0].strip()
+            fragment_id = information[2].strip()
+            fragment = Fragment(fragment_id=fragment_id, from_entry=entry)
+        else:
+            information = line.split()
+            atom = Atom(label=information[0].strip("%"), x=information[1], y=information[2], z=information[3])
+            
+            # TODO: something nice recursive here
+            if atom.label not in fragment.atoms.keys():
+                fragment.add_atom(atom)
+            else:
+                atom.label += 'a'
+                if atom.label not in fragment.atoms.keys():
+                    fragment.add_atom(atom)
+                else:
+                    atom.label += 'b'
+                    fragment.add_atom(atom)
+
+    fragments.append(fragment)
+    
+    return fragments
+
+
+
+
 
 def load_molecule(filename):
     """ Loads a molecule from a CIF file. Filename should be provided. """  
