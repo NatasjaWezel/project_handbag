@@ -2,8 +2,8 @@ import numpy as np
 import math
 import copy
 
-from helpers import plot_fragments
-from tests import test_rotation1, test_rotation2, test_rotation3
+from helpers.helpers import plot_fragments
+from helpers.tests import test_rotation1, test_rotation2, test_rotation3
 
 def perform_rotations(fragment, atoms_to_put_in_plane, plot):
     """ Performs three rotations to lie three of the atoms in the xy plane, one of those

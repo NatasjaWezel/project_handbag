@@ -1,4 +1,4 @@
-from headers import *
+from helpers.headers import CUT_OFF_ZERO
 
 def test_centering(fragment, atom_to_center):
 
