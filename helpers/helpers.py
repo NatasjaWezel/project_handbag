@@ -1,8 +1,8 @@
 from collections import defaultdict
 
-from Atom import Atom
-from Fragment import Fragment
-from Molecule import Molecule
+from helpers.Atom import Atom
+from helpers.Fragment import Fragment
+from helpers.Molecule import Molecule
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -113,7 +113,7 @@ def load_molecule(filename):
 
         if reading_coordinates == True and not line.startswith("_"):
             information = line.split()
-            atom = Atom(label=information[0], atomtype=information[1], x=information[2], y=information[3], z=information[4])
+            atom = Atom(label=information[0], x=information[2], y=information[3], z=information[4])
             molecule.all_atoms.append(atom)
 
         # switch reading extra parameters

@@ -1,4 +1,4 @@
-from density_helpers import find_maximum, count_points_per_square, plot_density, prepare_df
+from helpers.density_helpers import find_maximum, count_points_per_square, plot_density, prepare_df
 
 import pandas as pd
 import numpy as np

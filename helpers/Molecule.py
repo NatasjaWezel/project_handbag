@@ -1,4 +1,4 @@
-from Fragment import Fragment
+from helpers.Fragment import Fragment
 
 import copy
 import csv
@@ -19,7 +19,7 @@ class Molecule:
         """ This function adds a pair of target and coordination group. """ 
         
         for fragment_id in fragment_labels.keys():
-            fragment = Fragment(fragment_id)
+            fragment = Fragment(self.label, fragment_id)
 
             for atom in self.all_atoms:
                 if atom.label in fragment_labels[fragment_id]:

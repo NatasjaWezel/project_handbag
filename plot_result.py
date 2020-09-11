@@ -1,9 +1,9 @@
-from helpers import plot_fragments
+from helpers.helpers import plot_fragments
 
 import pickle
 
-from Fragment import Fragment
-from Atom import Atom
+from helpers.Fragment import Fragment
+from helpers.Atom import Atom
 import pandas as pd
 
 def main():

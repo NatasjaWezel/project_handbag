@@ -1,9 +1,8 @@
 import time
 import numpy as np
 
-from rotation_helpers import perform_rotations
-
-from helpers import load_molecule
+from helpers.rotation_helpers import perform_rotations
+from helpers.helpers import load_molecule
 
 import pickle
 
