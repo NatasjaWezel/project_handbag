@@ -14,6 +14,7 @@ def main():
     outputfilename = sys.argv[2]
 
     fragments = load_fragments_from_coords(filename=filename)
+
     rotated_fragments = []
 
     # center on N atom

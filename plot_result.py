@@ -6,8 +6,17 @@ from helpers.Fragment import Fragment
 from helpers.Atom import Atom
 import pandas as pd
 
+import sys
+
 def main():
-    df = pd.read_csv("results/coord_test.csv", header=None)
+    if len(sys.argv) != 2:
+        print("Usage: python run.py <inputfilename>")
+        sys.exit(1)
+    
+    filename = sys.argv[1]
+
+
+    df = pd.read_csv(filename, header=None)
     df.columns = ["entry_id", "fragment_id", "atom_label", "part_of", "atom_x", "atom_y", "atom_z"]
 
     fragments = []
@@ -34,6 +43,7 @@ def main():
             labels.append(unique_entry + str(fragment_id))
 
     amount = 10
+    
     plot_fragments(fragments[:amount], labels[:amount])
 
 

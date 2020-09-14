@@ -19,6 +19,7 @@ class Fragment:
             if atom_type in atom.label:
                 self.center_atom = atom
                 atom.distance_to_center = 0
+                atom.part_of = "c"
 
     def find_bonds_NO3_and_distances(self):
         for atom in self.atoms.values():
@@ -54,6 +55,8 @@ class Fragment:
         z_mean = 0.0
 
         for atom in self.atoms.values():
+            # TODO: make this not-NO3 specific
+            # if not "C" in atom.label:
             z_mean += atom.z
         z_mean = z_mean/len(self.atoms)
 
@@ -91,7 +94,7 @@ class Fragment:
         molecule_string += "Bonds in fragment: \n"
         if self.bonds:
             for bond in self.bonds:
-                molecule_string += bond[0] + "-" + bond[1] +"\n"
+                molecule_string += bond[0].label + "-" + bond[1].label +"\n"
         else:
             molecule_string += "None\n"
 

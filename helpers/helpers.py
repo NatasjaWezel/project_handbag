@@ -26,6 +26,7 @@ def plot_fragments(fragments, labels):
             ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black')                 
         
         for bond in fragment.bonds:
+            # TODO: look into this cuz fragments.atoms.keys are supposed to be labels and bond[0] is supposed to be an atom
             if bond[0] in fragment.atoms.keys() and bond[1] in fragment.atoms.keys():
                 x = [fragment.atoms[bond[0]].x, fragment.atoms[bond[1]].x]
                 y = [fragment.atoms[bond[0]].y, fragment.atoms[bond[1]].y]

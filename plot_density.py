@@ -1,35 +1,50 @@
-from helpers.density_helpers import find_maximum, count_points_per_square, plot_density, prepare_df
+from helpers.density_helpers import count_points_per_square, plot_density, prepare_df, average_molecule
 
 import pandas as pd
 import numpy as np
 
+import time 
+
 def main():
-    plotname = "density.png"
-
-    df = pd.read_csv("results/NO3_CO_vdw5.csv", header=None)
-    df.columns = ["entry_id", "fragment_id", "atom_label", "atom_x", "atom_y", "atom_z"]
-    print(df.head())
-
-    maxx, maxy, maxz = find_maximum(df)
-    minx, miny, minz = -maxx, -maxy, -maxz
-
     # TODO: if total isnt a cube, it doens make sense to have the same amount of bins
     # in each direction
-    amount_bins = 10
-    bins = [np.linspace(minx, maxx, num=amount_bins+1),
-                np.linspace(miny, maxy, num=amount_bins+1),
-                np.linspace(minz, maxz, num=amount_bins+1)] 
+    # Hardcoding these makes that the volumes aren't always the same in every plot
+    bins_x = 9
+    bins_y = 9
+    bins_z = 5
 
-    indices = [i for i in range(0, amount_bins * amount_bins * amount_bins)]
+    resultsdir = "results/no3_c6h5r/"
+    inputfile = resultsdir + "coord_test_no3_c6h5r.csv"
+    intermediate_hdf_file = resultsdir + "density_df_" + str(bins_x) + "-" + str(bins_y) + "-" + str(bins_z) + ".hdf"
+    plotname = resultsdir + "density" + str(time.time()) + ".png"
 
-    density_df = prepare_df(amount_bins=amount_bins, bins=bins, indices=indices)
-    density_df = count_points_per_square(df=density_df, points_df=df)
-    density_df.to_hdf("test2.hdf", 'no3_co')
+    # TODO: make this more general:
+    # to_count = ["O"]
+    to_count = ["center"]
 
-    # density_df = pd.read_hdf("test2.hdf", 'no3_co')
-    print(density_df.head())
+    fragments_df = pd.read_csv(inputfile, header=None)
+    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
-    plot_density(plotname, density_df, amount_bins, minx, maxx, miny, maxy, minz, maxz)
+    amount_bins = bins_x * bins_y * bins_z
+
+    avg_fragment = average_molecule(fragments_df)
+
+    try:
+        density_df = pd.read_hdf(intermediate_hdf_file, 'no3_co')
+    except FileNotFoundError:
+        density_df = prepare_df(fragments_df=fragments_df, 
+                                    amount_bins=amount_bins, 
+                                    no_bins_x=bins_x, 
+                                    no_bins_y=bins_y, 
+                                    no_bins_z=bins_z, 
+                                    to_count=to_count)
+
+        density_df = count_points_per_square(df=density_df, points_df=fragments_df, to_count=to_count)
+
+        # save so we can use the data but only change the plot - saves time :)
+        density_df.to_hdf(intermediate_hdf_file, 'no3_co')
+
+    plot_density(plotname, to_count, avg_fragment, density_df, amount_bins)
 
 
 if __name__ == "__main__":

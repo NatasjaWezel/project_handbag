@@ -25,4 +25,6 @@ def test_rotation3(fragment, atoms_to_put_in_plane):
 
     assert (atom2.z > -CUT_OFF_ZERO and atom2.z < CUT_OFF_ZERO), fragment.from_entry + " "  + atom2.label + " is not in the xy plane (check third rotation)"
 
-    
+
+def test_count(density_df, points_df):
+    assert (len(points_df) == (density_df.amount_C.sum() + density_df.amount_O.sum())), "Amount of points is not divided into bins correctly"
