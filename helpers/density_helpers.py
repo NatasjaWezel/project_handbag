@@ -141,7 +141,7 @@ def count_points_per_square(df, points_df, to_count):
                     x, y, z = calculate_center(fragment_df=fragment_df, atoms=["C"])
                     df = add_one_to_bin(df, columname, x, y, z)
                 else:
-                    point = fragment_df[fragment_df.label in column]
+                    point = fragment_df[fragment_df.label.isin(column)]
 
                     assert (len(point) == 0), " atom label is not unique, can't count per bin"
 
