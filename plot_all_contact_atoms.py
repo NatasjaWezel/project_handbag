@@ -57,16 +57,7 @@ def main():
 def make_plot(plotname, avg_fragment, Xs, Ys, Zs):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-
-    def on_click(event):
-        if event.dblclick:
-            ax.scatter(0, 0, 0, s=30, c="green")
-            plt.show()
     
-    def _yes(event):
-        if event.button == 3:
-            print("yolo")
-
     # plot the (average of the) central group 
     for atom in avg_fragment.atoms.values():
         if "O" in atom.label:
@@ -75,17 +66,6 @@ def make_plot(plotname, avg_fragment, Xs, Ys, Zs):
             ax.scatter(atom.x, atom.y, atom.z, c="blue", s=20, edgecolor="black")
     
     p = ax.scatter(Xs, Ys, Zs, s=1, c="red")
-
-    rax = plt.axes([0.05, 0.4, 0.1, 0.15])
-    labels = ["show contact groups"]
-    visibility = [p.get_visible()]
-    check = CheckButtons(rax, labels, visibility)
-
-    def change_visibility(label):
-        p.set_visible(not p.get_visible())
-        plt.draw()
-
-    check.on_clicked(change_visibility)
 
     plt.show()
 
