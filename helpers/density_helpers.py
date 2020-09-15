@@ -104,18 +104,13 @@ def plot_density(plotname, to_count, avg_fragment, df, amount_bins):
     norm = plt.Normalize(0.001, points[columname].max())
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue","fuchsia","red"])
     
-    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=5, c=list(points[columname]), cmap=cmap, norm=norm)
+    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=25, c=list(points[columname]), cmap=cmap, norm=norm)
 
     ax.set_title("4D density plot\n Bins: " + str(amount_bins))
 
-    # TODO: make it square
-    # ax.set_xlim(minx, maxx)
-    # ax.set_ylim(miny, maxy)
-    # ax.set_zlim(minz, maxz)
-
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
 
     fig.colorbar(p)
     plt.savefig(plotname)
