@@ -8,16 +8,22 @@ import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+import sys
+
 def main():
-    resultsdir = "results/no3_co/"
-    inputfile = resultsdir + "coord_test_no3_co.csv"
-    plotname = resultsdir + "distribution" + str(time.time()) + ".png"
+
+    if len(sys.argv) != 3:
+        print("Usage: python run.py <inputfilename> <outputfilename>")
+        sys.exit(1)
+    
+    inputfilename = sys.argv[1]
+    plottitle = sys.argv[2]
 
     # TODO: make this more general:
     to_count = ["O"]
     # to_count = ["center"]
 
-    fragments_df = pd.read_csv(inputfile, header=None)
+    fragments_df = pd.read_csv(inputfilename, header=None)
     fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
     avg_fragment = average_molecule(fragments_df)
@@ -49,10 +55,10 @@ def main():
                     Ys.append(y)
                     Zs.append(z)
 
-    make_plot(plotname, avg_fragment, Xs, Ys, Zs)
+    make_plot(plottitle, avg_fragment, Xs, Ys, Zs)
 
 
-def make_plot(plotname, avg_fragment, Xs, Ys, Zs):
+def make_plot(plottitle, avg_fragment, Xs, Ys, Zs):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
@@ -69,7 +75,7 @@ def make_plot(plotname, avg_fragment, Xs, Ys, Zs):
     ax.set_ylabel('Y axis')
     ax.set_zlabel('Z axis')
 
-    plt.title(r"O$_3$N--O=C")
+    plt.title(plottitle)
     plt.show()
 
 

@@ -7,7 +7,7 @@ import sys
 def main():
     
     if len(sys.argv) != 3:
-        print("Usage: python run.py <inputfilename> <outputfilename>")
+        print("Usage: python load_from_coords.py <inputfilename> <outputfilename>")
         sys.exit(1)
     
     filename = sys.argv[1]
