@@ -6,21 +6,20 @@ import numpy as np
 import time 
 
 def main():
-    # TODO: if total isnt a cube, it doens make sense to have the same amount of bins
-    # in each direction
+    # TODO: if total isnt a cube, it doens make sense to have the same amount of bins in each direction
     # Hardcoding these makes that the volumes aren't always the same in every plot
     bins_x = 9
     bins_y = 9
     bins_z = 5
 
-    resultsdir = "results/no3_c6h5r/"
-    inputfile = resultsdir + "coord_test_no3_c6h5r.csv"
+    resultsdir = "results/no3_co/"
+    inputfile = resultsdir + "coord_test_no3_co.csv"
     intermediate_hdf_file = resultsdir + "density_df_" + str(bins_x) + "-" + str(bins_y) + "-" + str(bins_z) + ".hdf"
     plotname = resultsdir + "density" + str(time.time()) + ".png"
 
     # TODO: make this more general:
-    # to_count = ["O"]
-    to_count = ["center"]
+    to_count = ["O"]
+    # to_count = ["center"]
 
     fragments_df = pd.read_csv(inputfile, header=None)
     fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]

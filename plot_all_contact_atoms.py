@@ -8,8 +8,6 @@ import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from matplotlib.widgets import CheckButtons
-
 def main():
     resultsdir = "results/no3_co/"
     inputfile = resultsdir + "coord_test_no3_co.csv"
@@ -28,7 +26,7 @@ def main():
 
     contact_group_df = fragments_df[fragments_df.fragment_or_contact == "f"]
 
-    for i, entry_id in enumerate(contact_group_df.entry_id.unique()):
+    for entry_id in contact_group_df.entry_id.unique():
         entry_df = contact_group_df[contact_group_df.entry_id == entry_id]
 
         for fragment_id in entry_df.fragment_id.unique():
@@ -65,8 +63,13 @@ def make_plot(plotname, avg_fragment, Xs, Ys, Zs):
         elif "N" in atom.label:
             ax.scatter(atom.x, atom.y, atom.z, c="blue", s=20, edgecolor="black")
     
-    p = ax.scatter(Xs, Ys, Zs, s=1, c="red")
+    ax.scatter(Xs, Ys, Zs, s=1, c="red")
 
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
+
+    plt.title(r"O$_3$N--O=C")
     plt.show()
 
 
