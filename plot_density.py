@@ -28,8 +28,6 @@ def main():
     # resolution of the bins, in Angstrong
     resolution = float(sys.argv[2])
 
-    
-
     intermediate_hdf_file = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] + "_" + str(resolution) + ".hdf"
     plotname = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] + "_" + str(resolution) + "_density.png"
 

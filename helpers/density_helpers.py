@@ -55,9 +55,10 @@ def prepare_df(fragments_df, resolution, to_count):
 
     # TODO: check if this is entirely correct
     # i think the volumes still differ per search now
-    no_bins_x = math.ceil((maxx + abs(minx)/resolution))
-    no_bins_y = math.ceil((maxy + abs(miny)/resolution))
-    no_bins_z = math.ceil((maxz + abs(minz)/resolution))
+    no_bins_x = math.ceil((maxx + abs(minx))/resolution)
+    no_bins_y = math.ceil((maxy + abs(miny))/resolution)
+    no_bins_z = math.ceil((maxz + abs(minz))/resolution)
+
     amount_bins = no_bins_x * no_bins_y * no_bins_z
 
     print("Bins: ", no_bins_x, no_bins_y, no_bins_z)
@@ -115,8 +116,7 @@ def plot_density(plotname, to_count, avg_fragment, df, resolution):
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue","fuchsia","red"])
     
     # TODO: fix sizes of points
-    # s=list(points[columname] * 1000)
-    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=25, c=list(points[columname]), cmap=cmap, norm=norm)
+    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=list(10000 * points[columname]), c=list(points[columname]), cmap=cmap, norm=norm)
 
     ax.set_title("4D density plot\n Resolution: " + str(resolution))
 
