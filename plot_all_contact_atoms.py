@@ -1,3 +1,11 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This is a script that I wrote for my master thesis
+# It loads the coordinates of the aligned fragments, and then plots the central
+# group and all contact atoms/the centers of the contact groups around it.
+#
+# Author: Natasja Wezel
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 from helpers.density_helpers import count_points_per_square, plot_density, prepare_df, average_molecule, calculate_center
 
 import pandas as pd
@@ -12,12 +20,11 @@ import sys
 
 def main():
 
-    if len(sys.argv) != 3:
-        print("Usage: python run.py <inputfilename> <outputfilename>")
+    if len(sys.argv) != 2:
+        print("Usage: python plot_all_contact_atoms.py <path/to/inputfile>")
         sys.exit(1)
     
     inputfilename = sys.argv[1]
-    plottitle = sys.argv[2]
 
     # TODO: make this more general:
     to_count = ["O"]
@@ -55,10 +62,10 @@ def main():
                     Ys.append(y)
                     Zs.append(z)
 
-    make_plot(plottitle, avg_fragment, Xs, Ys, Zs)
+    make_plot(avg_fragment, Xs, Ys, Zs)
 
 
-def make_plot(plottitle, avg_fragment, Xs, Ys, Zs):
+def make_plot(avg_fragment, Xs, Ys, Zs):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
@@ -75,7 +82,7 @@ def make_plot(plottitle, avg_fragment, Xs, Ys, Zs):
     ax.set_ylabel('Y axis')
     ax.set_zlabel('Z axis')
 
-    plt.title(plottitle)
+    plt.show("Central group and all contact atoms")
     plt.show()
 
 

@@ -1,3 +1,12 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This is a script that I wrote for my master thesis
+# It loads the coordinates of the fragments exported from a conquest query and 
+# aligns the central groups by using rotation matrices and other linear algebra.
+# It then saves the new coordinates in a .csv file.
+#
+# Author: Natasja Wezel
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 from helpers.rotation_helpers import perform_rotations
 from helpers.helpers import load_fragments_from_coords
 
@@ -6,12 +15,12 @@ import sys
 
 def main():
     
-    if len(sys.argv) != 3:
-        print("Usage: python load_from_coords.py <inputfilename> <outputfilename>")
+    if len(sys.argv) != 2:
+        print("Usage: python load_from_coords.py <path/to/inputfile>")
         sys.exit(1)
     
     filename = sys.argv[1]
-    outputfilename = sys.argv[2]
+    outputfilename = filename.rsplit('.', 1)[0] + "_aligned.csv"
 
     fragments = load_fragments_from_coords(filename=filename)
 
@@ -26,9 +35,7 @@ def main():
             fragment.center_coordinates()
             atoms_to_put_in_plane = fragment.find_atoms_for_plane()
 
-            # print(fragment.from_entry, end=" ")
             fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)
-            # print(fragment.fragment_id, "Passed all checks. Rotation OK")
             
             fragment.invert_if_neccessary()
 
@@ -48,5 +55,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 

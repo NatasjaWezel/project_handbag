@@ -2,6 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import math
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -48,9 +49,18 @@ def find_minimum(df):
 
     return minx, miny, minz
    
-def prepare_df(fragments_df, amount_bins, no_bins_x, no_bins_y, no_bins_z, to_count):
+def prepare_df(fragments_df, resolution, to_count):
     maxx, maxy, maxz = find_maximum(fragments_df)
     minx, miny, minz = find_minimum(fragments_df)
+
+    # TODO: check if this is entirely correct
+    # i think the volumes still differ per search now
+    no_bins_x = math.ceil((maxx + abs(minx)/resolution))
+    no_bins_y = math.ceil((maxy + abs(miny)/resolution))
+    no_bins_z = math.ceil((maxz + abs(minz)/resolution))
+    amount_bins = no_bins_x * no_bins_y * no_bins_z
+
+    print("Bins: ", no_bins_x, no_bins_y, no_bins_z)
 
     bins = [np.linspace(minx, maxx, num=no_bins_x + 1),
             np.linspace(miny, maxy, num=no_bins_y + 1),
@@ -78,7 +88,7 @@ def prepare_df(fragments_df, amount_bins, no_bins_x, no_bins_y, no_bins_z, to_co
     
     return df
 
-def plot_density(plotname, to_count, avg_fragment, df, amount_bins):
+def plot_density(plotname, to_count, avg_fragment, df, resolution):
     df['ymiddle'] = (df['ystart'] + df['yend']) / 2
     df['xmiddle'] = (df['xstart'] + df['xend']) / 2
     df['zmiddle'] = (df['zstart'] + df['zend']) / 2
@@ -104,9 +114,11 @@ def plot_density(plotname, to_count, avg_fragment, df, amount_bins):
     norm = plt.Normalize(0.001, points[columname].max())
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue","fuchsia","red"])
     
+    # TODO: fix sizes of points
+    # s=list(points[columname] * 1000)
     p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=25, c=list(points[columname]), cmap=cmap, norm=norm)
 
-    ax.set_title("4D density plot\n Bins: " + str(amount_bins))
+    ax.set_title("4D density plot\n Resolution: " + str(resolution))
 
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
@@ -133,14 +145,16 @@ def count_points_per_square(df, points_df, to_count):
                 
                 # if center, calculate per fragment instead of per atom
                 if "center" == column:
+                    # TODO: can it say just C here?
                     x, y, z = calculate_center(fragment_df=fragment_df, atoms=["C"])
+                    
                     df = add_one_to_bin(df, columname, x, y, z)
                 else:
-                    point = fragment_df[fragment_df.label.isin(column)]
+                    point = fragment_df[fragment_df.atom_label.str.contains(column)]
 
-                    assert (len(point) == 0), " atom label is not unique, can't count per bin"
+                    assert (len(point) == 1), " atom label is not unique, can't count per bin"
 
-                    x, y, z = point.atom_x, point.atom_y, point.atom_z
+                    x, y, z = float(point.atom_x), float(point.atom_y), float(point.atom_z)
                     df = add_one_to_bin(df, columname, x, y, z)
         
         if i % 100 == 0:
@@ -148,10 +162,23 @@ def count_points_per_square(df, points_df, to_count):
 
     # TODO: see if counting is right
     # test_count(df, small_points_df)
-    print(df[df["amount_center"] != 0])
     return df
 
 def add_one_to_bin(df, columname, x, y, z):
+    # print("In add one to bin function")
+    # print(float(x))
+    # print(df.columns)
+    # print(columname)
+
+
+    # print(df.xstart)
+    # print(x)
+    # print(df[df.xstart <= x])
+
+
+    # print("HOOOOOOOOOOOOOI")
+
+
     # TODO: find out what happens with points exactly on a bin-line
     df.loc[(df.xstart <= x) & (df.xend >= x) & 
                 (df.ystart <= y) & (df.yend >= y) & 

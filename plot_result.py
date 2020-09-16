@@ -15,7 +15,6 @@ def main():
     
     filename = sys.argv[1]
 
-
     df = pd.read_csv(filename, header=None)
     df.columns = ["entry_id", "fragment_id", "atom_label", "part_of", "atom_x", "atom_y", "atom_z"]
 
