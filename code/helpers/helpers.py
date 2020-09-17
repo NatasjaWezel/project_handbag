@@ -21,7 +21,9 @@ def load_fragments_from_coords(filename):
             fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
         else:
             information = line.split()
-            atom = Atom(label=information[0].strip("%"), x=information[1], y=information[2], z=information[3])
+            x, y, z = information[0].split("("), information[1].split("("), information[2].split("(")
+
+            atom = Atom(label=information[0].strip("%"), coordinates=[float(x[0]), float(y[0]), float(z[0])])
 
             atom = check_if_label_exists(atom, fragment)
 

@@ -1,21 +1,14 @@
 class Atom:
     """ This class holds atom objects. """ 
 
-    def __init__(self, label, x, y, z):
+    def __init__(self, label, coordinates):
         self.label = label
         self.distance_to_center = None
         self.part_of = "f"
 
-        if not type(x) == float and "(" in x:
-            x = x.split("(")[0]
-        if not type(y) == float and "(" in y:
-            y = y.split("(")[0]
-        if not type(z) == float and "(" in z:
-            z = z.split("(")[0]
-
-        self.x = float(x)
-        self.y = float(y)
-        self.z = float(z)
+        self.x = coordinates[0]
+        self.y = coordinates[1]
+        self.z = coordinates[2]
 
         self.is_part_of_target = False
 

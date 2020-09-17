@@ -3,7 +3,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import matplotlib
 
-def plot_density(ax, to_count, df, resolution):
+def plot_density(ax, to_count, df):
     df['ymiddle'] = (df['ystart'] + df['yend']) / 2
     df['xmiddle'] = (df['xstart'] + df['xend']) / 2
     df['zmiddle'] = (df['zstart'] + df['zend']) / 2
@@ -21,8 +21,6 @@ def plot_density(ax, to_count, df, resolution):
     
     # TODO: fix sizes of points
     p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=list(10000 * points[columname]), c=list(points[columname]), cmap=cmap, norm=norm)
-
-    ax.set_title("4D density plot\n Resolution: " + str(resolution))
 
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')

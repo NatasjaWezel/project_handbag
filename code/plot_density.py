@@ -65,7 +65,9 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
 
     ax = plot_fragment_colored(ax, avg_fragment)
-    p, ax = plot_density(ax, to_count, density_df, resolution)
+    p, ax = plot_density(ax, to_count, density_df)
+
+    ax.set_title("4D density plot\n Resolution: " + str(resolution))
 
     fig.colorbar(p)
     plt.savefig(plotname)

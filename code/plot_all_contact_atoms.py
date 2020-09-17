@@ -35,9 +35,9 @@ def main():
 
     avg_fragment = average_molecule(fragments_df)
 
-    Xs, Ys, Zs = count_contact_atoms(fragments_df, to_count)
+    coordinate_lists = count_contact_atoms(fragments_df, to_count)
 
-    make_plot(avg_fragment, Xs, Ys, Zs)
+    make_plot(avg_fragment, coordinate_lists)
 
 def count_contact_atoms(fragments_df, to_count):
     """ This is a function that counts the contact atoms or centers of contact groups near the
@@ -70,10 +70,10 @@ def count_contact_atoms(fragments_df, to_count):
                     Ys.append(y)
                     Zs.append(z)
 
-    return Xs, Ys, Zs
+    return [Xs, Ys, Zs]
 
 
-def make_plot(avg_fragment, Xs, Ys, Zs):
+def make_plot(avg_fragment, coordinate_lists):
     """ Plot all the surrounding contact groups around the central group. """
 
     fig = plt.figure()
@@ -86,7 +86,7 @@ def make_plot(avg_fragment, Xs, Ys, Zs):
         elif "N" in atom.label:
             ax.scatter(atom.x, atom.y, atom.z, c="blue", s=20, edgecolor="black")
     
-    ax.scatter(Xs, Ys, Zs, s=1, c="red")
+    ax.scatter(coordinate_lists[0], coordinate_lists[1], coordinate_lists[2], s=1, c="red")
 
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')

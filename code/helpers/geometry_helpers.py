@@ -21,7 +21,7 @@ def average_molecule(df):
     fragment = Fragment(entry_id, fragment_id)
 
     for _, row in central_group_df[(central_group_df.fragment_id == fragment_id) & (central_group_df.entry_id == entry_id)].iterrows():
-        atom = Atom(row.atom_label, row.atom_x, row.atom_y, row.atom_z)
+        atom = Atom(row.atom_label, [row.atom_x, row.atom_y, row.atom_z])
         fragment.add_atom(atom)
 
     return fragment    
