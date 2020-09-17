@@ -81,63 +81,6 @@ def load_fragments_from_coords(filename):
     return fragments
 
 
-
-
-
-def load_molecule(filename):
-    """ Loads a molecule from a CIF file. Filename should be provided. """  
-
-    with open(filename) as inputfile:
-        cif_file = inputfile.readlines()
-
-    reading_coordinates = False
-    reading_parameters = False
-    reading_bonds = False
-
-    parameterlines = []
-    bond_lines = []
-
-    molecule = None
-
-    for line in cif_file:
-
-        if line.startswith("_database_code_CSD"):
-            label = line.split()[1]
-            molecule = Molecule(label)
-
-        # switch reading coordinates
-        if line.startswith("_atom_site_label"):
-            reading_coordinates = True
-
-        if reading_coordinates == True and line.startswith("loop"):
-            reading_coordinates = False
-
-        if reading_coordinates == True and not line.startswith("_"):
-            information = line.split()
-            atom = Atom(label=information[0], x=information[2], y=information[3], z=information[4])
-            molecule.all_atoms.append(atom)
-
-        # switch reading extra parameters
-        if line.startswith("_ccdc_geom_distance_query_id"):
-            reading_parameters = True
-
-        if reading_parameters and not "END" in line and not line.startswith("_"):
-            parameterlines.append(line)
-
-        if line.startswith("_geom_bond_atom_site_label_1"):
-            reading_bonds = True
-
-        if reading_bonds == True and line.startswith("loop"):
-            reading_bonds = False
-
-        if reading_bonds == True and not line.startswith("_"):
-            bond_lines.append(line)
-
-    molecule = process_parameter_lines(molecule, parameterlines)
-    molecule = process_bond_lines(molecule, bond_lines)
-
-    return molecule
-
 def process_bond_lines(molecule, bond_lines):
     """ Adds bonds to each fragment in a molecule, by reading which bonds 
         exist in the inputfile. """
