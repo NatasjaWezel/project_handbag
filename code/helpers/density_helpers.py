@@ -74,7 +74,9 @@ def add_boundaries_per_bin(bins, indices):
     return df
 
 
-def add_one_to_bin(df, columname, x, y, z):
+def add_one_to_bin(df, columname, coordinates):
+    x, y, z = coordinates[0], coordinates[1], coordinates[2]
+
     # TODO: find out what happens with points exactly on a bin-line
     df.loc[(df.xstart <= x) & (df.xend >= x) & 
                 (df.ystart <= y) & (df.yend >= y) & 

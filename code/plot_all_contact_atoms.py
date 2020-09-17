@@ -56,10 +56,10 @@ def count_contact_atoms(fragments_df, to_count):
             for column in to_count:
                 # if center, calculate per fragment instead of per atom
                 if "center" == column:
-                    x, y, z = calculate_center(fragment_df=fragment_df, atoms=["C"])
-                    Xs.append(x)
-                    Ys.append(y)
-                    Zs.append(z)
+                    coordinates = calculate_center(fragment_df=fragment_df, atoms=["C"])
+                    Xs.append(coordinates[0])
+                    Ys.append(coordinates[1])
+                    Zs.append(coordinates[2])
                 else:
                     point = fragment_df[fragment_df['atom_label'].str.contains(column)]
 

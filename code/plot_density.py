@@ -90,16 +90,16 @@ def count_points_per_square(df, points_df, to_count):
                 # if center, calculate per fragment instead of per atom
                 if "center" == column:
                     # TODO: can it say just C here?
-                    x, y, z = calculate_center(fragment_df=fragment_df, atoms=["C"])
+                    coordinates = calculate_center(fragment_df=fragment_df, atoms=["C"])
                     
-                    df = add_one_to_bin(df, columname, x, y, z)
+                    df = add_one_to_bin(df, columname, coordinates)
                 else:
                     point = fragment_df[fragment_df.atom_label.str.contains(column)]
 
                     assert (len(point) == 1), " atom label is not unique, can't count per bin"
 
-                    x, y, z = float(point.atom_x), float(point.atom_y), float(point.atom_z)
-                    df = add_one_to_bin(df, columname, x, y, z)
+                    coordinates = [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
+                    df = add_one_to_bin(df, columname, coordinates)
         
         if i % 100 == 0:
             print(str(i) + "/" + str(total_entries) + " done")

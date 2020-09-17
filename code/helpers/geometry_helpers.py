@@ -4,9 +4,9 @@ from helpers.Fragment import Fragment
 def calculate_center(fragment_df, atoms):
     # TODO: only count "C" (or other atoms in atoms) for average
     atom_df = fragment_df
-    x, y, z = atom_df.atom_x.mean(), atom_df.atom_y.mean(), atom_df.atom_z.mean()
+    coordinates = [atom_df.atom_x.mean(), atom_df.atom_y.mean(), atom_df.atom_z.mean()]
 
-    return x, y, z
+    return coordinates
 
 def average_molecule(df):
     """ Returns a fragment containing the bonds and average points of the interacting molecule. """ 
