@@ -3,24 +3,23 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import matplotlib
 
-def plot_density(ax, to_count, df):
+def plot_density(ax, df):
     df['ymiddle'] = (df['ystart'] + df['yend']) / 2
     df['xmiddle'] = (df['xstart'] + df['xend']) / 2
     df['zmiddle'] = (df['zstart'] + df['zend']) / 2
 
     # for now only use first column
-    column = to_count[0]
-    columname = "amount_" + column
+    column_name = [i for i in df.columns if "amount" in i][0]
     # normalize per column 
-    df[columname] = df[columname] / df[columname].sum()
+    df[column_name] = df[column_name] / df[column_name].sum()
 
-    points = df[df[columname] > 0.001]
+    points = df[df[column_name] > 0.001]
 
-    norm = plt.Normalize(0.001, points[columname].max())
+    norm = plt.Normalize(0.001, points[column_name].max())
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue","fuchsia","red"])
     
     # TODO: fix sizes of points
-    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=list(10000 * points[columname]), c=list(points[columname]), cmap=cmap, norm=norm)
+    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=list(10000 * points[column_name]), c=list(points[column_name]), cmap=cmap, norm=norm)
 
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')

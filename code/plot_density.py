@@ -30,15 +30,14 @@ def main():
     
     inputfilename = sys.argv[1]
 
+    # TODO: make this more general
+    to_count = ["center"]
+
     # resolution of the bins, in Angstrong
     resolution = float(sys.argv[2])
 
     intermediate_hdf_file = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] + "_" + str(resolution) + ".hdf"
     plotname = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] + "_" + str(resolution) + "_density.png"
-
-    # TODO: make this more general:
-    to_count = ["O"]
-    # to_count = ["center"]
 
     fragments_df = pd.read_csv(inputfilename, header=None)
     fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
@@ -54,7 +53,7 @@ def main():
                                     resolution=resolution, 
                                     to_count=to_count)
 
-        density_df = count_points_per_square(df=empty_density_df, points_df=fragments_df, to_count=to_count)
+        density_df = count_points_per_square(df=empty_density_df, points_df=fragments_df)
 
         # save so we can use the data but only change the plot - saves time :)
         density_df.to_hdf(intermediate_hdf_file, 'key')
@@ -65,7 +64,7 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
 
     ax = plot_fragment_colored(ax, avg_fragment)
-    p, ax = plot_density(ax, to_count, density_df)
+    p, ax = plot_density(ax=ax, df=density_df)
 
     ax.set_title("4D density plot\n Resolution: " + str(resolution))
 
@@ -74,8 +73,10 @@ def main():
     plt.show()
 
 
-def count_points_per_square(df, points_df, to_count):
-    
+def count_points_per_square(df, points_df):
+    columns = list(df.columns)
+    to_count = [i.split("_")[1] for i in columns if "amount" in i]
+
     small_points_df = points_df[points_df.fragment_or_contact == "f"]
     unique_entries = small_points_df.entry_id.unique()
     total_entries = len(unique_entries)

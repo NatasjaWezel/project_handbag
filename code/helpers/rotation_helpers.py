@@ -17,7 +17,7 @@ def perform_rotations(fragment, atoms_to_put_in_plane):
         coord_vector = find_coord_vector(ax=axis[i], atom=atom)
 
         angle = find_angles(ax=axis[i], coord_vector=coord_vector)
-        angle = find_rotation_direction(ax=axis[i], atom=atom, angle=angle)
+        angle = angle*find_rotation_direction(ax=axis[i], atom=atom)
 
         fragment = calculate_rotation(fragment=fragment, angle=angle, ax=axis[i])
 
@@ -53,17 +53,17 @@ def find_coord_vector(ax, atom):
     return coord_vector
 
 
-def find_rotation_direction(ax, atom, angle):
+def find_rotation_direction(ax, atom):
     """ Defines the direction of the rotation, clockwise or counter clockwise. """ 
     
     if ax == "x" and atom.z < 0:
-        angle = -angle
+        return -1
     elif ax == "y" and atom.z < 0:
-        angle = -angle
+        return -1
     elif ax == "z" and atom.y < 0:
-        angle = -angle
-
-    return angle
+        return -1
+    else:
+        return 1
 
 
 def find_angles(coord_vector, ax):
