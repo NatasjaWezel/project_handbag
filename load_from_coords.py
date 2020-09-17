@@ -32,7 +32,9 @@ def main():
     for fragment in fragments:
         try:
             fragment.set_center(atom_to_center)
+            
             fragment.center_coordinates()
+
             atoms_to_put_in_plane = fragment.find_atoms_for_plane()
 
             fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)

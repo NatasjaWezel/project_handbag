@@ -17,32 +17,37 @@ def plot_fragments(fragments, labels):
 
     for i, fragment in enumerate(fragments):
 
+        # plot first atom of the fragment and label it
         atom = list(fragment.atoms.values())[0]
         ax.scatter(atom.x, atom.y, atom.z, color=colors[i % len(colors)], label=labels[i])
         ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black') 
         
-        for atom in list(fragment.atoms.values())[1:]:
-            ax.scatter(atom.x, atom.y, atom.z, color=colors[i % len(colors)])
-            ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black')                 
-        
-        for bond in fragment.bonds:
-            # TODO: look into this cuz fragments.atoms.keys are supposed to be labels and bond[0] is supposed to be an atom
-            if bond[0] in fragment.atoms.keys() and bond[1] in fragment.atoms.keys():
-                x = [fragment.atoms[bond[0]].x, fragment.atoms[bond[1]].x]
-                y = [fragment.atoms[bond[0]].y, fragment.atoms[bond[1]].y]
-                z = [fragment.atoms[bond[0]].z, fragment.atoms[bond[1]].z]
-
-                ax.plot(x, y, z, color=colors[i])
+        ax = plot_atoms_bonds(i, ax, colors, fragment)
 
     ax.legend()
-    ax.set_xlabel('X')
-    ax.set_xlim(-2, 6)
-    ax.set_ylabel('Y')
-    ax.set_ylim(-2, 6)
-    ax.set_zlabel('Z')
-    ax.set_zlim(-2, 6)
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
     
     plt.show()
+
+def plot_atoms_bonds(i, ax, colors, fragment):
+    """ This function plots the atoms and bonds of a fragment. """ 
+
+    for atom in list(fragment.atoms.values())[1:]:
+        ax.scatter(atom.x, atom.y, atom.z, color=colors[i % len(colors)])
+        ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black')                 
+    
+    for bond in fragment.bonds:
+        # TODO: look into this cuz fragments.atoms.keys are supposed to be labels and bond[0] is supposed to be an atom
+        if bond[0] in fragment.atoms.keys() and bond[1] in fragment.atoms.keys():
+            x = [fragment.atoms[bond[0]].x, fragment.atoms[bond[1]].x]
+            y = [fragment.atoms[bond[0]].y, fragment.atoms[bond[1]].y]
+            z = [fragment.atoms[bond[0]].z, fragment.atoms[bond[1]].z]
+
+            ax.plot(x, y, z, color=colors[i])
+    
+    return ax
 
 
 def load_fragments_from_coords(filename):
@@ -64,21 +69,26 @@ def load_fragments_from_coords(filename):
         else:
             information = line.split()
             atom = Atom(label=information[0].strip("%"), x=information[1], y=information[2], z=information[3])
-            
-            # TODO: something nice recursive here
-            if atom.label not in fragment.atoms.keys():
-                fragment.add_atom(atom)
-            else:
-                atom.label += 'a'
-                if atom.label not in fragment.atoms.keys():
-                    fragment.add_atom(atom)
-                else:
-                    atom.label += 'b'
-                    fragment.add_atom(atom)
 
+            atom = check_if_label_exists(atom, fragment)
+
+            fragment.add_atom(atom)
+            
     fragments.append(fragment)
     
     return fragments
+
+def check_if_label_exists(atom, fragment):
+    """ Checks if label already exists in the fragment. Adds the laetter 'a' to it if it does.
+        #TODO: should maybe change from a to b, etc. """
+        
+    if atom.label in fragment.atoms.keys():
+        atom.label += 'a'
+        atom = check_if_label_exists(atom, fragment)
+    
+    return atom
+
+        
 
 
 def process_bond_lines(molecule, bond_lines):
