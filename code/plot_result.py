@@ -1,9 +1,7 @@
 from helpers.plot_functions import plot_fragments
-
-import pickle
-
 from helpers.Fragment import Fragment
 from helpers.Atom import Atom
+
 import pandas as pd
 
 import sys

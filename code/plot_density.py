@@ -9,13 +9,18 @@
 # Author: Natasja Wezel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from helpers.density_helpers import count_points_per_square, plot_density, prepare_df, average_molecule
+from helpers.density_helpers import prepare_df, add_one_to_bin
+from helpers.plot_functions import plot_fragment_colored, plot_density
+from helpers.geometry_helpers import average_molecule, calculate_center
 
 import pandas as pd
 import numpy as np
 
 import sys
 import time
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 def main():
 
@@ -56,7 +61,52 @@ def main():
 
         print("It took me", time.time() - starttime, "s to calculate the df for a resolution of", resolution)
 
-    plot_density(plotname, to_count, avg_fragment, density_df, resolution)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax = plot_fragment_colored(ax, avg_fragment)
+    p, ax = plot_density(ax, to_count, density_df, resolution)
+
+    fig.colorbar(p)
+    plt.savefig(plotname)
+    plt.show()
+
+
+def count_points_per_square(df, points_df, to_count):
+    
+    small_points_df = points_df[points_df.fragment_or_contact == "f"]
+    unique_entries = small_points_df.entry_id.unique()
+    total_entries = len(unique_entries)
+
+    for i, entry_id in enumerate(unique_entries):
+        entry_df = small_points_df[small_points_df.entry_id == entry_id]
+
+        for fragment_id in entry_df.fragment_id.unique():
+            fragment_df = entry_df[entry_df.fragment_id == fragment_id]
+            
+            for column in to_count:
+                columname = "amount_" + column
+                
+                # if center, calculate per fragment instead of per atom
+                if "center" == column:
+                    # TODO: can it say just C here?
+                    x, y, z = calculate_center(fragment_df=fragment_df, atoms=["C"])
+                    
+                    df = add_one_to_bin(df, columname, x, y, z)
+                else:
+                    point = fragment_df[fragment_df.atom_label.str.contains(column)]
+
+                    assert (len(point) == 1), " atom label is not unique, can't count per bin"
+
+                    x, y, z = float(point.atom_x), float(point.atom_y), float(point.atom_z)
+                    df = add_one_to_bin(df, columname, x, y, z)
+        
+        if i % 100 == 0:
+            print(str(i) + "/" + str(total_entries) + " done")
+
+    # TODO: see if counting is right
+    # test_count(df, small_points_df)
+    return df
 
 
 if __name__ == "__main__":
