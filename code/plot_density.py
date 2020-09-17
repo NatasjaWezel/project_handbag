@@ -75,7 +75,7 @@ def main():
 
 def count_points_per_square(df, points_df):
     columns = list(df.columns)
-    to_count = [i.split("_")[1] for i in columns if "amount" in i]
+    column_name = [i.split("_") for i in columns if "amount" in i]
 
     small_points_df = points_df[points_df.fragment_or_contact == "f"]
     unique_entries = small_points_df.entry_id.unique()
@@ -86,23 +86,20 @@ def count_points_per_square(df, points_df):
 
         for fragment_id in entry_df.fragment_id.unique():
             fragment_df = entry_df[entry_df.fragment_id == fragment_id]
-            
-            for column in to_count:
-                columname = "amount_" + column
+                           
+            # if center, calculate per fragment instead of per atom
+            if "center" in column_name:
+                # TODO: can it say just C here?
+                coordinates = calculate_center(fragment_df=fragment_df, atoms=["C"])
+
+            else:
+                point = fragment_df[fragment_df.atom_label.str.contains(column_name.split("_")[1])]
+
+                assert (len(point) == 1), " atom label is not unique, can't count per bin"
+
+                coordinates = [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
                 
-                # if center, calculate per fragment instead of per atom
-                if "center" == column:
-                    # TODO: can it say just C here?
-                    coordinates = calculate_center(fragment_df=fragment_df, atoms=["C"])
-                    
-                    df = add_one_to_bin(df, columname, coordinates)
-                else:
-                    point = fragment_df[fragment_df.atom_label.str.contains(column)]
-
-                    assert (len(point) == 1), " atom label is not unique, can't count per bin"
-
-                    coordinates = [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
-                    df = add_one_to_bin(df, columname, coordinates)
+            df = add_one_to_bin(df, column_name, coordinates)
         
         if i % 100 == 0:
             print(str(i) + "/" + str(total_entries) + " done")

@@ -23,7 +23,7 @@ def main():
     outputfilename = "results/" + filename.rsplit('\\')[-1].rsplit('.', 1)[0] + "_aligned.csv"
 
     fragments = load_fragments_from_coords(filename=filename)
-
+    
     rotated_fragments = []
 
     # center on N atom

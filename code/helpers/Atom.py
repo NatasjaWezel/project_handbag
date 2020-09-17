@@ -10,10 +10,14 @@ class Atom:
         self.y = coordinates[1]
         self.z = coordinates[2]
 
-        self.is_part_of_target = False
+    def set_color(self, color):
+        self.color = color
 
     def add_fragment_id(self, fragment_id):
         self.fragment_id = fragment_id
+
+    def set_vdw_radius(self, radius):
+        self.vdw_radius = radius
 
     def __str__(self):
         return self.label + ": " + str(self.x) + ", " + str(self.y) + ", " + str(self.z)

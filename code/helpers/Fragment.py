@@ -1,6 +1,8 @@
 from helpers.headers import CUT_OFF_ZERO
 import math
 
+import pandas as pd
+
 class Fragment:
     def __init__(self, from_entry, fragment_id):
         self.from_entry = from_entry
@@ -21,6 +23,15 @@ class Fragment:
                 self.center_atom = atom
                 atom.distance_to_center = 0
                 atom.part_of = "c"
+
+    def set_vdw_radii(self, filename):
+        radii_df = pd.read_csv(filename, header=None)
+        radii_df.columns = ["name", "symbol", "radius"]
+
+        for atom in self.atoms.values():
+            # TODO: fix this it's ugly and doesn't always work
+            atom.vdw_radius = float(radii_df[radii_df.symbol == atom.label.strip("0123456789")].radius)
+            print(atom.label, radii_df[radii_df.symbol == atom.label.strip("0123456789")])
 
     def find_bonds_NO3_and_distances(self):
         for atom in self.atoms.values():
