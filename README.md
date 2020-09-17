@@ -14,7 +14,7 @@ Search query in conquest, export fragments xyz coordinates.
 ### Running
 Align the fragments by running `python load_from_coords.py <inputfile.xyz> <outputfile.csv>`. 
 
-Plot the overlapping fragments by running `python plot_result.py`.
+Plot the overlapping fragments by running `python plot_result.py <inputfile.csv>`.
 
-Plot the 4D graph by running `python plot_density.py`.
+Plot the 4D graph by running `python plot_density.py <inputfile.csv> <resolution>`.
 
