@@ -95,7 +95,7 @@ class Fragment:
         molecule_string += "Bonds in fragment: \n"
         if self.bonds:
             for bond in self.bonds:
-                molecule_string += bond[0].label + "-" + bond[1].label +"\n"
+                molecule_string += bond[0] + "-" + bond[1] +"\n"
         else:
             molecule_string += "None\n"
 

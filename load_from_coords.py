@@ -20,7 +20,7 @@ def main():
         sys.exit(1)
     
     filename = sys.argv[1]
-    outputfilename = filename.rsplit('.', 1)[0] + "_aligned.csv"
+    outputfilename = "results/" + filename.rsplit('\\')[-1].rsplit('.', 1)[0] + "_aligned.csv"
 
     fragments = load_fragments_from_coords(filename=filename)
 
@@ -31,20 +31,19 @@ def main():
 
     for fragment in fragments:
         try:
-            fragment.set_center(atom_to_center)
-            
+            fragment.set_center(atom_to_center)        
             fragment.center_coordinates()
 
             atoms_to_put_in_plane = fragment.find_atoms_for_plane()
 
-            fragment = perform_rotations(fragment, atoms_to_put_in_plane, plot=False)
+            fragment = perform_rotations(fragment, atoms_to_put_in_plane)
             
             fragment.invert_if_neccessary()
 
             rotated_fragments.append(fragment)
         except AssertionError as msg:
             print(msg)
-        
+                    
     print(len(rotated_fragments), "/", len(fragments), ' rotated succesfully')
 
     with open(outputfilename, "a", newline="") as outputfile:
