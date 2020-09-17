@@ -53,7 +53,7 @@ def plot_atoms_bonds(ax, fragment):
 
 def load_fragments_from_coords(filename):
     """ Loads the list of aligned fragments from a .cor file. """
-    
+
     with open(filename) as inputfile:
         lines = inputfile.readlines()
 
@@ -81,8 +81,7 @@ def load_fragments_from_coords(filename):
 
 
 def check_if_label_exists(atom, fragment):
-    """ Checks if label already exists in the fragment. Adds the laetter 'a' to it if it does.
-        #TODO: should maybe change from a to b, etc. """
+    """ Checks if label already exists in the fragment. Adds the laetter 'a' to it if it does. """
         
     if atom.label in fragment.atoms.keys():
         atom.label += 'a'
