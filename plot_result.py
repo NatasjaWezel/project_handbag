@@ -9,17 +9,17 @@ import pandas as pd
 import sys
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python run.py <inputfilename>")
+    if len(sys.argv) != 3:
+        print("Usage: python run.py <inputfilename> <fragments_to_plot>")
         sys.exit(1)
     
     filename = sys.argv[1]
+    amount = int(sys.argv[2])
 
     df = pd.read_csv(filename, header=None)
     df.columns = ["entry_id", "fragment_id", "atom_label", "part_of", "atom_x", "atom_y", "atom_z"]
 
     fragments = []
-    labels = []
 
     unique_entrys = df.entry_id.unique()
     
@@ -39,11 +39,8 @@ def main():
             fragment.set_center('N')
             fragment.find_bonds_NO3_and_distances()
             fragments.append(fragment)
-            labels.append(unique_entry + str(fragment_id))
-
-    amount = 10
     
-    plot_fragments(fragments[:amount], labels[:amount])
+    plot_fragments(fragments[:amount])
 
 
 if __name__ == "__main__":

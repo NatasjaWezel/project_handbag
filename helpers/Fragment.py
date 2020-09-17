@@ -7,6 +7,7 @@ class Fragment:
         self.fragment_id = fragment_id
         self.atoms = {}
         self.bonds = []
+        self.color = "red"
 
     def add_atom(self, atom):
         self.atoms[atom.label] = atom

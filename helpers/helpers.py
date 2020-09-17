@@ -7,7 +7,7 @@ from helpers.Molecule import Molecule
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-def plot_fragments(fragments, labels):
+def plot_fragments(fragments):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
@@ -16,13 +16,14 @@ def plot_fragments(fragments, labels):
                 "mediumorchid", "fuchsia"]
 
     for i, fragment in enumerate(fragments):
+        fragment.color = colors[i % len(colors)]
 
         # plot first atom of the fragment and label it
         atom = list(fragment.atoms.values())[0]
-        ax.scatter(atom.x, atom.y, atom.z, color=colors[i % len(colors)], label=labels[i])
+        ax.scatter(atom.x, atom.y, atom.z, color=fragment.color, label=fragment.from_entry + str(fragment.fragment_id))
         ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black') 
         
-        ax = plot_atoms_bonds(i, ax, colors, fragment)
+        ax = plot_atoms_bonds(ax=ax, fragment=fragment)
 
     ax.legend()
     ax.set_xlabel('X axis')
@@ -31,11 +32,11 @@ def plot_fragments(fragments, labels):
     
     plt.show()
 
-def plot_atoms_bonds(i, ax, colors, fragment):
+def plot_atoms_bonds(ax, fragment):
     """ This function plots the atoms and bonds of a fragment. """ 
 
     for atom in list(fragment.atoms.values())[1:]:
-        ax.scatter(atom.x, atom.y, atom.z, color=colors[i % len(colors)])
+        ax.scatter(atom.x, atom.y, atom.z, color=fragment.color)
         ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black')                 
     
     for bond in fragment.bonds:
@@ -45,12 +46,14 @@ def plot_atoms_bonds(i, ax, colors, fragment):
             y = [fragment.atoms[bond[0]].y, fragment.atoms[bond[1]].y]
             z = [fragment.atoms[bond[0]].z, fragment.atoms[bond[1]].z]
 
-            ax.plot(x, y, z, color=colors[i])
+            ax.plot(x, y, z, color=fragment.color)
     
     return ax
 
 
 def load_fragments_from_coords(filename):
+    """ Loads the list of aligned fragments from a .cor file. """
+    
     with open(filename) as inputfile:
         lines = inputfile.readlines()
 
@@ -63,9 +66,7 @@ def load_fragments_from_coords(filename):
                 fragments.append(fragment)
 
             information = line.split('**')
-            entry = information[0].strip()
-            fragment_id = information[2].strip()
-            fragment = Fragment(fragment_id=fragment_id, from_entry=entry)
+            fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
         else:
             information = line.split()
             atom = Atom(label=information[0].strip("%"), x=information[1], y=information[2], z=information[3])
@@ -78,6 +79,7 @@ def load_fragments_from_coords(filename):
     
     return fragments
 
+
 def check_if_label_exists(atom, fragment):
     """ Checks if label already exists in the fragment. Adds the laetter 'a' to it if it does.
         #TODO: should maybe change from a to b, etc. """
@@ -87,8 +89,6 @@ def check_if_label_exists(atom, fragment):
         atom = check_if_label_exists(atom, fragment)
     
     return atom
-
-        
 
 
 def process_bond_lines(molecule, bond_lines):
