@@ -1,4 +1,4 @@
-from helpers.helpers import plot_fragments
+from helpers.plot_functions import plot_fragments
 
 import pickle
 

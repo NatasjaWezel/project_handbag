@@ -6,7 +6,7 @@
 # Author: Natasja Wezel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from helpers.density_helpers import count_points_per_square, plot_density, prepare_df, average_molecule, calculate_center
+from helpers.geometry_helpers import average_molecule, calculate_center
 
 import pandas as pd
 import numpy as np
