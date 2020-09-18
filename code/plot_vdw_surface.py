@@ -26,17 +26,35 @@ def main():
 
     ax = plot_fragment_colored(ax, avg_fragment)
     
-    # Create a sphere
-    r = 1
+    # Create a sphere around the nitrogen atom
+    ax, _ = plot_vdw_spheres(avg_fragment, ax)
 
-    phi, theta = np.mgrid[0.0: np.pi : 100j, 0.0 : 2.0*np.pi : 100j]
-    x = r*np.sin(phi)*np.cos(theta)
-    y = r*np.sin(phi)*np.sin(theta)
-    z = r*np.cos(phi)
+    ax.set_xlim(-1.5, 1.5)
+    ax.set_ylim(-1.5, 1.5)
+    ax.set_zlim(-1.5, 1.5)
 
-    ax.plot_surface(x, y, z, color='red', alpha=0.3, linewidth=0)
+    ax.set_xlabel("X axis")
+    ax.set_ylabel("Y axis")
+    ax.set_zlabel("Z axis")
 
     plt.show()
+
+def plot_vdw_spheres(avg_fragment, ax):
+    for atom in avg_fragment.atoms.values():
+        spheres = []
+
+        r = atom.vdw_radius
+
+        theta, phi = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+
+        x = r*np.sin(phi)*np.cos(theta) + atom.x
+        y = r*np.sin(phi)*np.sin(theta) + atom.y
+        z = r*np.cos(phi) + atom.z
+
+        sphere = ax.plot_surface(x, y, z, color='pink', alpha=0.2, linewidth=0)
+
+        spheres.append(sphere)
+    return ax, spheres
 
 
 if __name__ == "__main__":
