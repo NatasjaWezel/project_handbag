@@ -87,7 +87,5 @@ def average_fragment(df):
         atom = Atom(atom_label, coordinates)
 
         fragment.add_atom(atom)
-    
-    print(fragment)
-    
+        
     return fragment    
