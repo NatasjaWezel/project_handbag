@@ -29,9 +29,7 @@ class Fragment:
         radii_df.columns = ["name", "symbol", "radius"]
 
         for atom in self.atoms.values():
-            # TODO: fix this it's ugly and doesn't always work
-            atom.vdw_radius = float(radii_df[radii_df.symbol == atom.label.strip("0123456789")].radius)
-            print(atom.label, radii_df[radii_df.symbol == atom.label.strip("0123456789")])
+            atom.vdw_radius = float(radii_df[radii_df.symbol == atom.symbol].radius)
 
     def find_bonds_NO3_and_distances(self):
         for atom in self.atoms.values():

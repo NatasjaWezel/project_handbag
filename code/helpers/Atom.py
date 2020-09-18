@@ -3,6 +3,10 @@ class Atom:
 
     def __init__(self, label, coordinates):
         self.label = label
+        
+        # TODO: this only works for elements with an atomic lable of 1 letter
+        self.symbol = label[:1]
+
         self.distance_to_center = None
         self.part_of = "f"
 

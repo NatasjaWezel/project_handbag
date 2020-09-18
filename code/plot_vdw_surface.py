@@ -1,6 +1,6 @@
 import sys
 import pandas as pd
-from helpers.geometry_helpers import average_molecule
+from helpers.geometry_helpers import average_fragment
 from helpers.plot_functions import plot_fragment_colored
 
 import matplotlib.pyplot as plt
@@ -21,13 +21,16 @@ def main():
     inputfilename = sys.argv[1]
 
     fragments_df = pd.read_csv(inputfilename)
-    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
+    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_element", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
-    avg_fragment = average_molecule(fragments_df)
+    avg_fragment = average_fragment(fragments_df)
 
     # to plot the vdw surface we need the vdw radii
     avg_fragment.set_vdw_radii("data/vdw_radii.csv")
 
+    plot_vdw_surface(avg_fragment)
+
+def plot_vdw_surface(avg_fragment):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     plt.subplots_adjust(left=0.25, bottom=0.25)
@@ -41,7 +44,7 @@ def main():
     rax = plt.axes([0.025, 0.5, 0.15, 0.15], facecolor=AXCOLOR)
     radio = RadioButtons(rax, ('visible', 'blue', 'pink', 'green'), active=0)
 
-    def colorfunc(label):
+    def visibility(label):
         if label == "visible":
             for sphere in spheres:
                 sphere.set_visible(not sphere.get_visible())
@@ -49,8 +52,8 @@ def main():
             for sphere in spheres:
                 sphere.set_color(label)
         fig.canvas.draw_idle()
-    
-    radio.on_clicked(colorfunc)
+
+    radio.on_clicked(visibility)
     
     ax.set_xlabel("X axis")
     ax.set_ylabel("Y axis")
@@ -73,6 +76,8 @@ def plot_vdw_spheres(avg_fragment, ax):
 
         sphere = ax.plot_surface(x, y, z, color='pink', alpha=0.2, linewidth=0)
         spheres.append(sphere)
+
+    assert len(spheres) == len(avg_fragment.atoms.keys()), "Something went wrong with plotting the vdw surfaces"
 
     return ax, spheres
 
