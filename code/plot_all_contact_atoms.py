@@ -53,22 +53,21 @@ def count_contact_atoms(fragments_df, to_count):
         for fragment_id in entry_df.fragment_id.unique():
             fragment_df = entry_df[entry_df.fragment_id == fragment_id]
             
+            # TODO: this will break if to_count is more than a single atom
             for column in to_count:
                 # if center, calculate per fragment instead of per atom
                 if "center" == column:
                     coordinates = calculate_center(fragment_df=fragment_df, atoms=["C"])
-                    Xs.append(coordinates[0])
-                    Ys.append(coordinates[1])
-                    Zs.append(coordinates[2])
                 else:
                     point = fragment_df[fragment_df['atom_label'].str.contains(column)]
 
                     assert (len(point) == 1), " atom label is not unique, can't count per bin"
 
-                    x, y, z = point.atom_x, point.atom_y, point.atom_z
-                    Xs.append(x)
-                    Ys.append(y)
-                    Zs.append(z)
+                    coordinates = [point.atom_x, point.atom_y, point.atom_z]
+
+                Xs.append(coordinates[0])
+                Ys.append(coordinates[1])
+                Zs.append(coordinates[2])
 
     return [Xs, Ys, Zs]
 

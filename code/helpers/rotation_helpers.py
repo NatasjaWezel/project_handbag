@@ -1,6 +1,6 @@
 import numpy as np
 
-from helpers.tests import test_rotation1, test_rotation2, test_rotation3, compare_distances
+from helpers.tests import check_new_alignment, compare_distances
 import copy
 
 def perform_rotations(fragment, atoms_to_put_in_plane):
@@ -20,16 +20,11 @@ def perform_rotations(fragment, atoms_to_put_in_plane):
         coord_vector = find_coord_vector(ax=axis[i], atom=atom)
 
         angle = find_angles(ax=axis[i], coord_vector=coord_vector)
-        angle = angle*find_rotation_direction(ax=axis[i], atom=atom)
+        angle = angle * find_rotation_direction(ax=axis[i], atom=atom)
 
         fragment = calculate_rotation(fragment=fragment, angle=angle, ax=axis[i])
 
-        if i == 0:
-            test_rotation1(fragment, atoms_to_put_in_plane)
-        elif i == 1:
-            test_rotation2(fragment, atoms_to_put_in_plane)
-        else:
-            test_rotation3(fragment, atoms_to_put_in_plane)
+        check_new_alignment(fragment, atoms_to_put_in_plane)
 
     compare_distances(old_fragment, fragment)
 

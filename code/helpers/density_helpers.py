@@ -38,11 +38,7 @@ def prepare_df(fragments_df, resolution, to_count):
     amount_bins = no_bins_x * no_bins_y * no_bins_z
     indices = [i for i in range(0, amount_bins)]
 
-    print("Bins: ", no_bins_x, no_bins_y, no_bins_z)
-
-    bins = [np.linspace(minx, maxx, num=no_bins_x + 1),
-            np.linspace(miny, maxy, num=no_bins_y + 1),
-            np.linspace(minz, maxz, num=no_bins_z + 1)] 
+    bins = [np.linspace(minx, maxx, num=no_bins_x + 1), np.linspace(miny, maxy, num=no_bins_y + 1), np.linspace(minz, maxz, num=no_bins_z + 1)] 
  
     df = add_boundaries_per_bin(bins, indices)
 

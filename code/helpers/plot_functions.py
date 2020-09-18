@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 import matplotlib
+from helpers.headers import COLORS
 
 def plot_density(ax, df):
     df['ymiddle'] = (df['ystart'] + df['yend']) / 2
@@ -43,12 +44,8 @@ def plot_fragments(fragments):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
-    colors = ["red", "sandybrown", "gold", "chartreuse", "green", 
-                "mediumturquoise", "dodgerblue", "darkblue", "slateblue",
-                "mediumorchid", "fuchsia"]
-
     for i, fragment in enumerate(fragments):
-        fragment.color = colors[i % len(colors)]
+        fragment.color = COLORS[i % len(COLORS)]
 
         # plot first atom of the fragment and label it
         atom = list(fragment.atoms.values())[0]
