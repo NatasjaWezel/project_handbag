@@ -6,7 +6,7 @@
 # Author: Natasja Wezel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from helpers.geometry_helpers import average_molecule, calculate_center
+from helpers.geometry_helpers import average_fragment, calculate_center
 
 import pandas as pd
 import numpy as np
@@ -27,13 +27,13 @@ def main():
     inputfilename = sys.argv[1]
 
     # TODO: make this more general:
-    to_count = ["O"]
-    # to_count = ["center"]
+    # to_count = ["O"]
+    to_count = ["center"]
 
     fragments_df = pd.read_csv(inputfilename, header=None)
-    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
+    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
-    avg_fragment = average_molecule(fragments_df)
+    avg_fragment = average_fragment(fragments_df)
 
     coordinate_lists = count_contact_atoms(fragments_df, to_count)
 

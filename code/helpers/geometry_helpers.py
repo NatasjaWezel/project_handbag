@@ -5,9 +5,14 @@ import pandas as pd
 import math
 
 def calculate_center(fragment_df, atoms):
-    # TODO: only count "C" (or other atoms in atoms) for average
-    atom_df = fragment_df
-    coordinates = [atom_df.atom_x.mean(), atom_df.atom_y.mean(), atom_df.atom_z.mean()]
+    frames = []
+
+    for atom in atoms:
+        atom_df = fragment_df[fragment_df.atom_symbol == atom]
+        frames.append(atom_df)
+
+    result = pd.concat(frames)
+    coordinates = [result.atom_x.mean(), result.atom_y.mean(), result.atom_z.mean()]
 
     return coordinates
 
@@ -37,7 +42,7 @@ def average_fragment(df):
 
     # TODO: count the columnames here too
     for _, row in single_fragment_df.iterrows():
-        if row.atom_element == "N":
+        if row.atom_symbol == "N":
             new_df.loc[new_df.index == single_fragment_df.unique_f_label.unique()[0], "Nx"] = row.atom_x
             new_df.loc[new_df.index == single_fragment_df.unique_f_label.unique()[0], "Ny"] = row.atom_y
             new_df.loc[new_df.index == single_fragment_df.unique_f_label.unique()[0], "Nz"] = row.atom_z
@@ -55,7 +60,7 @@ def average_fragment(df):
         single_fragment_df = central_group_df[central_group_df.unique_f_label == label]
 
         for _, row in single_fragment_df.iterrows():
-            if row.atom_element == "N":
+            if row.atom_symbol == "N":
                 new_df.loc[new_df.index == single_fragment_df.unique_f_label.unique()[0], "Nx"] = row.atom_x
                 new_df.loc[new_df.index == single_fragment_df.unique_f_label.unique()[0], "Ny"] = row.atom_y
                 new_df.loc[new_df.index == single_fragment_df.unique_f_label.unique()[0], "Nz"] = row.atom_z

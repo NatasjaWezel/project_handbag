@@ -21,7 +21,7 @@ def main():
     inputfilename = sys.argv[1]
 
     fragments_df = pd.read_csv(inputfilename)
-    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_element", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
+    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
     avg_fragment = average_fragment(fragments_df)
 
