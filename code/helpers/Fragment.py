@@ -50,9 +50,6 @@ class Fragment:
             self.add_bond([self.center_atom.label, atom.label])
             atom.part_of = "c"
 
-        # the other two are also attached
-        self.add_bond([self.attached_atoms[4].label, self.attached_atoms[5].label])
-
     
     def find_atoms_for_plane(self):
         self.find_bonds_NO3_and_distances()

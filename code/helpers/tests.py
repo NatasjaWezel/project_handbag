@@ -1,4 +1,33 @@
 from helpers.headers import CUT_OFF_ZERO
+import math
+import numpy as np
+
+def compare_distances(oldfragment, newfragment):
+    distances1 = calc_distances(oldfragment)
+    distances2 = calc_distances(newfragment)
+
+    distances1.sort()
+    distances2.sort()
+    
+    np.testing.assert_allclose(distances1, distances2, err_msg=oldfragment.from_entry + oldfragment.fragment_id + "after rotating the distances differ")
+
+def calc_distances(fragment):
+    distances = []
+    counter = 0
+
+    for atom1 in fragment.atoms.values():
+        for atom2 in list(fragment.atoms.values())[counter:]:
+            if not atom1 == atom2:
+                diffx = abs(atom1.x - atom2.x)
+                diffy = abs(atom1.y - atom2.y)
+                diffz = abs(atom1.z - atom2.z)
+
+                distance = math.sqrt(diffx**2 + diffy**2 + diffz**2)
+                distances.append(distance)
+        
+        counter +=1
+
+    return distances
 
 def test_centering(fragment, atom_to_center):
 

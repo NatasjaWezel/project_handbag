@@ -19,6 +19,8 @@ def average_fragment(df):
 
     central_group_df = df[df.fragment_or_contact == "c"]
 
+    ideal_atoms = ["N", "O1", "O2", "O3"]
+
     # count how many atoms in one fragment
     new_df = pd.DataFrame(columns=['Nx', 'Ny', 'Nz',
                                         'O1x', 'O1y', 'O1z', 
@@ -74,8 +76,6 @@ def average_fragment(df):
                 new_df.loc[new_df.index == single_fragment_df.unique_f_label.unique()[0], closest_atom  + "z"] = row.atom_z
     
     fragment = Fragment(from_entry="allentries", fragment_id=1)
-
-    ideal_atoms = ["N", "O1", "O2", "O3"]
 
     for atom_label in ideal_atoms:
         x = new_df[atom_label + "x"].mean()

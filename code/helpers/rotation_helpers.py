@@ -1,6 +1,7 @@
 import numpy as np
 
-from helpers.tests import test_rotation1, test_rotation2, test_rotation3
+from helpers.tests import test_rotation1, test_rotation2, test_rotation3, compare_distances
+import copy
 
 def perform_rotations(fragment, atoms_to_put_in_plane):
     """ Performs three rotations to lie three of the atoms in the xy plane, one of those
@@ -12,6 +13,8 @@ def perform_rotations(fragment, atoms_to_put_in_plane):
 
     atoms = [atoms_to_put_in_plane[0], atoms_to_put_in_plane[0], atoms_to_put_in_plane[1]]
     axis = ["z", "y", "x"]
+
+    old_fragment = copy.deepcopy(fragment)
 
     for i, atom in enumerate(atoms):
         coord_vector = find_coord_vector(ax=axis[i], atom=atom)
@@ -27,6 +30,8 @@ def perform_rotations(fragment, atoms_to_put_in_plane):
             test_rotation2(fragment, atoms_to_put_in_plane)
         else:
             test_rotation3(fragment, atoms_to_put_in_plane)
+
+    compare_distances(old_fragment, fragment)
 
     return fragment
 
