@@ -67,6 +67,8 @@ def add_boundaries_per_bin(bins, indices):
                 df.loc[current_index] = [xstart, xend, ystart, yend, zstart, zend]
                 current_index += 1
     
+    df = df.apply(pd.to_numeric, downcast='float', errors='coerce')
+
     return df
 
 

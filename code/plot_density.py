@@ -11,7 +11,7 @@
 
 from helpers.density_helpers import prepare_df, add_one_to_bin
 from helpers.plot_functions import plot_fragment_colored, plot_density
-from helpers.geometry_helpers import average_molecule, calculate_center
+from helpers.geometry_helpers import average_fragment, calculate_center
 
 import pandas as pd
 import numpy as np
@@ -31,18 +31,20 @@ def main():
     inputfilename = sys.argv[1]
 
     # TODO: make this more general
-    to_count = ["center"]
+    to_count = ["O"]
 
     # resolution of the bins, in Angstrong
     resolution = float(sys.argv[2])
 
-    intermediate_hdf_file = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] + "_" + str(resolution) + ".hdf"
-    plotname = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] + "_" + str(resolution) + "_density.png"
+    prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
+    intermediate_hdf_file = prefix + "_" + str(resolution) + ".hdf"
+    plotname = prefix + "_" + str(resolution) + "_density.png"
 
     fragments_df = pd.read_csv(inputfilename, header=None)
-    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
+    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
-    avg_fragment = average_molecule(fragments_df)
+    avg_fragment_name = prefix + "_avg_fragment.pkl"
+    avg_fragment = average_fragment(avg_fragment_name, fragments_df)
 
     try:
         density_df = pd.read_hdf(intermediate_hdf_file, 'key')
@@ -75,7 +77,9 @@ def main():
 
 def count_points_per_square(df, points_df):
     columns = list(df.columns)
-    column_name = [i.split("_") for i in columns if "amount" in i]
+
+    # TODO: check out this [0]
+    column_name = [i for i in columns if "amount" in i][0]
 
     small_points_df = points_df[points_df.fragment_or_contact == "f"]
     unique_entries = small_points_df.entry_id.unique()

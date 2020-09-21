@@ -15,7 +15,7 @@ def main():
     amount = int(sys.argv[2])
 
     df = pd.read_csv(filename, header=None)
-    df.columns = ["entry_id", "fragment_id", "atom_label", "part_of", "atom_x", "atom_y", "atom_z"]
+    df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "part_of", "atom_x", "atom_y", "atom_z"]
 
     fragments = []
 
@@ -31,7 +31,7 @@ def main():
             fragment = Fragment(unique_entry, fragment_id)
 
             for _, row in atoms.iterrows():
-                atom = Atom(row.atom_label, row.atom_x, row.atom_y, row.atom_z)
+                atom = Atom(row.atom_label, [row.atom_x, row.atom_y, row.atom_z])
                 fragment.add_atom(atom)
             
             fragment.set_center('N')
