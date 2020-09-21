@@ -2,11 +2,6 @@ import numpy as np
 import pandas as pd
 import math
 
-from helpers.tests import test_count
-
-from helpers.Atom import Atom
-from helpers.Fragment import Fragment
-
 def find_maximum(df):
     """ Returns the largest coordinate for each of the x, y and z axis. """
 

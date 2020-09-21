@@ -6,7 +6,7 @@ from helpers.plot_functions import plot_fragment_colored
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from matplotlib.widgets import RadioButtons
+from matplotlib.widgets import RadioButtons, CheckButtons, Slider
 
 
 import numpy as np
@@ -20,10 +20,13 @@ def main():
     
     inputfilename = sys.argv[1]
 
+    prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
+    avg_fragment_name = prefix + "_avg_fragment.pkl"
+
     fragments_df = pd.read_csv(inputfilename)
     fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
-    avg_fragment = average_fragment(fragments_df)
+    avg_fragment = average_fragment(avg_fragment_name, fragments_df)
 
     # to plot the vdw surface we need the vdw radii
     avg_fragment.set_vdw_radii("data/vdw_radii.csv")
@@ -37,23 +40,37 @@ def plot_vdw_surface(avg_fragment):
 
     ax.margins(x=0)
     ax = plot_fragment_colored(ax, avg_fragment)
-
     # Create a sphere around the nitrogen atom
     ax, spheres = plot_vdw_spheres(avg_fragment, ax)
 
-    rax = plt.axes([0.025, 0.5, 0.15, 0.15], facecolor=AXCOLOR)
-    radio = RadioButtons(rax, ('visible', 'blue', 'pink', 'green'), active=0)
+    # visibility of the spheres    
+    check_ax = plt.axes([0.025, 0.5, 0.15, 0.15], facecolor=AXCOLOR)
+    radio = CheckButtons(check_ax, ['visible'])
 
-    def visibility(label):
-        if label == "visible":
-            for sphere in spheres:
-                sphere.set_visible(not sphere.get_visible())
-        else:
-            for sphere in spheres:
-                sphere.set_color(label)
+    def switch_visibility(label):
+        for sphere in spheres:
+            sphere.set_visible(not sphere.get_visible())
+
         fig.canvas.draw_idle()
 
-    radio.on_clicked(visibility)
+    radio.on_clicked(switch_visibility)
+
+    
+
+    # how big the spheres are
+    # axvdw = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=AXCOLOR)
+    # slider_vdw = Slider(axvdw, 'Radii', 0.0, 2.5, valinit=2.0, valstep=0.1)
+    
+    # def update_vdw(val):
+    #     if val < 2.0:
+    #         val = round(val - 2.0, 1)
+    #     else:
+    #         val = round(2.0 - val, 1)
+        
+    #     print(val)
+    #     print(ax)
+   
+    # slider_vdw.on_changed(update_vdw)
     
     ax.set_xlabel("X axis")
     ax.set_ylabel("Y axis")
@@ -62,11 +79,11 @@ def plot_vdw_surface(avg_fragment):
     plt.show()
 
 
-def plot_vdw_spheres(avg_fragment, ax):
+def plot_vdw_spheres(avg_fragment, ax, slider=0.0):
     spheres = []
 
     for atom in avg_fragment.atoms.values():
-        r = atom.vdw_radius
+        r = atom.vdw_radius + slider
 
         theta, phi = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
 

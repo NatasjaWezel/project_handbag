@@ -26,6 +26,9 @@ def main():
     
     inputfilename = sys.argv[1]
 
+    prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
+    avg_fragment_name = prefix + "_avg_fragment.pkl"
+
     # TODO: make this more general:
     # to_count = ["O"]
     to_count = ["center"]
@@ -33,7 +36,7 @@ def main():
     fragments_df = pd.read_csv(inputfilename, header=None)
     fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
-    avg_fragment = average_fragment(fragments_df)
+    avg_fragment = average_fragment(avg_fragment_name, fragments_df)
 
     coordinate_lists = count_contact_atoms(fragments_df, to_count)
 
