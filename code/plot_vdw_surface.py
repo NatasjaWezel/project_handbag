@@ -54,23 +54,6 @@ def plot_vdw_surface(avg_fragment):
         fig.canvas.draw_idle()
 
     radio.on_clicked(switch_visibility)
-
-    
-
-    # how big the spheres are
-    # axvdw = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=AXCOLOR)
-    # slider_vdw = Slider(axvdw, 'Radii', 0.0, 2.5, valinit=2.0, valstep=0.1)
-    
-    # def update_vdw(val):
-    #     if val < 2.0:
-    #         val = round(val - 2.0, 1)
-    #     else:
-    #         val = round(2.0 - val, 1)
-        
-    #     print(val)
-    #     print(ax)
-   
-    # slider_vdw.on_changed(update_vdw)
     
     ax.set_xlabel("X axis")
     ax.set_ylabel("Y axis")
