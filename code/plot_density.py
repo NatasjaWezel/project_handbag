@@ -38,7 +38,7 @@ def main():
 
     prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
     intermediate_hdf_file = prefix + "_" + str(resolution) + ".hdf"
-    plotname = prefix + "_" + str(resolution) + "_density.png"
+    plotname = prefix + "_" + str(resolution) + "_density.pdf"
 
     fragments_df = pd.read_csv(inputfilename, header=None)
     fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]

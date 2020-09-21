@@ -33,31 +33,31 @@ def average_fragment(avg_fragment_name, df):
 
         ideal_atoms = ["N", "O1", "O2", "O3"]
 
+        columns = []
+        for atom in ideal_atoms:
+            columns.extend([atom + "x", atom + "y", atom + "z"])
+
         # count how many atoms in one fragment
-        new_df = pd.DataFrame(columns=['Nx', 'Ny', 'Nz',
-                                            'O1x', 'O1y', 'O1z', 
-                                            'O2x', 'O2y', 'O2z', 
-                                            'O3x', 'O3y', 'O3z'], index=central_group_df.unique_f_label.unique())
+        new_df = pd.DataFrame(columns=columns, index=central_group_df.unique_f_label.unique())
 
         # put first fragment in there
         label = central_group_df.unique_f_label.unique()[0]
         single_fragment_df = central_group_df[central_group_df.unique_f_label == label]
 
-        O_counter = 1
-
+        counter = 1
         closest = {}
 
-        # TODO: count the columnames here too
         for _, row in single_fragment_df.iterrows():
-            label = single_fragment_df.unique_f_label.unique()[0]
             if row.atom_symbol == "N":
                 new_df = add_coordinates_to_df(new_df, label, row.atom_symbol, row)
             else:
-                atom_symbol = "O" + str(O_counter)
+                atom_symbol = "O" + str(counter)
                 new_df = add_coordinates_to_df(new_df, label, atom_symbol, row)
 
                 closest[atom_symbol] = [row.atom_x, row.atom_y, row.atom_z]
-                O_counter += 1
+                counter += 1
+
+        
 
         # TODO: time this and check std's to see what's worth and what's not
         labels = central_group_df.unique_f_label.unique()[1:]
