@@ -34,13 +34,15 @@ def main():
     avg_fragment_name = prefix + "_avg_fragment.pkl"
 
     fragments_df = pd.read_csv(inputfilename, header=None)
-    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
+    fragments_df.columns = ["entry_id", "fragment_id", "unique_fragment", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
     avg_fragment = average_fragment(avg_fragment_name, fragments_df)
+    print("Avg fragment calculated")
 
     coordinate_df = count_contact_atoms(fragments_df, to_count)
+    print("Contact atoms counted")
 
-    coordinate_df = distances_closest_atom_central(coordinate_df, avg_fragment)
+    # coordinate_df = distances_closest_atom_central(coordinate_df, avg_fragment)
 
     make_plot(avg_fragment, coordinate_df)
 
@@ -72,18 +74,15 @@ def count_contact_atoms(fragments_df, to_count):
 
     contact_group_df = fragments_df[fragments_df.fragment_or_contact == "f"]
 
-    labels = contact_group_df.entry_id.unique()
-    coordinate_df = pd.DataFrame(columns=["x", "y", "z", "distance", "vdw_closest_atom"], index=labels)
+    unique_fragments = contact_group_df.unique_fragment
+    coordinate_df = pd.DataFrame(columns=["x", "y", "z", "distance", "vdw_closest_atom"], index=unique_fragments)
 
-    for entry_id in labels:
-        entry_df = contact_group_df[contact_group_df.entry_id == entry_id]
-
-        for fragment_id in entry_df.fragment_id.unique():
-            fragment_df = entry_df[entry_df.fragment_id == fragment_id]
+    for unique_fragment_id in unique_fragments:
+        fragment_df = contact_group_df[contact_group_df.unique_fragment == unique_fragment_id]
             
-            coordinates = get_coordinates(fragment_df, to_count)
-                
-            coordinate_df.loc[coordinate_df.index == entry_id, ["x", "y", "z"]] = coordinates[0], coordinates[1], coordinates[2]
+        coordinates = get_coordinates(fragment_df, to_count)
+            
+        coordinate_df.loc[coordinate_df.index == unique_fragment_id, ["x", "y", "z"]] = coordinates[0], coordinates[1], coordinates[2]
 
     return coordinate_df
 
@@ -107,7 +106,7 @@ def make_plot(avg_fragment, coordinate_df):
     # plot the (average of the) central group 
     ax = plot_fragment_colored(ax, avg_fragment)
     
-    ax.scatter(coordinate_df.x, coordinate_df.y, coordinate_df.z, s=1, c="red")
+    ax.scatter(list(coordinate_df.x), list(coordinate_df.y), list(coordinate_df.z), s=1, c="red")
 
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
