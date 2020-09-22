@@ -34,7 +34,10 @@ def prepare_df(fragments_df, resolution, to_count):
     indices = [i for i in range(0, amount_bins)]
 
     bins = [np.linspace(minx, maxx, num=no_bins_x + 1), np.linspace(miny, maxy, num=no_bins_y + 1), np.linspace(minz, maxz, num=no_bins_z + 1)] 
- 
+    
+    volume_total = abs(maxx - minx) * abs(maxy - miny) * abs(maxz - minz)
+    print("Volume per bin & volume per bin according to resolution: ", resolution**3, volume_total/amount_bins)
+
     df = add_boundaries_per_bin(bins, indices)
 
     for column in to_count:
