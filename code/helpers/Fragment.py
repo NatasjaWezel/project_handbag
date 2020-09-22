@@ -6,7 +6,7 @@ class Fragment:
     def __init__(self, from_entry, fragment_id):
         self.from_entry = from_entry
         self.fragment_id = fragment_id
-        self.unique_id = from_entry + fragment_id
+        self.unique_id = from_entry + str(fragment_id)
 
         self.atoms = {}
         self.bonds = []
