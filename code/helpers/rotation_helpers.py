@@ -24,7 +24,7 @@ def perform_rotations(fragment, atoms_to_put_in_plane):
 
         fragment = calculate_rotation(fragment=fragment, angle=angle, ax=axis[i])
 
-        check_new_alignment(fragment, atoms_to_put_in_plane)
+    check_new_alignment(fragment, atoms_to_put_in_plane)
 
     compare_distances(old_fragment, fragment)
 
@@ -37,17 +37,12 @@ def find_coord_vector(ax, atom):
     
     coord_vector = [atom.x, atom.y, atom.z]
     
-    # check if the atom is in a plane
-    not_in_any_plane = False
-    if not atom.x == 0.0 and not atom.y == 0.0 and not atom.z == 0.0:
-        not_in_any_plane = True
-
     # if not in any plane project it onto the xy plane for the first rotation
-    if not_in_any_plane and ax == "x":
+    if ax == "x":
         coord_vector = [0, atom.y, atom.z]
-    elif not_in_any_plane and ax == "y":
+    elif ax == "y":
         coord_vector = [atom.x, 0, atom.z]
-    elif not_in_any_plane:
+    elif ax == "z":
         coord_vector = [atom.x, atom.y, 0]
 
     return coord_vector
@@ -74,15 +69,17 @@ def find_angles(coord_vector, ax):
     x, y =  np.array([1, 0, 0]), np.array([0, 1, 0])
 
     point_vector = np.array(coord_vector)
-    
-    # formula: u.v = |u|.|v|.cos(alpha)
-    # alpha = arccos((u.v)/(|u|.|v|))
-    if ax == "x":
+
+    norm = np.linalg.norm(point_vector)
+
+    if norm < 1e-10:
+        return 0.0
+    elif ax == "x":
         # return angle with y axis (beta)
-        return np.arccos(np.dot(point_vector, y) / np.linalg.norm(point_vector))
+        return np.arccos(np.dot(point_vector, y) / norm)
     elif ax == "y" or ax == "z":
         # return angle with x axis (alpha)
-        return np.arccos(np.dot(point_vector, x) / np.linalg.norm(point_vector))
+        return np.arccos(np.dot(point_vector, x) / norm)
     else:
         assert ax in ["x", "y", "z"], "Ax must be either x, y or z."
 
