@@ -84,6 +84,8 @@ def average_fragment(avg_fragment_name, df):
         
         fragment = make_fragment(ideal_atoms, new_df)
 
+        fragment.set_vdw_radii("data/vdw_radii.csv")
+
         openpicklefile = open(avg_fragment_name, 'wb')
         pickle.dump(fragment, openpicklefile)
         openpicklefile.close()
