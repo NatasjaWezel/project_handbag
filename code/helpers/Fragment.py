@@ -90,7 +90,7 @@ class Fragment:
                 atom.z += move_z
 
     def __str__(self):
-        molecule_string = "Atoms in fragment: " + str(self.fragment_id) + "\n"
+        molecule_string = "Atoms in fragment: " + str(self.unique_id) + "\n"
         # molecule_string = ""
         for atom in self.atoms.values():
             molecule_string += atom.label + ": " + str(atom.x) + ", " + str(atom.y) + ", " + str(atom.z) + "\n"
