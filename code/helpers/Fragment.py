@@ -1,4 +1,3 @@
-from helpers.headers import CUT_OFF_ZERO
 import math
 
 import pandas as pd
@@ -7,6 +6,8 @@ class Fragment:
     def __init__(self, from_entry, fragment_id):
         self.from_entry = from_entry
         self.fragment_id = fragment_id
+        self.unique_id = from_entry + fragment_id
+
         self.atoms = {}
         self.bonds = []
         self.color = "red"
@@ -92,11 +93,7 @@ class Fragment:
         molecule_string = "Atoms in fragment: " + str(self.fragment_id) + "\n"
         # molecule_string = ""
         for atom in self.atoms.values():
-            x = 0.0 if atom.x < CUT_OFF_ZERO and atom.x > -CUT_OFF_ZERO else atom.x 
-            y = 0.0 if atom.y < CUT_OFF_ZERO and atom.y > -CUT_OFF_ZERO else atom.y 
-            z = 0.0 if atom.z < CUT_OFF_ZERO and atom.z > -CUT_OFF_ZERO else atom.z 
-
-            molecule_string += atom.label + ": " + str(x) + ", " + str(y) + ", " + str(z) + "\n"
+            molecule_string += atom.label + ": " + str(atom.x) + ", " + str(atom.y) + ", " + str(atom.z) + "\n"
 
         molecule_string += "Bonds in fragment: \n"
         for bond in self.bonds:
