@@ -46,7 +46,7 @@ def main():
 
 def distances_closest_atom_central(coordinate_df, avg_fragment):
     closest_distances = []
-    closest_atom_vdw = []
+    closest_atoms_vdw = []
     
     for x, y, z in zip(coordinate_df.x, coordinate_df.y, coordinate_df.z):
         closest_distance = math.inf
@@ -59,10 +59,10 @@ def distances_closest_atom_central(coordinate_df, avg_fragment):
                 closest_atom_vdw = atom.vdw_radius
                 
         closest_distances.append(closest_distance)
-        closest_atom_vdw.append(closest_atom_vdw)
+        closest_atoms_vdw.append(closest_atom_vdw)
 
     coordinate_df["distance"] = closest_distances
-    coordinate_df["vdw_closest_atom"] = closest_atom_vdw
+    coordinate_df["vdw_closest_atom"] = closest_atoms_vdw
 
     return coordinate_df
 
