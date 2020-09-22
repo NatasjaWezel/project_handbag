@@ -41,7 +41,7 @@ def main():
     plotname = prefix + "_" + str(resolution) + "_density.pdf"
 
     fragments_df = pd.read_csv(inputfilename, header=None)
-    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
+    fragments_df.columns = ["entry_id", "fragment_id", "unique_fragment", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
     avg_fragment_name = prefix + "_avg_fragment.pkl"
     avg_fragment = average_fragment(avg_fragment_name, fragments_df)
