@@ -15,7 +15,7 @@ def main():
     amount = int(sys.argv[2])
 
     df = pd.read_csv(filename, header=None)
-    df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "part_of", "atom_x", "atom_y", "atom_z"]
+    df.columns = ["entry_id", "fragment_id", "unique_fragment", "atom_label", "atom_symbol", "part_of", "atom_x", "atom_y", "atom_z"]
 
     fragments = []
 
