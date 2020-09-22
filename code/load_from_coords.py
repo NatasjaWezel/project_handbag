@@ -51,7 +51,7 @@ def main():
 
         for fragment in rotated_fragments:
             for atom in fragment.atoms.values():
-                writer.writerow([fragment.from_entry, fragment.fragment_id, atom.label, atom.symbol, atom.part_of, atom.x, atom.y, atom.z])
+                writer.writerow([fragment.from_entry, fragment.fragment_id, fragment.from_entry + fragment.fragment_id, atom.label, atom.symbol, atom.part_of, atom.x, atom.y, atom.z])
     
 
 if __name__ == "__main__":
