@@ -1,6 +1,6 @@
 from helpers.plot_functions import plot_fragments
-from helpers.Fragment import Fragment
-from helpers.Atom import Atom
+from classes.Fragment import Fragment
+from classes.Atom import Atom
 
 import pandas as pd
 

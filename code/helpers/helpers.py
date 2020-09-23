@@ -1,7 +1,7 @@
 from collections import defaultdict
 
-from helpers.Atom import Atom
-from helpers.Fragment import Fragment
+from classes.Atom import Atom
+from classes.Fragment import Fragment
 
 def load_fragments_from_coords(filename):
     """ Loads the list of aligned fragments from a .cor file. """

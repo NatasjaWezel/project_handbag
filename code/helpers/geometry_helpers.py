@@ -1,5 +1,5 @@
-from helpers.Atom import Atom
-from helpers.Fragment import Fragment
+from classes.Atom import Atom
+from classes.Fragment import Fragment
 
 import pandas as pd
 import math
