@@ -4,6 +4,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib
 from helpers.headers import COLORS
 
+import numpy as np
+
 def plot_density(ax, df):
     df['ymiddle'] = (df['ystart'] + df['yend']) / 2
     df['xmiddle'] = (df['xstart'] + df['xend']) / 2
@@ -78,3 +80,23 @@ def plot_atoms_bonds(ax, fragment):
             ax.plot(x, y, z, color=fragment.color)
     
     return ax
+
+
+def plot_vdw_spheres(avg_fragment, ax):
+    spheres = []
+
+    for atom in avg_fragment.atoms.values():
+        r = atom.vdw_radius
+
+        theta, phi = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+
+        x = r * np.sin(phi) * np.cos(theta) + atom.x
+        y = r * np.sin(phi) * np.sin(theta) + atom.y
+        z = r * np.cos(phi) + atom.z
+
+        sphere = ax.plot_surface(x, y, z, color='pink', alpha=0.2, linewidth=0)
+        spheres.append(sphere)
+
+    assert len(spheres) == len(avg_fragment.atoms.keys()), "Something went wrong with plotting the vdw surfaces"
+
+    return ax, spheres

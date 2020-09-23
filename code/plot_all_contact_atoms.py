@@ -7,8 +7,10 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 from helpers.geometry_helpers import average_fragment, calculate_center
-from helpers.plot_functions import plot_fragment_colored
+from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
 from helpers.helpers import read_results_alignment
+
+from matplotlib.widgets import Slider
 
 import math
 
@@ -20,12 +22,14 @@ import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+from helpers.headers import AXCOLOR, VDW_CSV
+
 import sys
 
 def main():
 
     if len(sys.argv) != 3:
-        print("Usage: python plot_all_contact_atoms.py <path/to/inputfile> <atom to count or center>")
+        print("Usage: python plot_all_contact_atoms.py <path/to/inputfile> <atom/center to count>")
         sys.exit(1)
     
     inputfilename = sys.argv[1]
@@ -40,24 +44,34 @@ def main():
 
     coordinate_df = count_contact_atoms(aligned_fragments_df, to_count)
 
-    coordinate_df = distances_closest_atom_central(coordinate_df, avg_fragment)
+    # TODO: this only works for single atom, not for center
+    radii_df = pd.read_csv(VDW_CSV, header=None)
+    radii_df.columns = ["name", "symbol", "radius"]
+
+    vdw_radius = float(radii_df[radii_df.symbol == to_count].radius)
+
+    coordinate_df["vdw"] = vdw_radius
+
+    coordinate_df = distances_closest_vdw_central(coordinate_df, avg_fragment)
 
     make_plot(avg_fragment, coordinate_df)
 
-def distances_closest_atom_central(coordinate_df, avg_fragment):
+def distances_closest_vdw_central(coordinate_df, avg_fragment):
     closest_distances = []
     closest_atoms_vdw = []
     
-    for x, y, z in zip(coordinate_df.x, coordinate_df.y, coordinate_df.z):
+    for x, y, z, vdw in zip(coordinate_df.x, coordinate_df.y, coordinate_df.z, coordinate_df.vdw):
         closest_distance = math.inf
 
         for atom in avg_fragment.atoms.values():
-            distance = np.sqrt((x - atom.x)**2 + (y - atom.y)**2 + (z - atom.z)**2)
+            distance = np.sqrt((x - atom.x)**2 + (y - atom.y)**2 + (z - atom.z)**2) - vdw - atom.vdw_radius
             
             if distance < closest_distance:
                 closest_distance = distance
                 closest_atom_vdw = atom.vdw_radius
                 
+        # assert closest_distance <5, "closest distance can't be smaller then 3"
+
         closest_distances.append(closest_distance)
         closest_atoms_vdw.append(closest_atom_vdw)
 
@@ -73,7 +87,7 @@ def count_contact_atoms(fragments_df, to_count):
     contact_group_df = fragments_df[fragments_df.fragment_or_contact == "f"]
 
     unique_fragments = contact_group_df.unique_fragment
-    coordinate_df = pd.DataFrame(columns=["x", "y", "z", "distance", "vdw_closest_atom"], index=unique_fragments)
+    coordinate_df = pd.DataFrame(columns=["x", "y", "z"], index=unique_fragments)
 
     for unique_fragment_id in unique_fragments:
         fragment_df = contact_group_df[contact_group_df.unique_fragment == unique_fragment_id]
@@ -103,9 +117,26 @@ def make_plot(avg_fragment, coordinate_df):
     
     # plot the (average of the) central group 
     ax = plot_fragment_colored(ax, avg_fragment)
-    
-    ax.scatter(list(coordinate_df.x), list(coordinate_df.y), list(coordinate_df.z), s=1, c="red")
+    ax, _ = plot_vdw_spheres(avg_fragment, ax)
 
+    points = ax.scatter(list(coordinate_df.x), list(coordinate_df.y), list(coordinate_df.z), s=1, c="red")
+
+    print(coordinate_df.distance.min(), coordinate_df.distance.max())
+
+    vdw_slider_ax = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=AXCOLOR)
+    vdw_slider = Slider(vdw_slider_ax, 'VDW radius + ', -0.5, 2, valinit=0, valstep=0.1)
+
+    def update(val):
+        val = round(val, 2)
+       
+        show_df = coordinate_df[coordinate_df.distance <= 2 * val]
+
+        print(len(coordinate_df) , len(show_df), val)    
+        points._offsets3d = (list(show_df.x), list(show_df.y), list(show_df.z))
+        fig.canvas.draw_idle()
+
+    vdw_slider.on_changed(update)
+    
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
     ax.set_zlabel('Z axis')

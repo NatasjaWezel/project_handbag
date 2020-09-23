@@ -1,7 +1,7 @@
 import sys
 import pandas as pd
 from helpers.geometry_helpers import average_fragment
-from helpers.plot_functions import plot_fragment_colored
+from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
 from helpers.helpers import read_results_alignment
 
 import matplotlib.pyplot as plt
@@ -39,7 +39,7 @@ def plot_vdw_surface(avg_fragment):
 
     ax.margins(x=0)
     ax = plot_fragment_colored(ax, avg_fragment)
-    # Create a sphere around the nitrogen atom
+    # Create vdw spheres around central group atoms
     ax, spheres = plot_vdw_spheres(avg_fragment, ax)
 
     # visibility of the spheres    
@@ -59,26 +59,6 @@ def plot_vdw_surface(avg_fragment):
     ax.set_zlabel("Z axis")
 
     plt.show()
-
-
-def plot_vdw_spheres(avg_fragment, ax, slider=0.0):
-    spheres = []
-
-    for atom in avg_fragment.atoms.values():
-        r = atom.vdw_radius + slider
-
-        theta, phi = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
-
-        x = r * np.sin(phi) * np.cos(theta) + atom.x
-        y = r * np.sin(phi) * np.sin(theta) + atom.y
-        z = r * np.cos(phi) + atom.z
-
-        sphere = ax.plot_surface(x, y, z, color='pink', alpha=0.2, linewidth=0)
-        spheres.append(sphere)
-
-    assert len(spheres) == len(avg_fragment.atoms.keys()), "Something went wrong with plotting the vdw surfaces"
-
-    return ax, spheres
 
 
 if __name__ == "__main__":
