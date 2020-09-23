@@ -6,6 +6,8 @@ import math
 
 import pickle
 
+import progressbar
+
 def calculate_center(fragment_df, atoms):
     frames = []
 
@@ -57,12 +59,27 @@ def average_fragment(avg_fragment_name, df):
                 closest[atom_symbol] = [row.atom_x, row.atom_y, row.atom_z]
                 counter += 1
 
-        
+        new_df = fill_coordinates(central_group_df, new_df, closest)
 
-        # TODO: time this and check std's to see what's worth and what's not
-        labels = central_group_df.unique_f_label.unique()[1:]
+        fragment = make_fragment(ideal_atoms, new_df)
 
-        for label in labels:
+        fragment.set_vdw_radii("data/vdw_radii.csv")
+
+        openpicklefile = open(avg_fragment_name, 'wb')
+        pickle.dump(fragment, openpicklefile)
+        openpicklefile.close()
+            
+    return fragment   
+
+
+def fill_coordinates(central_group_df, new_df, closest):
+    # TODO: time this and check std's to see what's worth and what's not
+    labels = central_group_df.unique_f_label.unique()[1:]
+    
+    print("Calculating average fragment: ")
+
+    with progressbar.ProgressBar(max_value=len(labels)) as bar:
+        for i, label in enumerate(labels):
             single_fragment_df = central_group_df[central_group_df.unique_f_label == label]
 
             for _, row in single_fragment_df.iterrows():
@@ -81,17 +98,10 @@ def average_fragment(avg_fragment_name, df):
                             closest_atom = key
 
                     new_df = add_coordinates_to_df(df=new_df, label=label, atom_symbol=closest_atom, row=row)
-        
-        fragment = make_fragment(ideal_atoms, new_df)
-
-        fragment.set_vdw_radii("data/vdw_radii.csv")
-
-        openpicklefile = open(avg_fragment_name, 'wb')
-        pickle.dump(fragment, openpicklefile)
-        openpicklefile.close()
             
-    return fragment   
+            bar.update(i)
 
+    return new_df
 
 def make_fragment(ideal_atoms, new_df):
     fragment = Fragment(from_entry="allentries", fragment_id=1)
