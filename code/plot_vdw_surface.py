@@ -2,12 +2,12 @@ import sys
 import pandas as pd
 from helpers.geometry_helpers import average_fragment
 from helpers.plot_functions import plot_fragment_colored
+from helpers.helpers import read_results_alignment
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from matplotlib.widgets import RadioButtons, CheckButtons, Slider
-
 
 import numpy as np
 
@@ -25,7 +25,7 @@ def main():
 
     df = read_results_alignment(inputfilename)
 
-    avg_fragment = average_fragment(avg_fragment_name, fragments_df)
+    avg_fragment = average_fragment(avg_fragment_name, df)
 
     # to plot the vdw surface we need the vdw radii
     avg_fragment.set_vdw_radii("data/vdw_radii.csv")
