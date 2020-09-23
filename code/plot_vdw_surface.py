@@ -23,8 +23,7 @@ def main():
     prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
     avg_fragment_name = prefix + "_avg_fragment.pkl"
 
-    fragments_df = pd.read_csv(inputfilename)
-    fragments_df.columns = ["entry_id", "fragment_id", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
+    df = read_results_alignment(inputfilename)
 
     avg_fragment = average_fragment(avg_fragment_name, fragments_df)
 

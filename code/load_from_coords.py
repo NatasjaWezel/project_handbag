@@ -8,7 +8,10 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 from helpers.rotation_helpers import perform_rotations
-from helpers.helpers import load_fragments_from_coords
+from helpers.helpers import check_if_label_exists
+
+from classes.Atom import Atom
+from classes.Fragment import Fragment
 
 import csv
 import sys
@@ -53,6 +56,37 @@ def main():
             for atom in fragment.atoms.values():
                 writer.writerow([fragment.from_entry, fragment.fragment_id, fragment.from_entry + fragment.fragment_id, atom.label, atom.symbol, atom.part_of, atom.x, atom.y, atom.z])
     
+
+
+def load_fragments_from_coords(filename):
+    """ Loads a list of fragments from a .cor file. """
+
+    with open(filename) as inputfile:
+        lines = inputfile.readlines()
+
+    fragments = []
+    fragment = None
+
+    for line in lines:
+        if "FRAG" in line:
+            if fragment:
+                fragments.append(fragment)
+
+            information = line.split('**')
+            fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
+        else:
+            information = line.split()
+            x, y, z = information[1].split("("), information[2].split("("), information[3].split("(")
+
+            atom = Atom(label=information[0].strip("%"), coordinates=[float(x[0]), float(y[0]), float(z[0])])
+
+            atom = check_if_label_exists(atom, fragment)
+
+            fragment.add_atom(atom)
+            
+    fragments.append(fragment)
+    
+    return fragments
 
 if __name__ == "__main__":
     main()

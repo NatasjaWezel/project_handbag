@@ -8,6 +8,7 @@
 
 from helpers.geometry_helpers import average_fragment, calculate_center
 from helpers.plot_functions import plot_fragment_colored
+from helpers.helpers import read_results_alignment
 
 import math
 
@@ -33,16 +34,13 @@ def main():
     prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
     avg_fragment_name = prefix + "_avg_fragment.pkl"
 
-    fragments_df = pd.read_csv(inputfilename, header=None)
-    fragments_df.columns = ["entry_id", "fragment_id", "unique_fragment", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
+    aligned_fragments_df = read_results_alignment(inputfilename)
 
-    avg_fragment = average_fragment(avg_fragment_name, fragments_df)
-    print("Avg fragment calculated")
+    avg_fragment = average_fragment(avg_fragment_name, aligned_fragments_df)
 
-    coordinate_df = count_contact_atoms(fragments_df, to_count)
-    print("Contact atoms counted")
+    coordinate_df = count_contact_atoms(aligned_fragments_df, to_count)
 
-    # coordinate_df = distances_closest_atom_central(coordinate_df, avg_fragment)
+    coordinate_df = distances_closest_atom_central(coordinate_df, avg_fragment)
 
     make_plot(avg_fragment, coordinate_df)
 

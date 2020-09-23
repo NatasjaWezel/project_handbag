@@ -12,6 +12,7 @@
 from helpers.density_helpers import prepare_df, add_one_to_bin
 from helpers.plot_functions import plot_fragment_colored, plot_density
 from helpers.geometry_helpers import average_fragment, calculate_center
+from helpers.helpers import read_results_alignment
 
 import pandas as pd
 import numpy as np
@@ -40,28 +41,30 @@ def main():
     intermediate_hdf_file = prefix + "_" + str(resolution) + ".hdf"
     plotname = prefix + "_" + str(resolution) + "_density.pdf"
 
-    fragments_df = pd.read_csv(inputfilename, header=None)
-    fragments_df.columns = ["entry_id", "fragment_id", "unique_fragment", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
-
+    aligned_fragments_df = read_results_alignment(inputfilename)
+    
     avg_fragment_name = prefix + "_avg_fragment.pkl"
-    avg_fragment = average_fragment(avg_fragment_name, fragments_df)
+    avg_fragment = average_fragment(avg_fragment_name, aligned_fragments_df)
 
     try:
         density_df = pd.read_hdf(intermediate_hdf_file, 'key')
     except FileNotFoundError:
         starttime = time.time()
 
-        empty_density_df = prepare_df(fragments_df=fragments_df, 
+        empty_density_df = prepare_df(fragments_df=aligned_fragments_df, 
                                     resolution=resolution, 
                                     to_count=to_count)
 
-        density_df = count_points_per_square(df=empty_density_df, points_df=fragments_df)
+        density_df = count_points_per_square(df=empty_density_df, points_df=aligned_fragments_df)
 
         # save so we can use the data but only change the plot - saves time :)
         density_df.to_hdf(intermediate_hdf_file, 'key')
 
         print("It took me", time.time() - starttime, "s to calculate the df for a resolution of", resolution)
 
+        make_plot(avg_fragment, density_df, resolution, plotname)
+
+def make_plot(avg_fragment, density_df, resolution, plotname):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 

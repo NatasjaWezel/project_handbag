@@ -1,37 +1,12 @@
 from collections import defaultdict
 
-from classes.Atom import Atom
-from classes.Fragment import Fragment
+import pandas as pd
 
-def load_fragments_from_coords(filename):
-    """ Loads the list of aligned fragments from a .cor file. """
+def read_results_alignment(inputfilename):
+    df = pd.read_csv(inputfilename, header=None)
+    df.columns = ["entry_id", "fragment_id", "unique_fragment", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
 
-    with open(filename) as inputfile:
-        lines = inputfile.readlines()
-
-    fragments = []
-    fragment = None
-
-    for line in lines:
-        if "FRAG" in line:
-            if fragment:
-                fragments.append(fragment)
-
-            information = line.split('**')
-            fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
-        else:
-            information = line.split()
-            x, y, z = information[1].split("("), information[2].split("("), information[3].split("(")
-
-            atom = Atom(label=information[0].strip("%"), coordinates=[float(x[0]), float(y[0]), float(z[0])])
-
-            atom = check_if_label_exists(atom, fragment)
-
-            fragment.add_atom(atom)
-            
-    fragments.append(fragment)
-    
-    return fragments
+    return df
 
 
 def check_if_label_exists(atom, fragment):

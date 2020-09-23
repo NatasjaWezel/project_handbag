@@ -2,6 +2,8 @@ from helpers.plot_functions import plot_fragments
 from classes.Fragment import Fragment
 from classes.Atom import Atom
 
+from helpers.helpers import read_results_alignment
+
 import pandas as pd
 
 import sys
@@ -11,11 +13,10 @@ def main():
         print("Usage: python run.py <inputfilename> <fragments_to_plot>")
         sys.exit(1)
     
-    filename = sys.argv[1]
+    inputfilename = sys.argv[1]
     amount = int(sys.argv[2])
 
-    df = pd.read_csv(filename, header=None)
-    df.columns = ["entry_id", "fragment_id", "unique_fragment", "atom_label", "atom_symbol", "part_of", "atom_x", "atom_y", "atom_z"]
+    df = read_results_alignment(inputfilename)
 
     fragments = []
 
