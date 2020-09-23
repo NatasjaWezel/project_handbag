@@ -18,19 +18,18 @@ import sys
 
 def main():
     
-    if len(sys.argv) != 2:
-        print("Usage: python load_from_coords.py <path/to/inputfile>")
+    if len(sys.argv) != 3:
+        print("Usage: python load_from_coords.py <path/to/inputfile> <atom to put on origin>")
         sys.exit(1)
     
     filename = sys.argv[1]
+    atom_to_center = sys.argv[2]
+    
     outputfilename = "results/" + filename.rsplit('\\')[-1].rsplit('.', 1)[0] + "_aligned.csv"
 
     fragments = load_fragments_from_coords(filename=filename)
     
     rotated_fragments = []
-
-    # center on N atom
-    atom_to_center = "N"
 
     for fragment in fragments:
         try:
