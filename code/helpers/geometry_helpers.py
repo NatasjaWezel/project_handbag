@@ -6,7 +6,7 @@ import math
 
 import pickle
 
-import progressbar
+from progressbar import ProgressBar
 
 def calculate_center(fragment_df, atoms):
     frames = []
@@ -78,7 +78,7 @@ def fill_coordinates(central_group_df, new_df, closest):
     
     print("Calculating average fragment: ")
 
-    with progressbar.ProgressBar(max_value=len(labels)) as bar:
+    with ProgressBar(max_value=len(labels)) as bar:
         for i, label in enumerate(labels):
             single_fragment_df = central_group_df[central_group_df.unique_f_label == label]
 
