@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import math
 
+
 def find_maximum(df):
     """ Returns the largest coordinate for each of the x, y and z axis. """
 
@@ -10,6 +11,7 @@ def find_maximum(df):
     maxz = df.atom_z.max()
 
     return maxx, maxy, maxz
+
 
 def find_minimum(df):
     """ Returns the smallest coordinate for each of the x, y and z axis. """
@@ -20,7 +22,8 @@ def find_minimum(df):
 
     return minx, miny, minz
    
-def prepare_df(fragments_df, resolution, to_count):
+
+def prepare_df(fragments_df, resolution):
     maxx, maxy, maxz = find_maximum(fragments_df)
     minx, miny, minz = find_minimum(fragments_df)
 
@@ -39,11 +42,9 @@ def prepare_df(fragments_df, resolution, to_count):
     print("Volume per bin & volume per bin according to resolution: ", resolution**3, volume_total/amount_bins)
 
     df = add_boundaries_per_bin(bins, indices)
-
-    for column in to_count:
-        df["amount_" + column] = 0
-    
+   
     return df
+
 
 def add_boundaries_per_bin(bins, indices):
     
@@ -74,12 +75,11 @@ def add_one_to_bin(df, columname, coordinates):
     x, y, z = coordinates[0], coordinates[1], coordinates[2]
 
     # TODO: find out what happens with points exactly on a bin-line
-    df.loc[(df.xstart <= x) & (df.xend >= x) & 
+    index = df.index[((df.xstart <= x) & (df.xend >= x) & 
                 (df.ystart <= y) & (df.yend >= y) & 
-                (df.zstart <= z) & (df.zend >= z),
-                columname] = df[(df.xstart <= x) & (df.xend >= x) & 
-                                (df.ystart <= y) & (df.yend >= y) & 
-                                (df.zstart <= z) & (df.zend >= z)][columname] + 1
+                (df.zstart <= z) & (df.zend >= z))]
+
+    df.loc[index, columname] = df.loc[index, columname] + 1
 
     return df
 
