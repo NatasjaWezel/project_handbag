@@ -16,9 +16,9 @@ def plot_density(ax, df):
     # normalize per column 
     df[column_name] = df[column_name] / df[column_name].sum()
 
-    points = df[df[column_name] > 0.001]
+    points = df[df[column_name] > 0.00001]
 
-    norm = plt.Normalize(0.001, points[column_name].max())
+    norm = plt.Normalize(0.00001, points[column_name].max())
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue","fuchsia","red"])
     
     # TODO: fix sizes of points
