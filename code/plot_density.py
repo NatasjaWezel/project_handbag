@@ -25,17 +25,16 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def main():
 
-    if len(sys.argv) != 3:
-        print("Usage: python plot_density.py <path/to/inputfile> <resolution>")
+    if len(sys.argv) != 4:
+        print("Usage: python plot_density.py <path/to/inputfile> <resolution> <atom or center to count>")
         sys.exit(1)
     
     inputfilename = sys.argv[1]
-
-    # TODO: make this more general
-    to_count = ["O"]
-
+    
     # resolution of the bins, in Angstrong
     resolution = float(sys.argv[2])
+
+    to_count = sys.argv[3]
 
     prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
     intermediate_hdf_file = prefix + "_" + str(resolution) + ".hdf"
@@ -52,17 +51,22 @@ def main():
         starttime = time.time()
 
         empty_density_df = prepare_df(fragments_df=aligned_fragments_df, 
-                                    resolution=resolution, 
-                                    to_count=to_count)
+                                    resolution=resolution)
+
+        empty_density_df["amount_" + to_count] = 0
 
         density_df = count_points_per_square(df=empty_density_df, points_df=aligned_fragments_df)
+
+        
 
         # save so we can use the data but only change the plot - saves time :)
         density_df.to_hdf(intermediate_hdf_file, 'key')
 
         print("It took me", time.time() - starttime, "s to calculate the df for a resolution of", resolution)
 
-        make_plot(avg_fragment, density_df, resolution, plotname)
+
+    calculate_80_percent(density_df, to_count)
+    make_plot(avg_fragment, density_df, resolution, plotname)
 
 def make_plot(avg_fragment, density_df, resolution, plotname):
     fig = plt.figure()
@@ -114,6 +118,23 @@ def count_points_per_square(df, points_df):
     # TODO: see if counting is right
     # test_count(df, small_points_df)
     return df
+
+def calculate_80_percent(df, to_count):
+    total_atoms = df["amount_" + to_count].sum()
+    population = list(df[df["amount_" + to_count] > 0]["amount_" + to_count])
+    population.sort(reverse=True)
+
+    fraction = 0
+    i = 0
+
+    while fraction < 0.8:
+        fraction += population[i]/total_atoms
+        i+=1
+    
+    non_empty_bins = len(population)
+    bins = len(df)
+    print(str(round(fraction * 100, 2)) + "% of the contact group atoms is in " + str(round(i/non_empty_bins*100, 2)) + "% of the non-empty bins")
+    print(str(round(fraction * 100, 2)) + "% of the contact group atoms is in " + str(round(i/bins*100, 2)) + "% of the total bins")
 
 
 if __name__ == "__main__":
