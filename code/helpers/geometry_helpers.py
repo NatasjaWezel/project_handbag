@@ -6,7 +6,7 @@ import math
 
 import pickle
 
-from progressbar import ProgressBar
+from tqdm import tqdm
 
 def calculate_center(fragment_df, atoms):
     frames = []
@@ -77,30 +77,26 @@ def fill_coordinates(central_group_df, new_df, closest):
     labels = central_group_df.unique_f_label.unique()[1:]
     
     print("Calculating average fragment: ")
+    for label in tqdm(labels):
+        single_fragment_df = central_group_df[central_group_df.unique_f_label == label]
 
-    with ProgressBar(max_value=len(labels)) as bar:
-        for i, label in enumerate(labels):
-            single_fragment_df = central_group_df[central_group_df.unique_f_label == label]
+        for _, row in single_fragment_df.iterrows():
+            if row.atom_symbol == "N":
+                new_df = add_coordinates_to_df(df=new_df, label=label, atom_symbol=row.atom_symbol, row=row)
+            else:
+                distance = math.inf
+                closest_atom = None
 
-            for _, row in single_fragment_df.iterrows():
-                if row.atom_symbol == "N":
-                    new_df = add_coordinates_to_df(df=new_df, label=label, atom_symbol=row.atom_symbol, row=row)
-                else:
-                    distance = math.inf
-                    closest_atom = None
+                # find which O it's closest to
+                for key, value in closest.items():
+                    d = math.sqrt((row.atom_x - value[0])**2 + (row.atom_y - value[1])**2 + (row.atom_z - value[2])**2)
 
-                    # find which O it's closest to
-                    for key, value in closest.items():
-                        d = math.sqrt((row.atom_x - value[0])**2 + (row.atom_y - value[1])**2 + (row.atom_z - value[2])**2)
+                    if d < distance:
+                        distance = d
+                        closest_atom = key
 
-                        if d < distance:
-                            distance = d
-                            closest_atom = key
-
-                    new_df = add_coordinates_to_df(df=new_df, label=label, atom_symbol=closest_atom, row=row)
-            
-            bar.update(i)
-
+                new_df = add_coordinates_to_df(df=new_df, label=label, atom_symbol=closest_atom, row=row)
+        
     return new_df
 
 def make_fragment(ideal_atoms, new_df):

@@ -5,22 +5,47 @@ import pandas as pd
 class Fragment:
     def __init__(self, from_entry, fragment_id):
         self.from_entry = from_entry
-        self.fragment_id = fragment_id
-        self.unique_id = from_entry + str(fragment_id)
+        self.id = from_entry + str(fragment_id)
 
         self.atoms = {}
-        self.bonds = []
-        self.color = "red"
+
 
     def add_atom(self, atom):
         self.atoms[atom.label] = atom
 
-    def add_bond(self, bond):
-        self.bonds.append(bond)
+    def define_central_group(self, settings):
+        self.distances = {}
+        atoms = list(self.atoms.values())
 
-    def set_center(self, atom_type):
+        group1 = []
+        group2 = []
+
+        i = 0
+        # calculate distances
+        for atom1 in self.atoms.values():
+            
+            if len(group1) == 0:
+                group1.append(atom1)
+
+            i+=1
+            for atom2 in atoms[i:]:
+                if not atom1.label + "-" + atom2.label in self.distances.keys():
+                    diffx = atom1.x - atom2.x
+                    diffy = atom1.y - atom2.y
+                    diffz = atom1.z - atom2.z
+
+                    distance = math.sqrt(diffx**2 + diffy**2 + diffz**2)
+
+                    if distance < 1:
+                        group1.append(atom2)
+
+                    self.distances[atom1.label + "-" + atom2.label] = distance
+        print(self.distances)
+                
+
+    def set_center(self, settings):
         for atom in self.atoms.values():
-            if atom_type in atom.label:
+            if atom_type == atom.symbol:
                 self.center_atom = atom
                 atom.distance_to_center = 0
                 atom.part_of = "c"
@@ -31,31 +56,7 @@ class Fragment:
 
         for atom in self.atoms.values():
             atom.vdw_radius = float(radii_df[radii_df.symbol == atom.symbol].radius)
-
-    def find_bonds_NO3_and_distances(self):
-        for atom in self.atoms.values():
-            
-            if not atom == self.center_atom:
-                diffx = abs(atom.x - self.center_atom.x)
-                diffy = abs(atom.y - self.center_atom.y)
-                diffz = abs(atom.z - self.center_atom.z)
-
-                distance = math.sqrt(diffx**2 + diffy**2 + diffz**2)
-                atom.distance_to_center = distance
-
-        self.attached_atoms = sorted(self.atoms.values(), key=lambda x: x.distance_to_center, reverse=False)
-        
-        # TODO: this is now NO3 CO specific. Where to get the bonds from?
-        # the first three of these are bonded to the NO3:
-        for atom in self.attached_atoms[1:4]:
-            self.add_bond([self.center_atom.label, atom.label])
-            atom.part_of = "c"
-
     
-    def find_atoms_for_plane(self):
-        self.find_bonds_NO3_and_distances()
-        return self.attached_atoms[1:3]
-
     def invert_if_neccessary(self):
         """ Inverts the whole molecule if most of it is on the negative z-axis.
             Does this by mirroring the sign of the z coordinate. """
@@ -63,8 +64,6 @@ class Fragment:
         z_mean = 0.0
 
         for atom in self.atoms.values():
-            # TODO: make this not-NO3 specific
-            # if not "C" in atom.label:
             z_mean += atom.z
         z_mean = z_mean/len(self.atoms)
 
@@ -90,14 +89,9 @@ class Fragment:
                 atom.z += move_z
 
     def __str__(self):
-        molecule_string = "Atoms in fragment: " + str(self.unique_id) + "\n"
-        # molecule_string = ""
+        molecule_string = "Atoms in fragment: " + str(self.id) + "\n"
+
         for atom in self.atoms.values():
             molecule_string += atom.label + ": " + str(atom.x) + ", " + str(atom.y) + ", " + str(atom.z) + "\n"
-
-        molecule_string += "Bonds in fragment: \n"
-        for bond in self.bonds:
-            molecule_string += bond[0] + "-" + bond[1] +"\n"
-
 
         return molecule_string

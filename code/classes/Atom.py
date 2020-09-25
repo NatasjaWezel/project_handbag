@@ -8,11 +8,14 @@ class Atom:
         self.symbol = label[:1]
 
         self.distance_to_center = None
-        self.part_of = "f"
+        self.in_central_group = False
 
         self.x = coordinates[0]
         self.y = coordinates[1]
         self.z = coordinates[2]
+
+    def add_to_central_group(self):
+        self.in_central_group = True
 
     def set_color(self, color):
         self.color = color

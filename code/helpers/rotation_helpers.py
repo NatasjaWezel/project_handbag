@@ -14,8 +14,6 @@ def perform_rotations(fragment, atoms_to_put_in_plane):
     atoms = [atoms_to_put_in_plane[0], atoms_to_put_in_plane[0], atoms_to_put_in_plane[1]]
     axis = ["z", "y", "x"]
 
-    old_fragment = copy.deepcopy(fragment)
-
     for i, atom in enumerate(atoms):
         coord_vector = find_coord_vector(ax=axis[i], atom=atom)
 
@@ -23,10 +21,6 @@ def perform_rotations(fragment, atoms_to_put_in_plane):
         angle = angle * find_rotation_direction(ax=axis[i], atom=atom)
 
         fragment = calculate_rotation(fragment=fragment, angle=angle, ax=axis[i])
-
-    check_new_alignment(fragment, atoms_to_put_in_plane)
-
-    compare_distances(old_fragment, fragment)
 
     return fragment
 

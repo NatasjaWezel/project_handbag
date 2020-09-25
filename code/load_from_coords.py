@@ -12,9 +12,14 @@ from helpers.helpers import check_if_label_exists
 
 from classes.Atom import Atom
 from classes.Fragment import Fragment
+from classes.Settings import Settings
 
 import csv
 import sys
+
+from progressbar import ProgressBar
+
+from tqdm import tqdm
 
 def main():
     
@@ -23,56 +28,69 @@ def main():
         sys.exit(1)
     
     filename = sys.argv[1]
-    atom_to_center = sys.argv[2]
+    central_group = sys.argv[2]
     
-    outputfilename = "results/" + filename.rsplit('\\')[-1].rsplit('.', 1)[0] + "_aligned.csv"
+    settings = Settings(filename)
+    settings.set_central_group(central_group)
 
-    fragments = load_fragments_from_coords(filename=filename)
-    
-    rotated_fragments = []
+    outputfile = open(settings.outputfilename, 'a', newline='')
+    writer = csv.writer(outputfile)
 
-    for fragment in fragments:
-        try:
-            fragment.set_center(atom_to_center)        
-            fragment.center_coordinates()
+    coordinate_lines = read_coord_file(filename=filename)
+    fragments = load_fragments_from_coords(coordinate_lines)
 
-            atoms_to_put_in_plane = fragment.find_atoms_for_plane()
+    print("Aligning fragments and writing result to csv")
+    for fragment in tqdm(fragments):
+        fragment.define_central_group(settings)  
+              
+        #     fragment.center_coordinates()
 
-            fragment = perform_rotations(fragment, atoms_to_put_in_plane)
+        #     atoms_to_put_in_plane = fragment.find_atoms_for_plane()
+
+        #     fragment = perform_rotations(fragment, atoms_to_put_in_plane)
             
-            fragment.invert_if_neccessary()
+        #     fragment.invert_if_neccessary()
 
-            rotated_fragments.append(fragment)
-        except AssertionError as msg:
-            print(msg)
-                    
-    print(len(rotated_fragments), "/", len(fragments), ' rotated succesfully')
-
-    with open(outputfilename, "a", newline="") as outputfile:
-        writer = csv.writer(outputfile)
-
-        for fragment in rotated_fragments:
-            for atom in fragment.atoms.values():
-                writer.writerow([fragment.from_entry, fragment.fragment_id, fragment.from_entry + fragment.fragment_id, atom.label, atom.symbol, atom.part_of, atom.x, atom.y, atom.z])
+        #     write_fragment_to_csv(writer, fragment)
     
+    # outputfile.close()
+                
 
+def write_fragment_to_csv(writer, fragment):
+    """ This function saves the information of the fragment to a CSV file. """
+    
+    # [print(atom) for atom in fragment.atoms.values()]
 
-def load_fragments_from_coords(filename):
-    """ Loads a list of fragments from a .cor file. """
+    [writer.writerow([fragment.id, fragment.from_entry, atom.label, atom.symbol, atom.part_of, atom.x, atom.y, atom.z]) for atom in fragment.atoms.values()]
+
+def read_coord_file(filename):
+    """ Reads the file and saves its lines as a list. """
 
     with open(filename) as inputfile:
         lines = inputfile.readlines()
 
+    return lines
+
+def load_fragments_from_coords(lines):
+    """ Reads part of the coordinate file and returns an entire fragment. """
+
     fragments = []
     fragment = None
-
-    for line in lines:
-        if "FRAG" in line:
-            if fragment:
-                fragments.append(fragment)
-
-            information = line.split('**')
+    
+    print("Reading fragments from .cor file")
+    for line in tqdm(lines):
+        
+        if "FRAG" in line and fragment == None:
+            information = line.split("**")
             fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
+            
+        elif "FRAG" in line:
+            fragments.append(fragment)
+
+            # if we found the header of the next fragment, return
+            information = line.split("**")
+            fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
+
         else:
             information = line.split()
             x, y, z = information[1].split("("), information[2].split("("), information[3].split("(")
@@ -82,10 +100,12 @@ def load_fragments_from_coords(filename):
             atom = check_if_label_exists(atom, fragment)
 
             fragment.add_atom(atom)
-            
+
     fragments.append(fragment)
-    
+
+    # this return is here for the last fragment                   
     return fragments
+    
 
 if __name__ == "__main__":
     main()
