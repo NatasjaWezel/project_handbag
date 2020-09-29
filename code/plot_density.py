@@ -23,6 +23,10 @@ import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+from classes.Settings import Settings
+
+from tqdm import tqdm
+
 def main():
 
     if len(sys.argv) != 4:
@@ -36,37 +40,31 @@ def main():
 
     to_count = sys.argv[3]
 
-    prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
-    intermediate_hdf_file = prefix + "_" + str(resolution) + ".hdf"
-    plotname = prefix + "_" + str(resolution) + "_density.pdf"
+    settings = Settings(inputfilename)
 
-    aligned_fragments_df = read_results_alignment(inputfilename)
+    aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
     
-    avg_fragment_name = prefix + "_avg_fragment.pkl"
-    avg_fragment = average_fragment(avg_fragment_name, aligned_fragments_df)
+    avg_fragment = average_fragment(settings.get_avg_fragment_filename(), aligned_fragments_df)
 
     try:
-        density_df = pd.read_hdf(intermediate_hdf_file, 'key')
+        density_df = pd.read_hdf(settings.get_density_df_filename(resolution), 'key')
     except FileNotFoundError:
         starttime = time.time()
 
-        empty_density_df = prepare_df(fragments_df=aligned_fragments_df, 
-                                    resolution=resolution)
+        empty_density_df = prepare_df(fragments_df=aligned_fragments_df, resolution=resolution)
 
         empty_density_df["amount_" + to_count] = 0
 
         density_df = count_points_per_square(df=empty_density_df, points_df=aligned_fragments_df)
 
-        
-
         # save so we can use the data but only change the plot - saves time :)
-        density_df.to_hdf(intermediate_hdf_file, 'key')
+        density_df.to_hdf(settings.get_density_df_filename(resolution), 'key')
 
         print("It took me", time.time() - starttime, "s to calculate the df for a resolution of", resolution)
 
 
     calculate_80_percent(density_df, to_count)
-    make_plot(avg_fragment, density_df, resolution, plotname)
+    make_plot(avg_fragment, density_df, resolution, settings.get_density_plotname(resolution))
 
 def make_plot(avg_fragment, density_df, resolution, plotname):
     fig = plt.figure()
@@ -88,35 +86,27 @@ def count_points_per_square(df, points_df):
     # TODO: check out this [0]
     column_name = [i for i in columns if "amount" in i][0]
 
-    small_points_df = points_df[points_df.fragment_or_contact == "f"]
-    unique_entries = small_points_df.entry_id.unique()
-    total_entries = len(unique_entries)
+    small_points_df = points_df[points_df.in_central_group == False]
+    unique_fragments = small_points_df.id.unique()
 
-    for i, entry_id in enumerate(unique_entries):
-        entry_df = small_points_df[small_points_df.entry_id == entry_id]
+    print("Counting points per bin: ")
+    for fragment_id in tqdm(unique_fragments):
+        fragment_df = small_points_df[small_points_df.id == fragment_id]
+       
+        # if center, calculate per fragment instead of per atom
+        if "center" in column_name:
+            # TODO: can it say just C here?
+            coordinates = calculate_center(fragment_df=fragment_df, atoms=["C"])
 
-        for fragment_id in entry_df.fragment_id.unique():
-            fragment_df = entry_df[entry_df.fragment_id == fragment_id]
-                           
-            # if center, calculate per fragment instead of per atom
-            if "center" in column_name:
-                # TODO: can it say just C here?
-                coordinates = calculate_center(fragment_df=fragment_df, atoms=["C"])
+        else:
+            point = fragment_df[fragment_df.atom_label.str.contains(column_name.split("_")[1])]
+           
+            assert (len(point) == 1), " atom label is not unique, can't count per bin"
 
-            else:
-                point = fragment_df[fragment_df.atom_label.str.contains(column_name.split("_")[1])]
-
-                assert (len(point) == 1), " atom label is not unique, can't count per bin"
-
-                coordinates = [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
-                
-            df = add_one_to_bin(df, column_name, coordinates)
+            coordinates = [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
+            
+        df = add_one_to_bin(df, column_name, coordinates)
         
-        if i % 100 == 0:
-            print(str(i) + "/" + str(total_entries) + " done")
-
-    # TODO: see if counting is right
-    # test_count(df, small_points_df)
     return df
 
 def calculate_80_percent(df, to_count):
