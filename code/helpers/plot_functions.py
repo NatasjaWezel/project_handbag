@@ -49,10 +49,14 @@ def plot_fragments(fragments):
     for i, fragment in enumerate(fragments):
         fragment.color = COLORS[i % len(COLORS)]
 
-        # plot first atom of the fragment and label it
-        atom = list(fragment.atoms.values())[0]
-        ax.scatter(atom.x, atom.y, atom.z, color=fragment.color, label=fragment.from_entry + str(fragment.fragment_id))
-        ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black') 
+        atomxs = [atom.x for atom in fragment.atoms.values()]
+        atomys = [atom.y for atom in fragment.atoms.values()]
+        atomzs = [atom.z for atom in fragment.atoms.values()]
+
+        ax.scatter(atomxs, atomys, atomzs, color=fragment.color, label=fragment.id)
+
+        for atom in fragment.atoms.values():
+            ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black') 
         
         ax = plot_atoms_bonds(ax=ax, fragment=fragment)
 
