@@ -7,9 +7,13 @@ Auteur: Natasja Wezel (BSc)
 
 
 ### Installation
+pip install requirements.txt
 
 ### Preparation
 Search query in conquest, export fragments xyz coordinates.
+
+### What it does
+It takes as input orthogonal data from fragments. You can specify the central and contact groups.
 
 ### Running
 Align the fragments by running `python load_from_coords.py <inputfile.xyz> <outputfile.csv>`. 
