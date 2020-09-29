@@ -29,9 +29,7 @@ def average_fragment(avg_fragment_name, df):
         fragment = pickle.load(openpicklefile)
         openpicklefile.close()
     except FileNotFoundError:
-        df["unique_f_label"] = df["entry_id"] + df["fragment_id"].astype(str)
-
-        central_group_df = df[df.fragment_or_contact == "c"]
+        central_group_df = df[df.in_central_group]
 
         ideal_atoms = ["N", "O1", "O2", "O3"]
 
@@ -40,11 +38,11 @@ def average_fragment(avg_fragment_name, df):
             columns.extend([atom + "x", atom + "y", atom + "z"])
 
         # count how many atoms in one fragment
-        new_df = pd.DataFrame(columns=columns, index=central_group_df.unique_f_label.unique())
+        new_df = pd.DataFrame(columns=columns, index=central_group_df.id.unique())
 
         # put first fragment in there
-        label = central_group_df.unique_f_label.unique()[0]
-        single_fragment_df = central_group_df[central_group_df.unique_f_label == label]
+        label = central_group_df.id.unique()[0]
+        single_fragment_df = central_group_df[central_group_df.id == label]
 
         counter = 1
         closest = {}
@@ -63,8 +61,6 @@ def average_fragment(avg_fragment_name, df):
 
         fragment = make_fragment(ideal_atoms, new_df)
 
-        fragment.set_vdw_radii("data/vdw_radii.csv")
-
         openpicklefile = open(avg_fragment_name, 'wb')
         pickle.dump(fragment, openpicklefile)
         openpicklefile.close()
@@ -74,11 +70,11 @@ def average_fragment(avg_fragment_name, df):
 
 def fill_coordinates(central_group_df, new_df, closest):
     # TODO: time this and check std's to see what's worth and what's not
-    labels = central_group_df.unique_f_label.unique()[1:]
+    labels = central_group_df.id.unique()[1:]
     
     print("Calculating average fragment: ")
     for label in tqdm(labels):
-        single_fragment_df = central_group_df[central_group_df.unique_f_label == label]
+        single_fragment_df = central_group_df[central_group_df.id == label]
 
         for _, row in single_fragment_df.iterrows():
             if row.atom_symbol == "N":
