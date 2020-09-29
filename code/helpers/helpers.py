@@ -4,7 +4,7 @@ import pandas as pd
 
 def read_results_alignment(inputfilename):
     df = pd.read_csv(inputfilename, header=None)
-    df.columns = ["entry_id", "fragment_id", "unique_fragment", "atom_label", "atom_symbol", "fragment_or_contact", "atom_x", "atom_y", "atom_z"]
+    df.columns = ["id", "entry_id", "atom_label", "atom_symbol", "in_central_group", "atom_x", "atom_y", "atom_z"]
 
     return df
 
