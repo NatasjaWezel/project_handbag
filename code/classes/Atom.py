@@ -6,8 +6,6 @@ class Atom:
         
         # TODO: this only works for elements with an atomic lable of 1 letter
         self.symbol = label[:1]
-
-        self.distance_to_center = None
         self.in_central_group = False
 
         self.x = coordinates[0]
@@ -25,6 +23,9 @@ class Atom:
 
     def set_vdw_radius(self, radius):
         self.vdw_radius = radius
+
+    def set_cov_radius(self, radius):
+        self.cov_radius = radius
 
     def __str__(self):
         return self.label + ": " + str(self.x) + ", " + str(self.y) + ", " + str(self.z)
