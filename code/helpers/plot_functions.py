@@ -6,10 +6,10 @@ from helpers.headers import COLORS
 
 import numpy as np
 
-def plot_density(ax, df):
-    df['ymiddle'] = (df['ystart'] + df['yend']) / 2
-    df['xmiddle'] = (df['xstart'] + df['xend']) / 2
-    df['zmiddle'] = (df['zstart'] + df['zend']) / 2
+def plot_density(ax, df, resolution):
+    df['ymiddle'] = (df['ystart'] * 2 + resolution) / 2
+    df['xmiddle'] = (df['xstart'] * 2 + resolution) / 2
+    df['zmiddle'] = (df['zstart'] * 2 + resolution) / 2
 
     # for now only use first column
     column_name = [i for i in df.columns if "amount" in i][0]

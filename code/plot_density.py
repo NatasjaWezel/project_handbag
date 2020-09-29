@@ -55,7 +55,7 @@ def main():
 
         empty_density_df["amount_" + to_count] = 0
 
-        density_df = count_points_per_square(df=empty_density_df, points_df=aligned_fragments_df)
+        density_df = count_points_per_square(df=empty_density_df, points_df=aligned_fragments_df, resolution=resolution)
 
         # save so we can use the data but only change the plot - saves time :)
         density_df.to_hdf(settings.get_density_df_filename(resolution), 'key')
@@ -71,7 +71,7 @@ def make_plot(avg_fragment, density_df, resolution, plotname):
     ax = fig.add_subplot(111, projection='3d')
 
     ax = plot_fragment_colored(ax, avg_fragment)
-    p, ax = plot_density(ax=ax, df=density_df)
+    p, ax = plot_density(ax=ax, df=density_df, resolution=resolution)
 
     ax.set_title("4D density plot\n Resolution: " + str(resolution))
 
@@ -80,7 +80,7 @@ def make_plot(avg_fragment, density_df, resolution, plotname):
     plt.show()
 
 
-def count_points_per_square(df, points_df):
+def count_points_per_square(df, points_df, resolution):
     columns = list(df.columns)
 
     # TODO: check out this [0]
@@ -105,7 +105,7 @@ def count_points_per_square(df, points_df):
 
             coordinates = [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
             
-        df = add_one_to_bin(df, column_name, coordinates)
+        df = add_one_to_bin(df=df, column_name=column_name, resolution=resolution, coordinates=coordinates)
         
     return df
 

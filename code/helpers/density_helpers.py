@@ -48,38 +48,39 @@ def prepare_df(fragments_df, resolution):
 
 def add_boundaries_per_bin(bins, indices):
     
-    df = pd.DataFrame(columns=['xstart', 'xend', 'ystart', 'yend', 'zstart', 'zend'], index=indices)
-
-    current_index = 0
+    df = pd.DataFrame([], index=indices)
 
     bins_x, bins_y, bins_z = bins[0], bins[1], bins[2]
-
-    for i in range(0, len(bins_x) - 1):
-        xstart, xend = bins_x[i], bins_x[i + 1]
-
-        for j in range(0, len(bins_y) - 1):
-            ystart, yend = bins_y[j], bins_y[j + 1]
-
-            for k in range(0, len(bins_z) - 1):
-                zstart, zend = bins_z[k], bins_z[k + 1]
-                
-                df.loc[current_index] = [xstart, xend, ystart, yend, zstart, zend]
-                current_index += 1
     
+    # TODO: fix -1 earlier
+    xl = len(bins_x) -1
+    yl = len(bins_y) -1 
+    zl = len(bins_z) -1
+    
+    print(xl, yl, zl)
+
+    xstart_list = np.repeat(bins_x[:-1], (yl * zl))
+    ystart_list = list(np.repeat(bins_y[:-1], zl)) * xl 
+    zstart_list = list(bins_z[:-1]) * (xl * yl)
+
+    df["xstart"] = xstart_list
+    df["ystart"] = ystart_list
+    df["zstart"] = zstart_list
+
     df = df.apply(pd.to_numeric, downcast='float', errors='coerce')
 
     return df
 
 
-def add_one_to_bin(df, columname, coordinates):
+def add_one_to_bin(df, column_name, coordinates, resolution):
     x, y, z = coordinates[0], coordinates[1], coordinates[2]
 
     # TODO: find out what happens with points exactly on a bin-line
-    index = df.index[((df.xstart <= x) & (df.xend >= x) & 
-                (df.ystart <= y) & (df.yend >= y) & 
-                (df.zstart <= z) & (df.zend >= z))]
+    index = df.index[((df.xstart <= x) & (df.xstart + resolution >= x) & 
+                        (df.ystart <= y) & (df.ystart + resolution >= y) & 
+                        (df.zstart <= z) & (df.zstart + resolution >= z))]
 
-    df.loc[index, columname] = df.loc[index, columname] + 1
+    df.loc[index, column_name] = df.loc[index, column_name] + 1
 
     return df
 
