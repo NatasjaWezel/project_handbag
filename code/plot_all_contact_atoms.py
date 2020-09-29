@@ -22,7 +22,7 @@ import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from helpers.headers import AXCOLOR, VDW_CSV
+from helpers.headers import AXCOLOR, RADII_CSV
 
 import sys
 
@@ -45,8 +45,7 @@ def main():
     coordinate_df = count_contact_atoms(aligned_fragments_df, to_count)
 
     # TODO: this only works for single atom, not for center
-    radii_df = pd.read_csv(VDW_CSV, header=None)
-    radii_df.columns = ["name", "symbol", "radius"]
+    radii_df = pd.read_csv(RADII_CSV)
 
     vdw_radius = float(radii_df[radii_df.symbol == to_count].radius)
 
