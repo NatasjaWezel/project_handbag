@@ -47,7 +47,7 @@ def main():
     avg_fragment = average_fragment(settings.get_avg_fragment_filename(), aligned_fragments_df)
 
     try:
-        density_df = pd.read_hdf(settings.get_density_df_filename(resolution), 'key')
+        density_df = pd.read_hdf(settings.get_density_df_filename(resolution), settings.get_density_df_key(resolution))
     except FileNotFoundError:
         starttime = time.time()
 
@@ -58,7 +58,7 @@ def main():
         density_df = count_points_per_square(df=empty_density_df, points_df=aligned_fragments_df, resolution=resolution)
 
         # save so we can use the data but only change the plot - saves time :)
-        density_df.to_hdf(settings.get_density_df_filename(resolution), 'key')
+        density_df.to_hdf(settings.get_density_df_filename(resolution), settings.get_density_df_key(resolution))
 
         print("It took me", time.time() - starttime, "s to calculate the df for a resolution of", resolution)
 

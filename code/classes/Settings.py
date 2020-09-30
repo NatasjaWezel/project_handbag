@@ -36,6 +36,9 @@ class Settings():
         density_plotname = self.outputfile_prefix + "_" + str(resolution) + "_density.pdf"
         return density_plotname
 
+    def get_density_df_key(self, resolution):
+        return "key" + str(resolution).rstrip("0").rstrip(".")
+
     def get_vdw_radius(self, symbol):
         
         if symbol in self.vdw_radii.keys():
