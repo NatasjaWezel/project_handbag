@@ -29,22 +29,23 @@ from tqdm import tqdm
 
 def main():
 
-    if len(sys.argv) != 4:
-        print("Usage: python plot_density.py <path/to/inputfile> <resolution> <atom or center to count>")
+    if len(sys.argv) != 5:
+        print("Usage: python plot_density.py <path/to/inputfile> <central group> <resolution> <atom or center to count>")
         sys.exit(1)
     
     inputfilename = sys.argv[1]
-    
-    # resolution of the bins, in Angstrong
-    resolution = float(sys.argv[2])
 
-    to_count = sys.argv[3]
+    # resolution of the bins, in Angstrong
+    resolution = float(sys.argv[3])
+
+    to_count = sys.argv[4]
 
     settings = Settings(inputfilename)
+    settings.set_central_group(sys.argv[2])
 
     aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
     
-    avg_fragment = average_fragment(settings.get_avg_fragment_filename(), aligned_fragments_df)
+    avg_fragment = average_fragment(settings, aligned_fragments_df)
 
     try:
         density_df = pd.read_hdf(settings.get_density_df_filename(resolution), settings.get_density_df_key(resolution))
@@ -67,6 +68,7 @@ def make_plot(avg_fragment, density_df, resolution, plotname):
     ax = fig.add_subplot(111, projection='3d')
 
     ax = plot_fragment_colored(ax, avg_fragment)
+
     p, ax = plot_density(ax=ax, df=density_df, resolution=resolution)
 
     ax.set_title("4D density plot\n Resolution: " + str(resolution))

@@ -35,9 +35,15 @@ def plot_fragment_colored(ax, fragment):
     # plot the (average of the) central group 
     for atom in fragment.atoms.values():
         if "O" in atom.label:
-            ax.scatter(atom.x, atom.y, atom.z, c="red", s=20, edgecolor="black")
+            ax.scatter(atom.x, atom.y, atom.z, c="red", s=30, edgecolor="black")
         elif "N" in atom.label:
-            ax.scatter(atom.x, atom.y, atom.z, c="blue", s=20, edgecolor="black")
+            ax.scatter(atom.x, atom.y, atom.z, c="blue", s=30, edgecolor="black")
+        elif "C" in atom.label:
+            ax.scatter(atom.x, atom.y, atom.z, c="black", s=30, edgecolor="black")
+        elif "I" in atom.label:
+            ax.scatter(atom.x, atom.y, atom.z, c="orchid", s=30, edgecolor="black")
+        else:
+            ax.scatter(atom.x, atom.y, atom.z, c="pink", s=30, edgecolor="black")
 
     return ax
 
