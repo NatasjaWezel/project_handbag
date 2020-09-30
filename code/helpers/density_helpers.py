@@ -22,25 +22,29 @@ def find_minimum(df):
 
     return minx, miny, minz
    
+def calculate_no_bins(minimum, maximum, resolution):
+    bins_neg, bins_pos = math.ceil(abs(minimum)/resolution), math.ceil(abs(maximum)/resolution)
+
+    minimum, maximum = -bins_neg * resolution, bins_pos * resolution
+
+    no_bins =  bins_neg + bins_pos
+    return no_bins, minimum, maximum
 
 def prepare_df(fragments_df, resolution):
     maxx, maxy, maxz = find_maximum(fragments_df)
     minx, miny, minz = find_minimum(fragments_df)
 
-    # TODO: check if this is entirely correct
-    # i think the volumes still differ per search now
-    no_bins_x = math.ceil((maxx + abs(minx))/resolution)
-    no_bins_y = math.ceil((maxy + abs(miny))/resolution)
-    no_bins_z = math.ceil((maxz + abs(minz))/resolution)
+    no_bins_x, minx, maxx = calculate_no_bins(minx, maxx, resolution)
+    no_bins_y, miny, maxy = calculate_no_bins(miny, maxy, resolution)
+    no_bins_z, minz, maxz = calculate_no_bins(minz, maxz, resolution)
 
     amount_bins = no_bins_x * no_bins_y * no_bins_z
     indices = [i for i in range(0, amount_bins)]
 
-    bins = [np.linspace(minx, maxx, num=no_bins_x + 1), np.linspace(miny, maxy, num=no_bins_y + 1), np.linspace(minz, maxz, num=no_bins_z + 1)] 
+    bins = [np.linspace(minx, maxx, num=no_bins_x, endpoint=False), 
+                np.linspace(miny, maxy, num=no_bins_y, endpoint=False), 
+                np.linspace(minz, maxz, num=no_bins_z, endpoint=False)] 
     
-    volume_total = abs(maxx - minx) * abs(maxy - miny) * abs(maxz - minz)
-    print("Volume per bin & volume per bin according to resolution: ", resolution**3, volume_total/amount_bins)
-
     df = add_boundaries_per_bin(bins, indices)
    
     return df
@@ -51,17 +55,12 @@ def add_boundaries_per_bin(bins, indices):
     df = pd.DataFrame([], index=indices)
 
     bins_x, bins_y, bins_z = bins[0], bins[1], bins[2]
-    
-    # TODO: fix -1 earlier
-    xl = len(bins_x) -1
-    yl = len(bins_y) -1 
-    zl = len(bins_z) -1
-    
-    print(xl, yl, zl)
 
-    xstart_list = np.repeat(bins_x[:-1], (yl * zl))
-    ystart_list = list(np.repeat(bins_y[:-1], zl)) * xl 
-    zstart_list = list(bins_z[:-1]) * (xl * yl)
+    xl, yl, zl = len(bins_x), len(bins_y), len(bins_z)
+    
+    xstart_list = np.repeat(bins_x, (yl * zl))
+    ystart_list = list(np.repeat(bins_y, zl)) * xl 
+    zstart_list = list(bins_z) * (xl * yl)
 
     df["xstart"] = xstart_list
     df["ystart"] = ystart_list

@@ -48,9 +48,7 @@ def main():
 
     try:
         density_df = pd.read_hdf(settings.get_density_df_filename(resolution), settings.get_density_df_key(resolution))
-    except FileNotFoundError:
-        starttime = time.time()
-
+    except (FileNotFoundError, KeyError):
         empty_density_df = prepare_df(fragments_df=aligned_fragments_df, resolution=resolution)
 
         empty_density_df["amount_" + to_count] = 0
@@ -59,8 +57,6 @@ def main():
 
         # save so we can use the data but only change the plot - saves time :)
         density_df.to_hdf(settings.get_density_df_filename(resolution), settings.get_density_df_key(resolution))
-
-        print("It took me", time.time() - starttime, "s to calculate the df for a resolution of", resolution)
 
 
     calculate_80_percent(density_df, to_count)

@@ -29,7 +29,7 @@ class Settings():
         return avg_fragment_filename
 
     def get_density_df_filename(self, resolution):
-        density_df_filename = self.outputfile_prefix + "_" + str(resolution) + "_density.hdf"
+        density_df_filename = self.outputfile_prefix + "_density.hdf"
         return density_df_filename
 
     def get_density_plotname(self, resolution):
@@ -37,7 +37,7 @@ class Settings():
         return density_plotname
 
     def get_density_df_key(self, resolution):
-        return "key" + str(resolution).rstrip("0").rstrip(".")
+        return "key" + str(resolution).rstrip("0").replace(".", "")
 
     def get_vdw_radius(self, symbol):
         
