@@ -51,9 +51,9 @@ class Fragment:
                 # print(atom1.label + "-" + atom2.label, distance, settings.get_cov_radius(atom1.symbol) + settings.get_cov_radius(atom2.symbol))
                 if distance < settings.get_cov_radius(atom1.symbol) + settings.get_cov_radius(atom2.symbol) - 0.01:
                     # print("BOND!")
-                    if atom1 in group1:
+                    if atom1 in group1 and not atom2 in group1:
                         group1.append(atom2)
-                    elif atom2 in group1:
+                    elif atom2 in group1 and not atom1 in group1:
                         group1.append(atom1)
         
         return distances, group1
@@ -65,7 +65,6 @@ class Fragment:
                 plane_atoms.append(atom)
         
         return plane_atoms[:2]
-
 
     def invert_if_neccessary(self):
         """ Inverts the whole molecule if most of it is on the negative z-axis.
@@ -85,18 +84,35 @@ class Fragment:
                 elif atom.z > 0:
                     atom.z = atom.z - 2*atom.z
 
+    def find_moves_xyz_to_center(self, center_ring):
+        if center_ring != []:
+            no_atoms = len(center_ring)
+            move_x = -sum([atom.x for atom in center_ring])/no_atoms
+            move_y = -sum([atom.y for atom in center_ring])/no_atoms
+            move_z = -sum([atom.z for atom in center_ring])/no_atoms
+        elif self.center_atom:
+            move_x, move_y, move_z = -self.center_atom.x, -self.center_atom.y, -self.center_atom.z 
+
+            self.center_atom.x, self.center_atom.y, self.center_atom.z = 0, 0, 0
+        else:
+            assert center_ring != [] or self.center_atom, "No center atom and no center of ring found.... :/"
+
+        return move_x, move_y, move_z
+
     def center_coordinates(self, settings):
         """ This is a function that puts any atom you want at the origin of the
             xyz coordinate system, and moves important atoms according to the change. """ 
         
         self.center_atom = None
+        center_ring = []
 
         for atom in self.atoms.values():
             if atom.in_central_group and atom.symbol == settings.center_atom:
                 self.center_atom = atom
-
-        move_x, move_y, move_z = -self.center_atom.x, -self.center_atom.y, -self.center_atom.z 
-        self.center_atom.x, self.center_atom.y, self.center_atom.z = 0, 0, 0
+            elif atom.in_central_group and atom.symbol == settings.center_ring:
+                center_ring.append(atom)
+        
+        move_x, move_y, move_z = self.find_moves_xyz_to_center(center_ring)
 
         for atom in self.atoms.values():
             if not atom is self.center_atom:
@@ -141,9 +157,7 @@ def find_central_group(distances, atoms, group1, settings, tolerance=0.0):
             # print("Tolerance over 1. Something must've gone wrong")
            
             return None
-
-        
-        
+ 
         group1 = new_group1(distances, atoms, settings, tolerance)
         tolerance += 0.01
         return find_central_group(distances, atoms, group1, settings, tolerance)
@@ -163,8 +177,8 @@ def new_group1(distances, atoms, settings, tolerance):
                 
                 # TODO: this won't always work for phenyl for exmaple. Make something recursive
                 if distance < settings.get_cov_radius(atom1.symbol) + settings.get_cov_radius(atom2.symbol) + tolerance:
-                    if atom1 in group1:
+                    if atom1 in group1 and not atom2 in group1:
                         group1.append(atom2)
-                    elif atom2 in group1:
+                    elif atom2 in group1 and not atom1 in group1:
                         group1.append(atom1)
     return group1
