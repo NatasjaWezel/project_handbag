@@ -142,7 +142,7 @@ def count_atoms(group):
             atoms_count[atom.symbol] = 1
     return atoms_count
 
-# TODO: find out why there are extra atoms added sometimes.
+
 def find_central_group(distances, atoms, group1, settings):
     
     group2 = []
@@ -158,7 +158,7 @@ def find_central_group(distances, atoms, group1, settings):
     elif settings.central_group_atoms == atom_count2:
         return group2
     else:
-        if settings.tolerance >= 1:           
+        if settings.tolerance >= 0.2:           
             return None
  
         group1 = new_group1(distances, atoms, settings)
