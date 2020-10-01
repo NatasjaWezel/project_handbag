@@ -1,6 +1,4 @@
 import numpy as np
-
-from helpers.tests import check_new_alignment, compare_distances
 import copy
 
 def perform_rotations(fragment, atoms_to_put_in_plane):
