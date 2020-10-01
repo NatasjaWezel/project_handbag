@@ -84,7 +84,7 @@ def fill_coordinates(central_group_df, new_df, closest):
             distance = math.inf
             closest_atom = None
 
-            # find which O it's closest to
+            # find which other atom in the central group it's closest too
             for key, value in closest.items():
                 d = math.sqrt((row.atom_x - value[0])**2 + (row.atom_y - value[1])**2 + (row.atom_z - value[2])**2)
 

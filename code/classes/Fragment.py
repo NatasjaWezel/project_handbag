@@ -48,7 +48,7 @@ class Fragment:
                 distances[atom1.label + "-" + atom2.label] = distance
 
                 # TODO: this won't always work for phenyl for exmaple. Make something recursive
-                if distance < settings.get_cov_radius(atom1.symbol) + settings.get_cov_radius(atom2.symbol) - 0.01:
+                if distance < settings.get_cov_radius(atom1.symbol) + settings.get_cov_radius(atom2.symbol) + settings.tolerance:
                     if atom1 in group1 and not atom2 in group1:
                         group1.append(atom2)
                     elif atom2 in group1 and not atom1 in group1:
@@ -143,7 +143,7 @@ def count_atoms(group):
     return atoms_count
 
 # TODO: find out why there are extra atoms added sometimes.
-def find_central_group(distances, atoms, group1, settings, tolerance=0.0):
+def find_central_group(distances, atoms, group1, settings):
     
     group2 = []
     for atom in atoms:
@@ -158,14 +158,14 @@ def find_central_group(distances, atoms, group1, settings, tolerance=0.0):
     elif settings.central_group_atoms == atom_count2:
         return group2
     else:
-        if tolerance >= 1:           
+        if settings.tolerance >= 1:           
             return None
  
-        group1 = new_group1(distances, atoms, settings, tolerance)
-        tolerance += 0.01
-        return find_central_group(distances, atoms, group1, settings, tolerance)
+        group1 = new_group1(distances, atoms, settings)
+        settings.set_current_tolerance(settings.get_current_tolerance() + 0.01)
+        return find_central_group(distances, atoms, group1, settings)
 
-def new_group1(distances, atoms, settings, tolerance):
+def new_group1(distances, atoms, settings):
     group1 = []
     i = 0
 
@@ -179,7 +179,7 @@ def new_group1(distances, atoms, settings, tolerance):
                 distance = distances[atom1.label + "-" + atom2.label]
                 
                 # TODO: this won't always work for phenyl for exmaple. Make something recursive
-                if distance < settings.get_cov_radius(atom1.symbol) + settings.get_cov_radius(atom2.symbol) + tolerance:
+                if distance < settings.get_cov_radius(atom1.symbol) + settings.get_cov_radius(atom2.symbol) + settings.get_current_tolerance():
                     if atom1 in group1 and not atom2 in group1:
                         group1.append(atom2)
                     elif atom2 in group1 and not atom1 in group1:

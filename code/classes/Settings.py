@@ -13,6 +13,9 @@ class Settings():
         if not os.path.exists(self.output_folder):
             os.mkdir(self.output_folder)
 
+        # strict tolerance for bonds to start with.
+        self.tolerance = 0.01
+
         self.outputfile_prefix = self.output_folder + title
 
         self.radii_filename = RADII_CSV
@@ -23,6 +26,12 @@ class Settings():
     def get_aligned_csv_filename(self):
         aligned_csv_name = self.outputfile_prefix + "_aligned.csv"
         return aligned_csv_name
+
+    def get_current_tolerance(self):
+        return self.tolerance
+
+    def set_current_tolerance(self, tolerance):
+        self.tolerance = tolerance
         
     def get_avg_fragment_filename(self):
         avg_fragment_filename = self.outputfile_prefix + "_avg_fragment.pkl"
