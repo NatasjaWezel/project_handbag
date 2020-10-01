@@ -11,7 +11,7 @@
 
 from helpers.density_helpers import prepare_df, add_one_to_bin
 from helpers.plot_functions import plot_fragment_colored, plot_density
-from helpers.geometry_helpers import average_fragment, calculate_center
+from helpers.geometry_helpers import make_avg_fragment_if_not_exists, calculate_center
 from helpers.helpers import read_results_alignment
 
 import pandas as pd
@@ -45,7 +45,7 @@ def main():
 
     aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
     
-    avg_fragment = average_fragment(settings, aligned_fragments_df)
+    avg_fragment = make_avg_fragment_if_not_exists(settings, aligned_fragments_df)
 
     try:
         density_df = pd.read_hdf(settings.get_density_df_filename(resolution), settings.get_density_df_key(resolution))
