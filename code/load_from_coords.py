@@ -34,31 +34,23 @@ def main():
     settings.set_central_group(central_group)
 
     coordinate_lines = read_coord_file(filename=filename)
-    fragments = load_fragments_from_coords(coordinate_lines)
+    fragments = load_fragments_from_coords(coordinate_lines, settings)
 
     outputfile = open(settings.get_aligned_csv_filename(), 'w', newline='')
     writer = csv.writer(outputfile)
 
-    wrong = 0
-
     print("Aligning fragments and writing result to csv")
-    for fragment in tqdm(fragments):
+    for fragment in tqdm(fragments): 
+        fragment.center_coordinates(settings)
 
-        if fragment.define_central_group(settings):  
-            fragment.center_coordinates(settings)
+        atoms_to_put_in_plane = fragment.find_atoms_for_plane(settings)
 
-            atoms_to_put_in_plane = fragment.find_atoms_for_plane(settings)
-
-            fragment = perform_rotations(fragment, atoms_to_put_in_plane)
-            
-            fragment.invert_if_neccessary()
-
-            write_fragment_to_csv(writer, fragment)
-        else:
-            wrong += 1
-
-    print("Couldn't center/rotate:", wrong, "/", len(fragments))
+        fragment = perform_rotations(fragment, atoms_to_put_in_plane)
         
+        fragment.invert_if_neccessary()
+
+        write_fragment_to_csv(writer, fragment)
+
     outputfile.close()
                 
 
@@ -75,12 +67,14 @@ def read_coord_file(filename):
 
     return lines
 
-def load_fragments_from_coords(lines):
+def load_fragments_from_coords(lines, settings):
     """ Reads part of the coordinate file and returns an entire fragment. """
 
     fragments = []
     fragment = None
     
+    atom_count = 0
+        
     print("Reading fragments from .cor file")
     for line in tqdm(lines):
         
@@ -89,7 +83,7 @@ def load_fragments_from_coords(lines):
             fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
         elif "FRAG" in line:
             fragments.append(fragment)
-
+            atom_count = 0
             # if we found the header of the next fragment
             information = line.split("**")
             fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
@@ -102,7 +96,14 @@ def load_fragments_from_coords(lines):
 
             atom = check_if_label_exists(atom, fragment)
 
+            if atom_count < settings.amount_central_group_atoms:
+                fragment.define_central_group(atom)
+
             fragment.add_atom(atom)
+
+            atom_count += 1
+
+            
 
     fragments.append(fragment)
 

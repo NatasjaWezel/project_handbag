@@ -7,16 +7,17 @@ class Settings():
     def __init__(self, inputfilename):
         
         title = inputfilename.rsplit('\\')[-1].rsplit('.', 1)[0].rsplit('_aligned', 1)[0]
-            
-        self.output_folder = RESULTSDIR + title + "\\"
 
-        if not os.path.exists(self.output_folder):
-            os.mkdir(self.output_folder)
+        output_folder_central_group = RESULTSDIR + title.split("_")[0] + "\\"   
+        output_folder_specific = output_folder_central_group + title + "\\"
 
-        # strict tolerance for bonds to start with.
-        self.tolerance = 0.01
+        if not os.path.exists(output_folder_central_group):
+            os.mkdir(output_folder_central_group)
 
-        self.outputfile_prefix = self.output_folder + title
+        if not os.path.exists(output_folder_specific):
+            os.mkdir(output_folder_specific)
+
+        self.outputfile_prefix = output_folder_specific + title
 
         self.radii_filename = RADII_CSV
 
@@ -109,4 +110,6 @@ class Settings():
             elif row.center == True:
                 self.center_atom = False
                 self.center_ring = row.atom
+
+        self.amount_central_group_atoms = sum(self.central_group_atoms.values())
         
