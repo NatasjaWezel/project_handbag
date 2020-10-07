@@ -1,6 +1,6 @@
 import pandas as pd
 
-from helpers.headers import RADII_CSV, DATADIR, RESULTSDIR
+from helpers.headers import RADII_CSV, CENTRAL_GROUPS_CSV, DATADIR, RESULTSDIR
 import os
 
 class Settings():
@@ -8,11 +8,14 @@ class Settings():
         
         title = inputfilename.rsplit('\\')[-1].rsplit('.', 1)[0].rsplit('_aligned', 1)[0]
 
-        output_folder_central_group = RESULTSDIR + title.split("_")[0] + "\\"   
-        output_folder_specific = output_folder_central_group + title + "\\"
+        self.central_group_name = title.split("_")[0]
+        self.contact_group_name = title.split("_")[1]
 
-        if not os.path.exists(output_folder_central_group):
-            os.mkdir(output_folder_central_group)
+        self.output_folder_central_group = RESULTSDIR + title.split("_")[0] + "\\"   
+        output_folder_specific = self.output_folder_central_group + title + "\\"
+
+        if not os.path.exists(self.output_folder_central_group):
+            os.mkdir(self.output_folder_central_group)
 
         if not os.path.exists(output_folder_specific):
             os.mkdir(output_folder_specific)
@@ -23,6 +26,9 @@ class Settings():
 
         self.vdw_radii = {}
         self.cov_radii = {}
+
+    def get_directionality_results_filename(self):
+        return self.output_folder_central_group + self.central_group_name + "_directionality_results.csv"
 
     def get_aligned_csv_filename(self):
         aligned_csv_name = self.outputfile_prefix + "_aligned.csv"
@@ -52,6 +58,9 @@ class Settings():
 
     def get_density_df_key(self, resolution):
         return "key" + str(resolution).rstrip("0").replace(".", "")
+
+    def set_atom_to_count(self, atom_str):
+        self.to_count_contact = atom_str
 
     def get_vdw_radius(self, symbol):
         
@@ -91,13 +100,10 @@ class Settings():
             self.cov_radii[symbol] = cov_radius
             return cov_radius
         
-    def set_central_group(self, groupname):
-        self.central_group_name = groupname
+    def set_central_group(self):
+        groupnames = pd.read_csv(CENTRAL_GROUPS_CSV, header=0)
 
-        # TODO make this variable
-        groupnames = pd.read_csv("./data/central_groups.csv", header=0)
-
-        df = groupnames[groupnames.name == groupname]
+        df = groupnames[groupnames.name == self.central_group_name]
 
         self.central_group_atoms = {}
 

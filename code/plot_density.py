@@ -27,21 +27,24 @@ from classes.Settings import Settings
 
 from tqdm import tqdm
 
+import csv
+
 def main():
 
-    if len(sys.argv) != 5:
-        print("Usage: python plot_density.py <path/to/inputfile> <central group> <resolution> <atom or center to count>")
+    if len(sys.argv) != 4:
+        print("Usage: python plot_density.py <path/to/inputfile> <resolution> <atom or center to count>")
         sys.exit(1)
     
     inputfilename = sys.argv[1]
 
     # resolution of the bins, in Angstrong
-    resolution = float(sys.argv[3])
+    resolution = float(sys.argv[2])
 
-    to_count = sys.argv[4]
+    to_count = sys.argv[3]
 
     settings = Settings(inputfilename)
-    settings.set_central_group(sys.argv[2])
+    settings.set_central_group()
+    settings.set_atom_to_count(to_count)
 
     aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
     
@@ -60,7 +63,7 @@ def main():
         density_df.to_hdf(settings.get_density_df_filename(resolution), settings.get_density_df_key(resolution))
 
 
-    calculate_80_percent(density_df, to_count)
+    calculate_80_percent(density_df, settings)
     make_plot(avg_fragment, density_df, resolution, settings.get_density_plotname(resolution))
 
 def make_plot(avg_fragment, density_df, resolution, plotname):
@@ -97,8 +100,8 @@ def count_points_per_square(df, points_df, resolution):
             coordinates = calculate_center(fragment_df=fragment_df, atoms=["C"])
 
         else:
-            point = fragment_df[fragment_df.atom_label.str.contains(column_name.split("_")[1])]
-           
+            point = fragment_df[fragment_df.atom_symbol == column_name.split("_")[1]]
+
             assert (len(point) == 1), " atom label is not unique, can't count per bin"
 
             coordinates = [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
@@ -107,9 +110,12 @@ def count_points_per_square(df, points_df, resolution):
         
     return df
 
-def calculate_80_percent(df, to_count):
-    total_atoms = df["amount_" + to_count].sum()
-    population = list(df[df["amount_" + to_count] > 0]["amount_" + to_count])
+def calculate_80_percent(df, settings):
+    column_name = "amount_" + settings.to_count_contact
+    total_atoms = df[column_name].sum()
+
+    # take bins that aren't empty and sort them from highest fraction to lowest fraction
+    population = list(df[df[column_name] > 0][column_name])
     population.sort(reverse=True)
 
     fraction = 0
@@ -117,10 +123,16 @@ def calculate_80_percent(df, to_count):
 
     while fraction < 0.8:
         fraction += population[i]/total_atoms
-        i+=1
+        i += 1
     
     non_empty_bins = len(population)
     bins = len(df)
+
+    with open(settings.get_directionality_results_filename(), 'a') as resultsfile:
+        writer = csv.writer(resultsfile)
+
+        writer.writerow([settings.central_group_name, settings.contact_group_name, fraction, i, non_empty_bins, bins])
+
     print(str(round(fraction * 100, 2)) + "% of the contact group atoms is in " + str(round(i/non_empty_bins*100, 2)) + "% of the non-empty bins")
     print(str(round(fraction * 100, 2)) + "% of the contact group atoms is in " + str(round(i/bins*100, 2)) + "% of the total bins")
 
