@@ -48,16 +48,19 @@ class Settings():
         avg_fragment_hdf_filename = self.outputfile_prefix + "_avg_fragment.hdf"
         return avg_fragment_hdf_filename
 
-    def get_density_df_filename(self, resolution):
+    def get_density_df_filename(self):
         density_df_filename = self.outputfile_prefix + "_density.hdf"
         return density_df_filename
 
-    def get_density_plotname(self, resolution):
-        density_plotname = self.outputfile_prefix + "_" + str(resolution) + "_density.pdf"
+    def set_resolution(self, resolution):
+        self.resolution = resolution
+
+    def get_density_plotname(self):
+        density_plotname = self.outputfile_prefix + "_" + str(self.resolution) + "_density.pdf"
         return density_plotname
 
-    def get_density_df_key(self, resolution):
-        return "key" + str(resolution).rstrip("0").replace(".", "")
+    def get_density_df_key(self):
+        return "key" + str(self.resolution).rstrip("0").replace(".", "")
 
     def set_atom_to_count(self, atom_str):
         self.to_count_contact = atom_str
