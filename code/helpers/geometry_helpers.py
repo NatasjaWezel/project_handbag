@@ -11,6 +11,8 @@ from tqdm import tqdm
 
 import csv
 
+import copy
+
 def calculate_center(fragment_df, atoms):
     frames = []
 
@@ -75,32 +77,54 @@ def fill_coordinates(central_group_df, new_df, count_dict):
     closest = {}
     for _, row in single_fragment_df.iterrows():
         number = count_dict[row.atom_symbol]
+
+        new_df["time"] = time.time()
         new_df = add_coordinates_to_df(new_df, label, row.atom_symbol + str(number), row)
+
         closest[row.atom_symbol + str(number)] = [row.atom_x, row.atom_y, row.atom_z]
         count_dict[row.atom_symbol] += 1
 
     print("Calculating average fragment: ")
-    for label in tqdm(labels):
+    for label in tqdm(["BAPTIV1"]):
         single_fragment_df = central_group_df[central_group_df.id == label]
+        closest_Hs = [i for i in closest if "H" in i]
 
         for _, row in single_fragment_df.iterrows():
-            distance = math.inf
-            closest_atom = None
-
-            # find which other atom in the central group it's closest too
-            for key, value in closest.items():
-                d = math.sqrt((row.atom_x - value[0])**2 + (row.atom_y - value[1])**2 + (row.atom_z - value[2])**2)
-
-                if d < distance:
-                    distance = d
-                    closest_atom = key
-
+            closest_atom, closest_Hs = get_closest_atom(closest_Hs, closest, row, new_df)
+                
             new_df = add_coordinates_to_df(df=new_df, label=label, atom_symbol=closest_atom, row=row)
-            new_df['time'] = time.time()
-
+            
     dropped_na = new_df.dropna()
     print("Dropping", len(new_df) - len(dropped_na), "fragments for avg due to NaN values")
     return dropped_na
+
+def get_closest_atom(closest_Hs, closest, row, new_df):
+    print(row.atom_label, end="")
+    new_df['time'] = time.time()
+            
+    distance = math.inf
+    closest_atom = None
+
+    # find which other atom in the central group it's closest too
+    for key, value in closest.items():
+        d = math.sqrt((row.atom_x - value[0])**2 + (row.atom_y - value[1])**2 + (row.atom_z - value[2])**2)
+
+        if d < distance:
+            distance = d
+            closest_atom = key
+
+
+    print(closest_Hs, end="")
+    # TODO: what if there are two ch3 groups, can we make sure they get on either side
+    # make sure that for a CH3 group for example all Hs get a "closest" H
+    if "H" in closest_atom and not closest_atom in closest_Hs:
+        closest_atom = closest_Hs.pop()
+    elif "H" in closest_atom:
+        closest_Hs.remove(closest_atom)
+    
+    print(closest_Hs, end="")
+    print(closest_atom)
+    return closest_atom, closest_Hs
 
 def make_fragment(atoms, new_df):
     fragment = Fragment(from_entry="allentries", fragment_id=1)
@@ -114,10 +138,24 @@ def make_fragment(atoms, new_df):
     
     return fragment
 
+import numpy as np
 
 def add_coordinates_to_df(df, label, atom_symbol, row):
-    df.loc[df.index == label, atom_symbol + "x"] = row.atom_x
-    df.loc[df.index == label, atom_symbol + "y"] = row.atom_y
-    df.loc[df.index == label, atom_symbol + "z"] = row.atom_z
+    try:
+        # this gives a keyerror if this row/column does not exist
+        df.loc[df.index == label, atom_symbol + "x"]
+
+        df.loc[df.index == label, atom_symbol + "x"] = row.atom_x
+        df.loc[df.index == label, atom_symbol + "y"] = row.atom_y
+        df.loc[df.index == label, atom_symbol + "z"] = row.atom_z
+    except KeyError as e:
+        print("Amount of nans:", df.loc[df.index == label].isnull().sum().sum())
+        print(df.loc[df.index == label])
+
+        assert int(df.loc[df.index == label].isnull().sum().sum()) == 3, "KeyError" + str(e) + "while calculating avg fragment: R is not the last atom, something else went wrong"
+
+        df.loc[df.index == label, "R1x"] = row.atom_x
+        df.loc[df.index == label, "R1y"] = row.atom_y
+        df.loc[df.index == label, "R1z"] = row.atom_z
 
     return df
