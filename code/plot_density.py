@@ -14,6 +14,8 @@ from helpers.plot_functions import plot_fragment_colored, plot_density
 from helpers.geometry_helpers import make_avg_fragment_if_not_exists, calculate_center
 from helpers.helpers import read_results_alignment
 
+import math
+
 import pandas as pd
 import numpy as np
 
@@ -35,38 +37,38 @@ def main():
         print("Usage: python plot_density.py <path/to/inputfile> <resolution> <atom or center to count>")
         sys.exit(1)
     
-    inputfilename = sys.argv[1]
-
-    # resolution of the bins, in Angstrong
-    resolution = float(sys.argv[2])
-
-    to_count = sys.argv[3]
-
-    settings = Settings(inputfilename)
+    settings = Settings(sys.argv[1])
     settings.set_central_group()
-    settings.set_atom_to_count(to_count)
+    settings.set_atom_to_count(sys.argv[3])
+
+    # resolution of the bins, in Angstrom
+    settings.set_resolution(float(sys.argv[2]))
 
     aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
+    first_fragment_df = aligned_fragments_df[aligned_fragments_df.id == aligned_fragments_df.id.unique()[0]]
+    vdw_distance = calculate_longest_vdw_radius_contact(first_fragment_df, settings)
     
     avg_fragment = make_avg_fragment_if_not_exists(settings, aligned_fragments_df)
 
     try:
-        density_df = pd.read_hdf(settings.get_density_df_filename(resolution), settings.get_density_df_key(resolution))
+        density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
     except (FileNotFoundError, KeyError):
-        empty_density_df = prepare_df(fragments_df=aligned_fragments_df, resolution=resolution)
+        empty_density_df = prepare_df(fragments_df=aligned_fragments_df, resolution=settings.resolution)
 
-        empty_density_df["amount_" + to_count] = 0
+        empty_density_df["amount_" + settings.to_count_contact] = 0
 
-        density_df = count_points_per_square(df=empty_density_df, points_df=aligned_fragments_df, resolution=resolution)
+        density_df = count_points_per_square(df=empty_density_df, points_df=aligned_fragments_df, resolution=settings.resolution)
 
         # save so we can use the data but only change the plot - saves time :)
-        density_df.to_hdf(settings.get_density_df_filename(resolution), settings.get_density_df_key(resolution))
+        density_df.to_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
 
 
     calculate_80_percent(density_df, settings)
-    make_plot(avg_fragment, density_df, resolution, settings.get_density_plotname(resolution))
+    make_plot(avg_fragment, density_df, settings)
 
-def make_plot(avg_fragment, density_df, resolution, plotname):
+def make_plot(avg_fragment, density_df, settings):
+    resolution = settings.resolution
+    plotname = settings.get_density_plotname()
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
@@ -128,13 +130,31 @@ def calculate_80_percent(df, settings):
     non_empty_bins = len(population)
     bins = len(df)
 
-    with open(settings.get_directionality_results_filename(), 'a') as resultsfile:
+    with open(settings.get_directionality_results_filename(), 'a', newline='') as resultsfile:
         writer = csv.writer(resultsfile)
 
-        writer.writerow([settings.central_group_name, settings.contact_group_name, fraction, i, non_empty_bins, bins])
+        writer.writerow([settings.central_group_name, settings.contact_group_name, settings.to_count_contact, fraction, i, non_empty_bins,])
 
     print(str(round(fraction * 100, 2)) + "% of the contact group atoms is in " + str(round(i/non_empty_bins*100, 2)) + "% of the non-empty bins")
     print(str(round(fraction * 100, 2)) + "% of the contact group atoms is in " + str(round(i/bins*100, 2)) + "% of the total bins")
+
+
+def calculate_longest_vdw_radius_contact(fragment_df, settings):
+    longest_distance = 0
+    atom_a, atom_b = None, None
+
+    for _, atom1 in fragment_df.iterrows():
+        for _, atom2 in fragment_df.iterrows():
+            if not atom1.in_central_group and not atom2.in_central_group:
+                distance = math.sqrt((atom1.atom_x - atom2.atom_x)**2 + (atom1.atom_y - atom2.atom_y)**2 + (atom1.atom_z - atom2.atom_z)**2)
+
+                if distance > longest_distance:
+                    longest_distance = distance
+                    atom_a, atom_b = atom1, atom2
+
+    longest_vdw_distance = (longest_distance + settings.get_vdw_radius(atom_a.atom_symbol) + settings.get_vdw_radius(atom_b.atom_symbol))/2
+
+    return longest_vdw_distance
 
 
 if __name__ == "__main__":

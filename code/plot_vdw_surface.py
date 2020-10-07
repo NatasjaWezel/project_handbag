@@ -1,8 +1,10 @@
 import sys
 import pandas as pd
-from helpers.geometry_helpers import average_fragment
+from helpers.geometry_helpers import make_avg_fragment_if_not_exists
 from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
 from helpers.helpers import read_results_alignment
+
+from classes.Settings import Settings
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -14,21 +16,22 @@ import numpy as np
 from helpers.headers import AXCOLOR
 
 def main():
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         print("Usage: python plot_vdw_surface.py <path/to/inputfile>")
         sys.exit(1)
-    
-    inputfilename = sys.argv[1]
 
-    prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
-    avg_fragment_name = prefix + "_avg_fragment.pkl"
+    settings = Settings(sys.argv[1])
+    settings.set_central_group()
 
-    df = read_results_alignment(inputfilename)
+    df = read_results_alignment(settings.get_aligned_csv_filename())
 
-    avg_fragment = average_fragment(avg_fragment_name, df)
+    avg_fragment = make_avg_fragment_if_not_exists(settings, df)
 
     # to plot the vdw surface we need the vdw radii
-    avg_fragment.set_vdw_radii("data/vdw_radii.csv")
+    for atom in avg_fragment.atoms.values():
+        radius = settings.get_vdw_radius(atom.symbol)
+        print(atom, radius)
+        atom.set_vdw_radius(radius)
 
     plot_vdw_surface(avg_fragment)
 
