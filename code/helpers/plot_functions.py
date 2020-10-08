@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib
 from helpers.headers import COLORS
 
+import pandas as pd
 import numpy as np
 
 def plot_density(ax, df, resolution):
@@ -32,6 +33,27 @@ def plot_density(ax, df, resolution):
 
 
 def plot_fragment_colored(ax, fragment):
+    if isinstance(fragment, pd.DataFrame):
+        return plot_fragment_from_df(ax, fragment)
+    else:
+        return plot_fragment(ax, fragment)
+
+def plot_fragment_from_df(ax, fragment_df):
+    for _, atom in fragment_df.iterrows():
+        if "O" in atom.atom_label:
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="red", s=30, edgecolor="black")
+        elif "N" in atom.atom_label:
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="blue", s=30, edgecolor="black")
+        elif "C" in atom.atom_label:
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="black", s=30, edgecolor="black")
+        elif "I" in atom.atom_label:
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="orchid", s=30, edgecolor="black")
+        else:
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="pink", s=30, edgecolor="black")
+
+    return ax        
+
+def plot_fragment(ax, fragment):
     # plot the (average of the) central group 
     for atom in fragment.atoms.values():
         if "O" in atom.label:
