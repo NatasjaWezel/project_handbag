@@ -6,9 +6,11 @@
 # Author: Natasja Wezel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from helpers.geometry_helpers import average_fragment, calculate_center
+from helpers.geometry_helpers import make_avg_fragment_if_not_exists, calculate_center, calculate_longest_vdw_radius_contact
 from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
 from helpers.helpers import read_results_alignment
+
+from classes.Settings import Settings
 
 from matplotlib.widgets import Slider
 
@@ -32,43 +34,38 @@ def main():
         print("Usage: python plot_all_contact_atoms.py <path/to/inputfile> <atom/center to count>")
         sys.exit(1)
     
-    inputfilename = sys.argv[1]
-    to_count = sys.argv[2]
+    settings = Settings(sys.argv[1])
+    settings.set_central_group()
+    settings.set_atom_to_count(sys.argv[2])
 
-    prefix = inputfilename.rsplit("/\\", 1)[-1].rsplit(".", 1)[0] 
-    avg_fragment_name = prefix + "_avg_fragment.pkl"
+    aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
+    avg_fragment = make_avg_fragment_if_not_exists(settings, aligned_fragments_df)
 
-    aligned_fragments_df = read_results_alignment(inputfilename)
+    for atom in avg_fragment.atoms.values():
+        atom.set_vdw_radius(settings.get_vdw_radius(atom.symbol))
 
-    avg_fragment = average_fragment(avg_fragment_name, aligned_fragments_df)
+    coordinate_df = count_contact_atoms(aligned_fragments_df, settings)
+    coordinate_df = distances_closest_vdw_central(coordinate_df, avg_fragment, settings)
 
-    coordinate_df = count_contact_atoms(aligned_fragments_df, to_count)
+    first_fragment_df = aligned_fragments_df[aligned_fragments_df.id == aligned_fragments_df.id.unique()[0]]
+    vdw_distance_contact = calculate_longest_vdw_radius_contact(first_fragment_df, settings)
 
-    # TODO: this only works for single atom, not for center
-    radii_df = pd.read_csv(RADII_CSV)
+    make_plot(avg_fragment, coordinate_df, vdw_distance_contact)
 
-    vdw_radius = float(radii_df[radii_df.symbol == to_count].radius)
-
-    coordinate_df["vdw"] = vdw_radius
-
-    coordinate_df = distances_closest_vdw_central(coordinate_df, avg_fragment)
-
-    make_plot(avg_fragment, coordinate_df)
-
-def distances_closest_vdw_central(coordinate_df, avg_fragment):
+def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
     closest_distances = []
     closest_atoms_vdw = []
     
-    for x, y, z, vdw in zip(coordinate_df.x, coordinate_df.y, coordinate_df.z, coordinate_df.vdw):
+    for x, y, z in zip(coordinate_df.x, coordinate_df.y, coordinate_df.z):
         closest_distance = math.inf
 
         for atom in avg_fragment.atoms.values():
-            distance = np.sqrt((x - atom.x)**2 + (y - atom.y)**2 + (z - atom.z)**2) - vdw - atom.vdw_radius
+            distance = np.sqrt((x - atom.x)**2 + (y - atom.y)**2 + (z - atom.z)**2)
             
             if distance < closest_distance:
                 closest_distance = distance
-                closest_atom_vdw = atom.vdw_radius
-                
+                closest_atom_vdw = settings.get_vdw_radius(atom.symbol)
+
         # assert closest_distance <5, "closest distance can't be smaller then 3"
 
         closest_distances.append(closest_distance)
@@ -79,36 +76,35 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment):
 
     return coordinate_df
 
-def count_contact_atoms(fragments_df, to_count):
+def count_contact_atoms(fragments_df, settings):
     """ This is a function that counts the contact atoms or centers of contact groups near the
         central group. """
 
-    contact_group_df = fragments_df[fragments_df.fragment_or_contact == "f"]
+    contact_group_df = fragments_df[fragments_df.in_central_group == False]
+    ids = contact_group_df.id.unique()
 
-    unique_fragments = contact_group_df.unique_fragment
-    coordinate_df = pd.DataFrame(columns=["x", "y", "z"], index=unique_fragments)
+    coordinate_df = pd.DataFrame(columns=["x", "y", "z"], index=ids)
 
-    for unique_fragment_id in unique_fragments:
-        fragment_df = contact_group_df[contact_group_df.unique_fragment == unique_fragment_id]
+    for _id in ids:
+        fragment_df = contact_group_df[contact_group_df.id == _id]
             
-        coordinates = get_coordinates(fragment_df, to_count)
-            
-        coordinate_df.loc[coordinate_df.index == unique_fragment_id, ["x", "y", "z"]] = coordinates[0], coordinates[1], coordinates[2]
+        coordinates = get_coordinates(fragment_df, settings)
+        coordinate_df.loc[coordinate_df.index == _id, ["x", "y", "z"]] = coordinates[0], coordinates[1], coordinates[2]
 
     return coordinate_df
 
-def get_coordinates(fragment_df, to_count):
+def get_coordinates(fragment_df, settings):
     # if center, calculate per fragment instead of per atom
-    if to_count == "center":
-        return calculate_center(fragment_df=fragment_df, atoms=["C"])
+    if settings.to_count_contact == "center":
+        return calculate_center(fragment_df=fragment_df)
     else:
-        point = fragment_df[fragment_df['atom_label'].str.contains(to_count)]
+        point = fragment_df[fragment_df.atom_symbol == settings.to_count_contact]
 
         assert (len(point) == 1), " atom label is not unique, can't count per bin"
         
         return [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
 
-def make_plot(avg_fragment, coordinate_df):
+def make_plot(avg_fragment, coordinate_df, longest_vdw_contact):
     """ Plot all the surrounding contact groups around the central group. """
 
     fig = plt.figure()
@@ -116,19 +112,19 @@ def make_plot(avg_fragment, coordinate_df):
     
     # plot the (average of the) central group 
     ax = plot_fragment_colored(ax, avg_fragment)
-    ax, _ = plot_vdw_spheres(avg_fragment, ax)
+    ax, _ = plot_vdw_spheres(avg_fragment, ax, color='pink')
 
-    points = ax.scatter(list(coordinate_df.x), list(coordinate_df.y), list(coordinate_df.z), s=1, c="red")
-
-    print(coordinate_df.distance.min(), coordinate_df.distance.max())
+    points = ax.scatter(list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom + longest_vdw_contact].x), 
+                        list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom + longest_vdw_contact].y), 
+                        list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom + longest_vdw_contact].z), s=1, c="red")
 
     vdw_slider_ax = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=AXCOLOR)
-    vdw_slider = Slider(vdw_slider_ax, 'VDW radius + ', -0.5, 2, valinit=0, valstep=0.1)
+    vdw_slider = Slider(vdw_slider_ax, 'VDW radius + ', -2, 3, valinit=0, valstep=0.1)
 
     def update(val):
         val = round(val, 2)
        
-        show_df = coordinate_df[coordinate_df.distance <= 2 * val]
+        show_df = coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom + longest_vdw_contact + val]
 
         print(len(coordinate_df) , len(show_df), val)    
         points._offsets3d = (list(show_df.x), list(show_df.y), list(show_df.z))

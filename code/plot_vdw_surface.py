@@ -1,6 +1,6 @@
 import sys
 import pandas as pd
-from helpers.geometry_helpers import make_avg_fragment_if_not_exists
+from helpers.geometry_helpers import make_avg_fragment_if_not_exists, calculate_longest_vdw_radius_contact
 from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
 from helpers.helpers import read_results_alignment
 
@@ -16,7 +16,7 @@ import numpy as np
 from helpers.headers import AXCOLOR
 
 def main():
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 2:
         print("Usage: python plot_vdw_surface.py <path/to/inputfile>")
         sys.exit(1)
 
@@ -25,33 +25,49 @@ def main():
 
     df = read_results_alignment(settings.get_aligned_csv_filename())
 
+    first_contact_group = df[(df.id == df.id.unique()[0]) & (df.in_central_group == False)]
+    longest_vdw = calculate_longest_vdw_radius_contact(first_contact_group, settings)
+
     avg_fragment = make_avg_fragment_if_not_exists(settings, df)
 
     # to plot the vdw surface we need the vdw radii
-    for atom in avg_fragment.atoms.values():
-        radius = settings.get_vdw_radius(atom.symbol)
-        print(atom, radius)
-        atom.set_vdw_radius(radius)
+    for atom1 in avg_fragment.atoms.values():
+        radius = settings.get_vdw_radius(atom1.symbol)
+        atom1.set_vdw_radius(radius)
 
-    plot_vdw_surface(avg_fragment)
+    plot_vdw_surface(avg_fragment, longest_vdw)
 
-def plot_vdw_surface(avg_fragment):
+def plot_vdw_surface(avg_fragment, longest_vdw_contact):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     plt.subplots_adjust(left=0.25, bottom=0.25)
 
-    ax.margins(x=0)
+    ax.margins(x = 0)
     ax = plot_fragment_colored(ax, avg_fragment)
+
     # Create vdw spheres around central group atoms
-    ax, spheres = plot_vdw_spheres(avg_fragment, ax)
+    ax, spheres1 = plot_vdw_spheres(avg_fragment, ax, 'red')
+
+    # Create vdw spheres around central group atoms
+    ax, spheres2 = plot_vdw_spheres(avg_fragment, ax, 'orange', extra=0.5)
+
+    # Create vdw spheres around central group atoms
+    ax, spheres3 = plot_vdw_spheres(avg_fragment, ax, 'pink', extra=0.5+longest_vdw_contact)
 
     # visibility of the spheres    
     check_ax = plt.axes([0.025, 0.5, 0.15, 0.15], facecolor=AXCOLOR)
-    radio = CheckButtons(check_ax, ['visible'])
+    radio = CheckButtons(check_ax, ['vdwradius', 'vdwradis + 0.5', 'vdwradius + 0.5 + contact vdw'])
 
     def switch_visibility(label):
-        for sphere in spheres:
-            sphere.set_visible(not sphere.get_visible())
+        if label == 'vdwradius':
+            for sphere in spheres1:
+                sphere.set_visible(not sphere.get_visible())
+        elif label == 'vdwradis + 0.5':
+            for sphere in spheres2:
+                sphere.set_visible(not sphere.get_visible())
+        else:
+            for sphere in spheres3:
+                sphere.set_visible(not sphere.get_visible())
 
         fig.canvas.draw_idle()
 

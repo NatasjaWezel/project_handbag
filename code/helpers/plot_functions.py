@@ -22,7 +22,6 @@ def plot_density(ax, df, resolution):
     norm = plt.Normalize(0.00001, points[column_name].max())
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue","fuchsia","red"])
     
-    # TODO: fix sizes of points
     p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=list(10000 * points[column_name]), c=list(points[column_name]), cmap=cmap, norm=norm)
 
     ax.set_xlabel('X axis')
@@ -39,6 +38,7 @@ def plot_fragment_colored(ax, fragment):
         return plot_fragment(ax, fragment)
 
 def plot_fragment_from_df(ax, fragment_df):
+    fragment_df = fragment_df[fragment_df.in_central_group]
     for _, atom in fragment_df.iterrows():
         if "O" in atom.atom_label:
             ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="red", s=30, edgecolor="black")
@@ -114,11 +114,11 @@ def plot_atoms_bonds(ax, fragment):
     return ax
 
 
-def plot_vdw_spheres(avg_fragment, ax):
+def plot_vdw_spheres(avg_fragment, ax, color, extra=0):
     spheres = []
 
     for atom in avg_fragment.atoms.values():
-        r = atom.vdw_radius
+        r = atom.vdw_radius + extra
 
         theta, phi = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
 
@@ -126,7 +126,7 @@ def plot_vdw_spheres(avg_fragment, ax):
         y = r * np.sin(phi) * np.sin(theta) + atom.y
         z = r * np.cos(phi) + atom.z
 
-        sphere = ax.plot_surface(x, y, z, color='pink', alpha=0.2, linewidth=0)
+        sphere = ax.plot_surface(x, y, z, color=color, alpha=0.2, linewidth=0)
         spheres.append(sphere)
 
     assert len(spheres) == len(avg_fragment.atoms.keys()), "Something went wrong with plotting the vdw surfaces"

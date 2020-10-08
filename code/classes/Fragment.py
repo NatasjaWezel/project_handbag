@@ -19,15 +19,25 @@ class Fragment:
 
     def find_atoms_for_plane(self, settings):
         plane_atoms = []
+        atoms = [atom for atom in self.atoms.values() if atom.in_central_group and not atom is self.center_atom]
 
+        # checks if is ring
         for key, value in settings.central_group_atoms.items():
             if value == 1 and settings.center_ring:
-                for atom in self.atoms.values():
-                    if atom.in_central_group and atom is not self.center_atom and atom.symbol == key:
+                for atom in atoms:
+                    if atom is not self.center_atom and atom.symbol == key:
                         plane_atoms.append(atom)
 
-        for atom in self.atoms.values():
-            if atom.in_central_group and atom is not self.center_atom and not atom in plane_atoms:
+        # checks for R atoms
+        count_dict = settings.get_avg_fragment_helpers()
+        amount_R = count_dict["R"]
+
+        if amount_R == 1 and atoms[-1]:
+            plane_atoms.append(atoms[-1])
+
+        # if not enough plane atoms add other randoms
+        for atom in atoms:
+            if not atom in plane_atoms:
                 plane_atoms.append(atom)
         
         return plane_atoms[:2]
