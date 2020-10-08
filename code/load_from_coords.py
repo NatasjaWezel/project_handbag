@@ -102,8 +102,6 @@ def load_fragments_from_coords(lines, settings):
 
             atom_count += 1
 
-            
-
     fragments.append(fragment)
 
     # this return is here for the last fragment                   
