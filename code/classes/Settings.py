@@ -78,18 +78,12 @@ class Settings():
             return vdw_radius
 
     def get_avg_fragment_helpers(self):
-        columns, atoms = [], []
-
         count_dict = {}
 
         for atom, amount in self.central_group_atoms.items():
-            count_dict[atom] = 1
+            count_dict[atom] = amount
 
-            for i in range(1, amount + 1):
-                atoms.append(atom + str(i))
-                columns.extend([atom + str(i) + "x", atom + str(i) + "y", atom + str(i) + "z"])
-        
-        return columns, atoms,count_dict
+        return count_dict
 
     def get_cov_radius(self, symbol):
         

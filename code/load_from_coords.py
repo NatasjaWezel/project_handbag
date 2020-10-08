@@ -23,15 +23,14 @@ import pickle as pkl
 
 def main():
     
-    if len(sys.argv) != 3:
-        print("Usage: python load_from_coords.py <path/to/inputfile> <central group>")
+    if len(sys.argv) != 2:
+        print("Usage: python load_from_coords.py <path/to/inputfile>")
         sys.exit(1)
     
     filename = sys.argv[1]
-    central_group = sys.argv[2]
     
     settings = Settings(filename)
-    settings.set_central_group(central_group)
+    settings.set_central_group()
 
     coordinate_lines = read_coord_file(filename=filename)
     fragments = load_fragments_from_coords(coordinate_lines, settings)
