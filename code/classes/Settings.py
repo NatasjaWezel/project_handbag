@@ -8,6 +8,8 @@ class Settings():
         
         title = inputfilename.rsplit('\\')[-1].rsplit('.', 1)[0].rsplit('_aligned', 1)[0]
 
+        self.parameter_csv = inputfilename.rsplit('.', 1)[0] + '.csv'
+
         self.central_group_name = title.split("_")[0]
         self.contact_group_name = title.split("_")[1]
 
@@ -24,6 +26,7 @@ class Settings():
 
         self.radii_filename = RADII_CSV
 
+        self.alignment = {}
         self.vdw_radii = {}
         self.cov_radii = {}
 
@@ -41,16 +44,25 @@ class Settings():
         self.tolerance = tolerance
         
     def get_avg_fragment_filename(self):
-        avg_fragment_filename = self.outputfile_prefix + "_avg_fragment.pkl"
+        avg_fragment_filename = self.outputfile_prefix + "_avg_fragment.csv"
         return avg_fragment_filename
 
     def get_avg_fragment_hdf_filename(self):
         avg_fragment_hdf_filename = self.outputfile_prefix + "_avg_fragment.hdf"
         return avg_fragment_hdf_filename
 
+    def get_coordinate_df_filename(self):
+        return self.outputfile_prefix + "_coordinates_contact.hdf"
+
+    def get_coordinate_df_key(self):
+        return self.to_count_contact
+
     def get_density_df_filename(self):
         density_df_filename = self.outputfile_prefix + "_density.hdf"
         return density_df_filename
+
+    def get_density_df_key(self):
+        return self.to_count_contact + str(self.resolution).rstrip("0").replace(".", "")
 
     def set_resolution(self, resolution):
         self.resolution = resolution
@@ -58,9 +70,6 @@ class Settings():
     def get_density_plotname(self):
         density_plotname = self.outputfile_prefix + "_" + str(self.resolution) + "_density.pdf"
         return density_plotname
-
-    def get_density_df_key(self):
-        return "key" + str(self.resolution).rstrip("0").replace(".", "")
 
     def set_atom_to_count(self, atom_str):
         self.to_count_contact = atom_str
@@ -77,14 +86,6 @@ class Settings():
             self.vdw_radii[symbol] = vdw_radius
             return vdw_radius
 
-    def get_avg_fragment_helpers(self):
-        count_dict = {}
-
-        for atom, amount in self.central_group_atoms.items():
-            count_dict[atom] = amount
-
-        return count_dict
-
     def get_cov_radius(self, symbol):
         
         if symbol in self.cov_radii.keys():
@@ -96,23 +97,17 @@ class Settings():
 
             self.cov_radii[symbol] = cov_radius
             return cov_radius
+
+
+    def alignment_labels(self):
+        df = pd.read_csv(CENTRAL_GROUPS_CSV)
+        df = df[df.name == self.central_group_name]
+
+        self.alignment['center'] = df.center_label.max()
+        self.alignment['yaxis'] = df.y_axis_label.max()
+        self.alignment['xyplane'] = df.xy_plane_label.max()
+
+        return self.alignment
+
         
-    def set_central_group(self):
-        groupnames = pd.read_csv(CENTRAL_GROUPS_CSV, header=0)
-
-        df = groupnames[groupnames.name == self.central_group_name]
-
-        self.central_group_atoms = {}
-
-        for _, row in df.iterrows():
-            self.central_group_atoms[row["atom"]] = int(row["amount"])
-
-            if row.center == True and row.amount == 1:
-                self.center_atom = row.atom
-                self.center_ring = False
-            elif row.center == True:
-                self.center_atom = False
-                self.center_ring = row.atom
-
-        self.amount_central_group_atoms = sum(self.central_group_atoms.values())
         

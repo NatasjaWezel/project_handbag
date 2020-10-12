@@ -38,7 +38,6 @@ def plot_fragment_colored(ax, fragment):
         return plot_fragment(ax, fragment)
 
 def plot_fragment_from_df(ax, fragment_df):
-    fragment_df = fragment_df[fragment_df.in_central_group]
     for _, atom in fragment_df.iterrows():
         if "O" in atom.atom_label:
             ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="red", s=30, edgecolor="black")
@@ -70,23 +69,20 @@ def plot_fragment(ax, fragment):
     return ax
 
 
-def plot_fragments(fragments):
+def plot_fragments(df, amount):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
-    for i, fragment in enumerate(fragments):
-        fragment.color = COLORS[i % len(COLORS)]
+    i = 0
+    unique = list(df.id.unique())
 
-        atomxs = [atom.x for atom in fragment.atoms.values()]
-        atomys = [atom.y for atom in fragment.atoms.values()]
-        atomzs = [atom.z for atom in fragment.atoms.values()]
+    for _id in unique[:amount]:
+        fragment = df[df.id == _id]
 
-        ax.scatter(atomxs, atomys, atomzs, color=fragment.color, label=fragment.id)
+        color = COLORS[i % len(COLORS)]
+        ax.scatter(fragment.atom_x, fragment.atom_y, fragment.atom_z, color=color, label=_id)
 
-        for atom in fragment.atoms.values():
-            ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black') 
-        
-        ax = plot_atoms_bonds(ax=ax, fragment=fragment)
+        i += 1
 
     ax.legend()
     ax.set_xlabel('X axis')
@@ -95,40 +91,21 @@ def plot_fragments(fragments):
     
     plt.show()
 
-def plot_atoms_bonds(ax, fragment):
-    """ This function plots the atoms and bonds of a fragment. """ 
-
-    for atom in list(fragment.atoms.values())[1:]:
-        ax.scatter(atom.x, atom.y, atom.z, color=fragment.color)
-        ax.text(atom.x + .005, atom.y + .005 , atom.z + .005,  atom.label, size=8, zorder=1, color='black')                 
-    
-    for bond in fragment.bonds:
-        # TODO: look into this cuz fragments.atoms.keys are supposed to be labels and bond[0] is supposed to be an atom
-        if bond[0] in fragment.atoms.keys() and bond[1] in fragment.atoms.keys():
-            x = [fragment.atoms[bond[0]].x, fragment.atoms[bond[1]].x]
-            y = [fragment.atoms[bond[0]].y, fragment.atoms[bond[1]].y]
-            z = [fragment.atoms[bond[0]].z, fragment.atoms[bond[1]].z]
-
-            ax.plot(x, y, z, color=fragment.color)
-    
-    return ax
-
-
 def plot_vdw_spheres(avg_fragment, ax, color, extra=0):
     spheres = []
 
-    for atom in avg_fragment.atoms.values():
+    for _, atom in avg_fragment.iterrows():
         r = atom.vdw_radius + extra
 
         theta, phi = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
 
-        x = r * np.sin(phi) * np.cos(theta) + atom.x
-        y = r * np.sin(phi) * np.sin(theta) + atom.y
-        z = r * np.cos(phi) + atom.z
+        x = r * np.sin(phi) * np.cos(theta) + atom.atom_x
+        y = r * np.sin(phi) * np.sin(theta) + atom.atom_y
+        z = r * np.cos(phi) + atom.atom_z
 
         sphere = ax.plot_surface(x, y, z, color=color, alpha=0.2, linewidth=0)
         spheres.append(sphere)
 
-    assert len(spheres) == len(avg_fragment.atoms.keys()), "Something went wrong with plotting the vdw surfaces"
+    assert len(spheres) == len(avg_fragment), "Something went wrong with plotting the vdw surfaces"
 
     return ax, spheres

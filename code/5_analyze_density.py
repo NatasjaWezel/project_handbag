@@ -1,3 +1,5 @@
+
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # This is a script that I wrote for my master thesis
 # It loads the coordinates of the aligned fragments. It then divides the 
@@ -34,34 +36,22 @@ import csv
 def main():
 
     if len(sys.argv) != 4:
-        print("Usage: python plot_density.py <path/to/inputfile> <resolution> <atom or center to count>")
+        print("Usage: python analyze_density.py <path/to/inputfile> <resolution> <atom or center to count>")
         sys.exit(1)
     
     settings = Settings(sys.argv[1])
     settings.set_central_group()
-    settings.set_atom_to_count(sys.argv[3])
 
     # resolution of the bins, in Angstrom
     settings.set_resolution(float(sys.argv[2]))
 
     aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
-    first_fragment_df = aligned_fragments_df[aligned_fragments_df.id == aligned_fragments_df.id.unique()[0]]
-        
-    # avg_fragment = make_avg_fragment_if_not_exists(settings, aligned_fragments_df)
 
     try:
         density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
     except (FileNotFoundError, KeyError):
-        empty_density_df = prepare_df(fragments_df=aligned_fragments_df, resolution=settings.resolution)
-
-        empty_density_df["amount_" + settings.to_count_contact] = 0
-
-        print("Bins: ", len(empty_density_df))
-
-        density_df = count_points_per_square(df=empty_density_df, points_df=aligned_fragments_df, settings=settings)
-
-        # save so we can use the data but only change the plot - saves time :)
-        density_df.to_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
+        print("Run calc_density first")
+        sys.exit(1)
 
 
     calculate_80_percent(density_df, settings)
@@ -83,30 +73,6 @@ def make_plot(avg_fragment, density_df, settings):
     plt.savefig(plotname)
     plt.show()
 
-
-def count_points_per_square(df, points_df, settings):
-    column_name = "amount_" + settings.to_count_contact
-
-    small_points_df = points_df[points_df.in_central_group == False]
-    unique_fragments = small_points_df.id.unique()
-
-    print("Counting points per bin: ")
-    for fragment_id in tqdm(unique_fragments):
-        fragment_df = small_points_df[small_points_df.id == fragment_id]
-       
-        # if center, calculate per fragment instead of per atom
-        if "center" in column_name:
-            coordinates = calculate_center(fragment_df=fragment_df)
-        else:
-            point = fragment_df[fragment_df.atom_symbol == column_name.split("_")[1]]
-
-            assert (len(point) == 1), " atom label is not unique, can't count per bin"
-
-            coordinates = [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
-            
-        df = add_one_to_bin(df=df, column_name=column_name, resolution=settings.resolution, coordinates=coordinates)
-        
-    return df
 
 def calculate_80_percent(df, settings):
     column_name = "amount_" + settings.to_count_contact

@@ -19,6 +19,7 @@ import sys
 
 from tqdm import tqdm
 
+import pandas as pd
 import pickle as pkl
 
 def main():
@@ -30,21 +31,48 @@ def main():
     filename = sys.argv[1]
     
     settings = Settings(filename)
-    settings.set_central_group()
 
     coordinate_lines = read_coord_file(filename=filename)
-    fragments = load_fragments_from_coords(coordinate_lines, settings)
+    fragments = load_fragments_from_coords(coordinate_lines)
+
+    labels_contact_df = pd.read_csv(settings.parameter_csv)
+
+    # clean column names
+    columns = labels_contact_df.columns
+    columns = [i.strip() for i in columns]
+    labels_contact_df.columns = columns
+
+    labels = [i for i in columns if "LAB" in i]
+
+    alignment_labels = settings.alignment_labels()
 
     outputfile = open(settings.get_aligned_csv_filename(), 'w', newline='')
     writer = csv.writer(outputfile)
 
     print("Aligning fragments and writing result to csv")
-    for fragment in tqdm(fragments): 
-        fragment.center_coordinates(settings)
+    for i, fragment in enumerate(tqdm(fragments)): 
+        # get contact group and relabel it
+        row = labels_contact_df[labels_contact_df.index == i]
 
-        atoms_to_put_in_plane = fragment.find_atoms_for_plane(settings)
+        for j, label in enumerate(labels):
+            # use .max to get the string out of the row
+            atom_label = row[label].max()
+            atom = fragment.atoms[atom_label]
+            atom.add_to_central_group()
 
-        fragment = perform_rotations(fragment, atoms_to_put_in_plane)
+            if label == alignment_labels['center']:
+                center_atom = atom.label
+            elif label == alignment_labels['yaxis']:
+                y_axis_atom = atom.label
+            elif label == alignment_labels['xyplane']:
+                xy_plane_atom = atom.label
+
+            # TODO: maybe check if this label exists in the central group........
+            atom.label = atom.symbol + str(j + 1)
+
+        # center coordinates on center and rotate it
+        fragment.center_coordinates(center_atom)
+        fragment = perform_rotations(fragment, [y_axis_atom, xy_plane_atom])
         
         fragment.invert_if_neccessary()
 
@@ -66,14 +94,12 @@ def read_coord_file(filename):
 
     return lines
 
-def load_fragments_from_coords(lines, settings):
+def load_fragments_from_coords(lines):
     """ Reads part of the coordinate file and returns an entire fragment. """
 
     fragments = []
     fragment = None
-    
-    atom_count = 0
-        
+            
     print("Reading fragments from .cor file")
     for line in tqdm(lines):
         
@@ -82,7 +108,7 @@ def load_fragments_from_coords(lines, settings):
             fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
         elif "FRAG" in line:
             fragments.append(fragment)
-            atom_count = 0
+
             # if we found the header of the next fragment
             information = line.split("**")
             fragment = Fragment(fragment_id=information[2].strip(), from_entry=information[0].strip())
@@ -94,13 +120,8 @@ def load_fragments_from_coords(lines, settings):
             atom = Atom(label=information[0].strip("%"), coordinates=[float(x[0]), float(y[0]), float(z[0])])
 
             atom = check_if_label_exists(atom, fragment)
-
-            if atom_count < settings.amount_central_group_atoms:
-                fragment.define_central_group(atom)
-
+            
             fragment.add_atom(atom)
-
-            atom_count += 1
 
     fragments.append(fragment)
 

@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 
-def perform_rotations(fragment, atoms_to_put_in_plane):
+def perform_rotations(fragment, atoms):
     """ Performs three rotations to lie three of the atoms in the xy plane, one of those
         on the x-axis. 
         First rotation: puts first atom on xy-plane if it already was on a plane, 
@@ -9,17 +9,18 @@ def perform_rotations(fragment, atoms_to_put_in_plane):
         Second rotation: puts first atom on x-axis by rotating around y-axis.
         Third rotation: puts second atom in x-y plane by rotating around the x-axis. """
 
-    atoms = [atoms_to_put_in_plane[0], atoms_to_put_in_plane[0], atoms_to_put_in_plane[1]]
+    atoms = [fragment.atoms[atoms[0]], fragment.atoms[atoms[0]], fragment.atoms[atoms[1]]]
     axis = ["z", "y", "x"]
 
     for i, atom in enumerate(atoms):
+
         coord_vector = find_coord_vector(ax=axis[i], atom=atom)
 
         angle = find_angles(ax=axis[i], coord_vector=coord_vector)
         angle = angle * find_rotation_direction(ax=axis[i], atom=atom)
 
         fragment = calculate_rotation(fragment=fragment, angle=angle, ax=axis[i])
-
+ 
     return fragment
 
 
