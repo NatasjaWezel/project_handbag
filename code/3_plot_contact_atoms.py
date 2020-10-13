@@ -18,7 +18,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from tqdm import tqdm
 
 from classes.Settings import Settings
-from helpers.geometry_helpers import (calculate_longest_vdw_radius_contact,
+from helpers.geometry_helpers import (get_vdw_distance_contact,
                                       make_avg_fragment_if_not_exists,
                                       make_coordinate_df)
 from helpers.headers import AXCOLOR, RADII_CSV
@@ -47,14 +47,6 @@ def main():
     coordinate_df = make_coordinate_df(df, settings, avg_fragment)
     make_plot(avg_fragment, coordinate_df, vdw_distance_contact)
     
-
-def get_vdw_distance_contact(df, settings):
-    if settings.to_count_contact == "centroid":
-        first_fragment_df = df[df.id == df.id.unique()[0]]
-        return calculate_longest_vdw_radius_contact(first_fragment_df, settings)
-    
-    return settings.get_vdw_radius(settings.to_count_contact)
-
 
 def make_plot(avg_fragment, coordinate_df, longest_vdw_contact):
     """ Plot all the surrounding contact groups around the central group. """
