@@ -30,13 +30,13 @@ def calculate_no_bins(minimum, maximum, resolution):
     no_bins =  bins_neg + bins_pos
     return no_bins, minimum, maximum
 
-def prepare_df(fragments_df, resolution):
+def prepare_df(fragments_df, settings):
     maxx, maxy, maxz = find_maximum(fragments_df)
     minx, miny, minz = find_minimum(fragments_df)
 
-    no_bins_x, minx, maxx = calculate_no_bins(minx, maxx, resolution)
-    no_bins_y, miny, maxy = calculate_no_bins(miny, maxy, resolution)
-    no_bins_z, minz, maxz = calculate_no_bins(minz, maxz, resolution)
+    no_bins_x, minx, maxx = calculate_no_bins(minx, maxx, settings.resolution)
+    no_bins_y, miny, maxy = calculate_no_bins(miny, maxy, settings.resolution)
+    no_bins_z, minz, maxz = calculate_no_bins(minz, maxz, settings.resolution)
 
     amount_bins = no_bins_x * no_bins_y * no_bins_z
     indices = [i for i in range(0, amount_bins)]
@@ -45,12 +45,12 @@ def prepare_df(fragments_df, resolution):
                 np.linspace(miny, maxy, num=no_bins_y, endpoint=False), 
                 np.linspace(minz, maxz, num=no_bins_z, endpoint=False)] 
     
-    df = add_boundaries_per_bin(bins, indices)
+    df = add_boundaries_per_bin(bins, indices, settings)
    
     return df
 
 
-def add_boundaries_per_bin(bins, indices):
+def add_boundaries_per_bin(bins, indices, settings):
     
     df = pd.DataFrame([], index=indices)
 
@@ -66,20 +66,12 @@ def add_boundaries_per_bin(bins, indices):
     df["ystart"] = ystart_list
     df["zstart"] = zstart_list
 
+    df[settings.to_count_contact] = 0.0
+
     df = df.apply(pd.to_numeric, downcast='float', errors='coerce')
 
     return df
 
 
-def add_one_to_bin(df, column_name, coordinates, resolution):
-    x, y, z = coordinates[0], coordinates[1], coordinates[2]
 
-    # TODO: find out what happens with points exactly on a bin-line
-    index = df.index[((df.xstart <= x) & (df.xstart + resolution >= x) & 
-                        (df.ystart <= y) & (df.ystart + resolution >= y) & 
-                        (df.zstart <= z) & (df.zstart + resolution >= z))]
-
-    df.loc[index, column_name] = df.loc[index, column_name] + 1
-
-    return df
 

@@ -18,7 +18,7 @@ def main():
     
     settings = Settings(sys.argv[1])
     df = read_results_alignment(settings.get_aligned_csv_filename())
-    df = df[df.in_central_group]
+    # df = df[df.in_central_group]
 
     amount = int(sys.argv[2])
    

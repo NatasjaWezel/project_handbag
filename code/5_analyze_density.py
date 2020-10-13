@@ -11,27 +11,22 @@
 # Author: Natasja Wezel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from helpers.density_helpers import prepare_df, add_one_to_bin
-from helpers.plot_functions import plot_fragment_colored, plot_density
-from helpers.geometry_helpers import make_avg_fragment_if_not_exists, calculate_center, calculate_longest_vdw_radius_contact
-from helpers.helpers import read_results_alignment
-
+import csv
 import math
-
-import pandas as pd
-import numpy as np
-
 import sys
 import time
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
-
-from classes.Settings import Settings
-
 from tqdm import tqdm
 
-import csv
+from classes.Settings import Settings
+from helpers.geometry_helpers import make_avg_fragment_if_not_exists
+from helpers.helpers import read_results_alignment
+from helpers.plot_functions import plot_density, plot_fragment_colored
+
 
 def main():
 
@@ -40,34 +35,37 @@ def main():
         sys.exit(1)
     
     settings = Settings(sys.argv[1])
-    settings.set_central_group()
 
     # resolution of the bins, in Angstrom
     settings.set_resolution(float(sys.argv[2]))
 
-    aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
+    settings.set_atom_to_count(sys.argv[3])
 
+    df = read_results_alignment(settings.get_aligned_csv_filename())
+    avg_fragment = make_avg_fragment_if_not_exists(settings, df)
+    
+    
     try:
         density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
     except (FileNotFoundError, KeyError):
         print("Run calc_density first")
         sys.exit(1)
 
+    print(density_df.describe())
 
     calculate_80_percent(density_df, settings)
-    make_plot(first_fragment_df, density_df, settings)
+    make_plot(avg_fragment, density_df, settings)
 
 def make_plot(avg_fragment, density_df, settings):
-    resolution = settings.resolution
     plotname = settings.get_density_plotname()
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
     ax = plot_fragment_colored(ax, avg_fragment)
 
-    p, ax = plot_density(ax=ax, df=density_df, resolution=resolution)
+    p, ax = plot_density(ax=ax, df=density_df, settings=settings)
 
-    ax.set_title("4D density plot\n Resolution: " + str(resolution))
+    ax.set_title("4D density plot\n Resolution: " + str(settings.resolution))
 
     fig.colorbar(p)
     plt.savefig(plotname)
@@ -75,11 +73,10 @@ def make_plot(avg_fragment, density_df, settings):
 
 
 def calculate_80_percent(df, settings):
-    column_name = "amount_" + settings.to_count_contact
-    total_atoms = df[column_name].sum()
+    total_atoms = df[settings.to_count_contact].sum()
 
     # take bins that aren't empty and sort them from highest fraction to lowest fraction
-    population = list(df[df[column_name] > 0][column_name])
+    population = list(df[df[settings.to_count_contact] > 0][settings.to_count_contact])
     population.sort(reverse=True)
 
     fraction = 0

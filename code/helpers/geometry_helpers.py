@@ -1,30 +1,63 @@
-from classes.Atom import Atom
-from classes.Fragment import Fragment
-
-import pandas as pd
+import csv
 import math
 
-import pickle
+import numpy as np
+import pandas as pd
 
-import time
 from tqdm import tqdm
 
-import csv
 
-import copy
+def make_coordinate_df(df, settings, avg_fragment):
+    try:
+        coordinate_df = pd.read_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
 
-import numpy as np
+        return coordinate_df
+    except (KeyError, FileNotFoundError):
+        first_fragment_df = df[df.id == df.id.unique()[0]]
 
-def calculate_center(fragment_df):
-    # TODO: this only works if there are no other C's on the ring
-    atom_df = fragment_df[fragment_df.atom_symbol == 'C']
+        if settings.to_count_contact == "centroid":
+            # plot centroids of all contact fragments
+            coordinate_df = df.groupby("id").mean()
+        elif len(first_fragment_df[first_fragment_df["atom_symbol"] == settings.to_count_contact]) == 1:
+            # atom is unique, plot all of them
+            coordinate_df = df[df.atom_symbol == settings.to_count_contact]
+        else:
+            # TODO: atom is not unique, find closest
+            pass
 
-    coordinates = [atom_df.atom_x.mean(), atom_df.atom_y.mean(), atom_df.atom_z.mean()]
+        coordinate_df = distances_closest_vdw_central(coordinate_df, avg_fragment, settings)
 
-    assert (len(atom_df) == 6), "More then 6 C's in fragment, can't calculate center"
+        coordinate_df.to_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
 
-    return coordinates
+        return coordinate_df
 
+
+def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
+    closest_distances = []
+    closest_atoms_vdw = []
+
+    points_avg_f = np.array([avg_fragment.atom_x, avg_fragment.atom_y, avg_fragment.atom_z]).T
+
+    print("Searching for nearest atom from contact group...")
+    print(len(coordinate_df.atom_x))
+    for x, y, z in tqdm(zip(coordinate_df.atom_x, coordinate_df.atom_y, coordinate_df.atom_z)):
+        
+        p2 = np.array([x,y,z])
+
+        dist = np.sqrt([np.sum((f - p2)**2, axis=0) for f in points_avg_f])
+
+        min_dist_idx = dist.argmin()
+        min_dist = dist[min_dist_idx]
+        
+        min_atom_vdw = avg_fragment.iloc[min_dist_idx]['vdw_radius']
+
+        closest_distances.append(min_dist)
+        closest_atoms_vdw.append(min_atom_vdw)
+
+    coordinate_df["distance"] = closest_distances
+    coordinate_df["vdw_closest_atom"] = closest_atoms_vdw
+
+    return coordinate_df
 
 def make_avg_fragment_if_not_exists(settings, df):
     try:

@@ -7,22 +7,24 @@ from helpers.headers import COLORS
 import pandas as pd
 import numpy as np
 
-def plot_density(ax, df, resolution):
-    df['ymiddle'] = (df['ystart'] * 2 + resolution) / 2
-    df['xmiddle'] = (df['xstart'] * 2 + resolution) / 2
-    df['zmiddle'] = (df['zstart'] * 2 + resolution) / 2
+def plot_density(ax, df, settings):
+    df['ymiddle'] = (df['ystart'] * 2 + settings.resolution) / 2
+    df['xmiddle'] = (df['xstart'] * 2 + settings.resolution) / 2
+    df['zmiddle'] = (df['zstart'] * 2 + settings.resolution) / 2
 
-    # for now only use first column
-    column_name = [i for i in df.columns if "amount" in i][0]
     # normalize per column 
-    df[column_name] = df[column_name] / df[column_name].sum()
+    df[settings.to_count_contact] = df[settings.to_count_contact] / df[settings.to_count_contact].sum()
 
-    points = df[df[column_name] > 0.00001]
+    points = df[df[settings.to_count_contact] > 0.00001]
 
-    norm = plt.Normalize(0.00001, points[column_name].max())
+    norm = plt.Normalize(0.00001, points[settings.to_count_contact].max())
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue","fuchsia","red"])
     
-    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), s=list(10000 * points[column_name]), c=list(points[column_name]), cmap=cmap, norm=norm)
+    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), 
+                                            s=list(10000 * points[settings.to_count_contact]), 
+                                            c=list(points[settings.to_count_contact]), 
+                                            cmap=cmap, 
+                                            norm=norm)
 
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
