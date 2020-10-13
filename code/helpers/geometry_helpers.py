@@ -87,20 +87,28 @@ def average_fragment(df):
 
     return avg_fragment_df
 
+def get_vdw_distance_contact(df, settings):
+    if settings.to_count_contact == "centroid":
+        first_fragment_df = df[df.id == df.id.unique()[0]]
+        return calculate_longest_vdw_radius_contact(first_fragment_df, settings)
+    
+    return settings.get_vdw_radius(settings.to_count_contact)
+    
 def calculate_longest_vdw_radius_contact(fragment_df, settings):
     longest_distance = 0
-    atom_a, atom_b = None, None
+    atom_a = None
 
     # TODO: if there's an R, take the biggest vdw radius
-    for _, atom1 in fragment_df.iterrows():
-        for _, atom2 in fragment_df.iterrows():
-            if not atom1.in_central_group and not atom2.in_central_group:
-                distance = math.sqrt((atom1.atom_x - atom2.atom_x)**2 + (atom1.atom_y - atom2.atom_y)**2 + (atom1.atom_z - atom2.atom_z)**2)
+    centroid = fragment_df.groupby('id').mean()
 
-                if distance > longest_distance:
-                    longest_distance = distance
-                    atom_a, atom_b = atom1, atom2
+    for _, atom in fragment_df.iterrows():
+        if not atom.in_central_group:
+            distance = math.sqrt((atom.atom_x - centroid.atom_x)**2 + (atom.atom_y - centroid.atom_y)**2 + (atom.atom_z - centroid.atom_z)**2)
 
-    longest_vdw_distance = (longest_distance + settings.get_vdw_radius(atom_a.atom_symbol) + settings.get_vdw_radius(atom_b.atom_symbol))/2
+            if distance > longest_distance:
+                longest_distance = distance
+                atom_a = atom
+
+    longest_vdw_distance = (longest_distance + settings.get_vdw_radius(atom_a.atom_symbol))
 
     return longest_vdw_distance
