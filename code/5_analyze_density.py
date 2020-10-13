@@ -23,10 +23,11 @@ from mpl_toolkits.mplot3d import Axes3D
 from tqdm import tqdm
 
 from classes.Settings import Settings
-from helpers.geometry_helpers import make_avg_fragment_if_not_exists
+from helpers.geometry_helpers import make_avg_fragment_if_not_exists, get_vdw_distance_contact
 from helpers.helpers import read_results_alignment
 from helpers.plot_functions import plot_density, plot_fragment_colored
 
+from numba import jit
 
 def main():
 
@@ -43,6 +44,10 @@ def main():
 
     df = read_results_alignment(settings.get_aligned_csv_filename())
     avg_fragment = make_avg_fragment_if_not_exists(settings, df)
+
+    df = df[df.in_central_group == False]
+
+    vdw_distance_contact = get_vdw_distance_contact(df, settings)
     
     
     try:
@@ -51,10 +56,55 @@ def main():
         print("Run calc_density first")
         sys.exit(1)
 
+    
+
     print(density_df.describe())
 
+    count_bins_in_vdw(density_df, avg_fragment, settings, vdw_distance_contact)
     calculate_80_percent(density_df, settings)
     make_plot(avg_fragment, density_df, settings)
+
+
+def count_bins_in_vdw(density_df, avg_fragment, settings, vdw_distance_contact):
+    bin_coordinates = np.array([density_df.xstart, density_df.ystart, density_df.zstart])
+
+    index_x, index_y, index_z = np.where(bin_coordinates[0] < 0), np.where(bin_coordinates[1] < 0), np.where(bin_coordinates[2] < 0)
+    bin_coordinates[0][index_x] += settings.resolution
+    bin_coordinates[1][index_y] += settings.resolution
+    bin_coordinates[2][index_z] += settings.resolution
+
+    bin_coordinates = bin_coordinates.T
+
+    in_vdw_volume = np.zeros(len(bin_coordinates))
+
+    points_avg_f = np.array([avg_fragment.atom_x, avg_fragment.atom_y, avg_fragment.atom_z, avg_fragment.vdw_radius]).T
+
+    for i in tqdm(range(len(points_avg_f))):
+        indices = np.transpose(np.where(in_vdw_volume == 0))
+        avg_f_p = points_avg_f[i]
+
+        calc_distances(in_vdw_volume, bin_coordinates, avg_f_p, indices, vdw_distance_contact)
+    
+    total = np.sum(in_vdw_volume)
+
+    print(total, '/', len(in_vdw_volume), 'bins in overlapping vdw volume + 0.5')
+    print('Thats a fraction of:', total/len(in_vdw_volume) *100)
+
+    return total
+
+# @jit(nopython=True)
+def calc_distances(in_vdw_volume, bin_coordinates, avg_f_p, indices, vdw_distance_contact):
+
+    for idx in indices:
+        bin_point = bin_coordinates[idx[0]]
+        distance = np.sum((bin_point - avg_f_p[:3])**2, axis=0)**0.5
+        
+        # TODO: this hardcoded 0.5
+        if distance < avg_f_p[3] + vdw_distance_contact + 0.5:
+            in_vdw_volume[idx] = 1
+
+    return in_vdw_volume
+
 
 def make_plot(avg_fragment, density_df, settings):
     plotname = settings.get_density_plotname()
