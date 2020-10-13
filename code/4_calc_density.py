@@ -52,7 +52,7 @@ def main():
     except (FileNotFoundError, KeyError):
         empty_density_df = prepare_df(fragments_df=coordinate_df, settings=settings)
 
-        print("Bins: ", len(empty_density_df))
+        print("Bins: ", len(empty_density_df), '\nPoints:', len(coordinate_df))
 
         density_df = count_points_per_square(df=empty_density_df, contact_points_df=coordinate_df, settings=settings)
 
@@ -61,27 +61,32 @@ def main():
 
 
 def count_points_per_square(df, contact_points_df, settings):
+    contact_points_df = contact_points_df
 
-    print("Counting points per bin: ", len(contact_points_df))
-    for _, point in tqdm(contact_points_df.iterrows()):
+    print("Counting points per bin: ")
+    # prepare vector that will contain the amount
+    amount = np.zeros(len(df))
 
-        coordinates = [float(point.atom_x), float(point.atom_y), float(point.atom_z)]
-            
-        df = add_one_to_bin(df=df, settings=settings, coordinates=coordinates)
+    bin_coordinates = np.array([df.xstart, df.ystart, df.zstart])
+    contact_coordinates = np.transpose(np.array([contact_points_df.atom_x, contact_points_df.atom_y, contact_points_df.atom_z]))
+
+    amount = fill_bins(amount, bin_coordinates, contact_coordinates, settings.resolution)
+
+    df[settings.to_count_contact] = amount
+
+    return df
+
+
+def fill_bins(amount, bin_coordinates, contact_coordinates, resolution):
+    x, y, z = 0, 1, 2
+    for cor in tqdm(contact_coordinates):
+        idx = np.where((bin_coordinates[x] <= cor[x]) & (bin_coordinates[x] + resolution >= cor[x]) &
+                        (bin_coordinates[y] <= cor[y]) & (bin_coordinates[y] + resolution >= cor[y]) &
+                        (bin_coordinates[z] <= cor[z]) & (bin_coordinates[z] + resolution >= cor[z]))
         
-    return df
+        amount[idx] += 1
 
-def add_one_to_bin(df, coordinates, settings):
-    x, y, z = coordinates[0], coordinates[1], coordinates[2]
-
-    # TODO: find out what happens with points exactly on a bin-line
-    index = df.index[((df.xstart <= x) & (df.xstart + settings.resolution >= x) & 
-                        (df.ystart <= y) & (df.ystart + settings.resolution >= y) & 
-                        (df.zstart <= z) & (df.zstart + settings.resolution >= z))]
-
-    df.loc[index, settings.to_count_contact] = df.loc[index, settings.to_count_contact] + 1
-
-    return df
+    return amount
 
 
 if __name__ == "__main__":
