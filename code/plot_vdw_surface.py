@@ -21,7 +21,6 @@ def main():
         sys.exit(1)
 
     settings = Settings(sys.argv[1])
-    settings.set_central_group()
 
     df = read_results_alignment(settings.get_aligned_csv_filename())
 

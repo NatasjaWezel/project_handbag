@@ -1,9 +1,7 @@
-import csv
 import math
 
 import numpy as np
 import pandas as pd
-
 from tqdm import tqdm
 
 
@@ -41,14 +39,14 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
     print("Searching for nearest atom from contact group...")
     print(len(coordinate_df.atom_x))
     for x, y, z in tqdm(zip(coordinate_df.atom_x, coordinate_df.atom_y, coordinate_df.atom_z)):
-        
-        p2 = np.array([x,y,z])
+
+        p2 = np.array([x, y, z])
 
         dist = np.sqrt([np.sum((f - p2)**2, axis=0) for f in points_avg_f])
 
         min_dist_idx = dist.argmin()
         min_dist = dist[min_dist_idx]
-        
+
         min_atom_vdw = avg_fragment.iloc[min_dist_idx]['vdw_radius']
 
         closest_distances.append(min_dist)
@@ -58,6 +56,7 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
     coordinate_df["vdw_closest_atom"] = closest_atoms_vdw
 
     return coordinate_df
+
 
 def make_avg_fragment_if_not_exists(settings, df):
     try:
@@ -70,30 +69,32 @@ def make_avg_fragment_if_not_exists(settings, df):
         vdw_radii = [settings.get_vdw_radius(row.atom_symbol) for _, row in fragment.iterrows()]
 
         fragment['vdw_radius'] = vdw_radii
-            
+
         fragment.to_csv(settings.get_avg_fragment_filename())
 
         return fragment
 
 
 def average_fragment(df):
-    """ Returns a fragment containing the average points of the central groups. """ 
-    
+    """ Returns a fragment containing the average points of the central groups. """
+
     central_group_df = df[df.in_central_group]
 
     central_group_df = central_group_df.drop(columns=['entry_id', 'id', 'in_central_group'])
-    avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'atom_x': 'mean', 'atom_y': 'mean', 'atom_z': 'mean'})
-
+    avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'atom_x': 'mean',
+                                                                  'atom_y': 'mean', 'atom_z': 'mean'})
 
     return avg_fragment_df
+
 
 def get_vdw_distance_contact(df, settings):
     if settings.to_count_contact == "centroid":
         first_fragment_df = df[df.id == df.id.unique()[0]]
         return calculate_longest_vdw_radius_contact(first_fragment_df, settings)
-    
+
     return settings.get_vdw_radius(settings.to_count_contact)
-    
+
+
 def calculate_longest_vdw_radius_contact(fragment_df, settings):
     longest_distance = 0
     atom_a = None
@@ -103,7 +104,8 @@ def calculate_longest_vdw_radius_contact(fragment_df, settings):
 
     for _, atom in fragment_df.iterrows():
         if not atom.in_central_group:
-            distance = math.sqrt((atom.atom_x - centroid.atom_x)**2 + (atom.atom_y - centroid.atom_y)**2 + (atom.atom_z - centroid.atom_z)**2)
+            distance = math.sqrt((atom.atom_x - centroid.atom_x)**2 + (atom.atom_y - centroid.atom_y)**2 +
+                                 (atom.atom_z - centroid.atom_z)**2)
 
             if distance > longest_distance:
                 longest_distance = distance

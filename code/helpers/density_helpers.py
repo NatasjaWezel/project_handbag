@@ -1,6 +1,7 @@
+import math
+
 import numpy as np
 import pandas as pd
-import math
 
 
 def find_maximum(df):
@@ -51,13 +52,13 @@ def prepare_df(fragments_df, settings):
 
 
 def add_boundaries_per_bin(bins, indices, settings):
-    
+
     df = pd.DataFrame([], index=indices)
 
     bins_x, bins_y, bins_z = bins[0], bins[1], bins[2]
 
     xl, yl, zl = len(bins_x), len(bins_y), len(bins_z)
-    
+
     xstart_list = np.repeat(bins_x, (yl * zl))
     ystart_list = list(np.repeat(bins_y, zl)) * xl 
     zstart_list = list(bins_z) * (xl * yl)
@@ -71,7 +72,3 @@ def add_boundaries_per_bin(bins, indices, settings):
     df = df.apply(pd.to_numeric, downcast='float', errors='coerce')
 
     return df
-
-
-
-
