@@ -55,11 +55,11 @@ def find_rotation_direction(ax, atom):
 
 
 def find_angles(coord_vector, ax):
-    """ Rotates the molecule so that the contact fragment is always in the same position. 
+    """ Rotates the molecule so that the contact fragment is always in the same position.
         Rotates only the important part of the molecule. """
 
     # x, y, z unitary row vectors:
-    x, y =  np.array([1, 0, 0]), np.array([0, 1, 0])
+    x, y = np.array([1, 0, 0]), np.array([0, 1, 0])
 
     point_vector = np.array(coord_vector)
 
@@ -97,22 +97,22 @@ def calculate_rotation(fragment, angle, ax):
 def rotate_x(angle):
     """ Rotation matrix for rotation around x-axis. """
 
-    return np.array(( [1,             0,              0], 
-                        [0,             np.cos(angle),  -np.sin(angle)], 
-                        [0,             np.sin(angle),  np.cos(angle)]))
+    return np.array(([1,             0,              0],
+                     [0,             np.cos(angle),  -np.sin(angle)],
+                     [0,             np.sin(angle),  np.cos(angle)]))
 
 
 def rotate_y(angle):
     """ Rotation matrix for rotation around y-axis. """
 
-    return np.array(( [np.cos(angle),  0,              -np.sin(angle)], 
-                        [0,             1,              0], 
-                        [np.sin(angle),  0,              np.cos(angle)]))
+    return np.array(([np.cos(angle),  0,              -np.sin(angle)],
+                     [0,              1,              0],
+                     [np.sin(angle),  0,              np.cos(angle)]))
 
 
 def rotate_z(angle):
     """ Rotation matrix for rotation around z-axis. """
 
-    return np.array(( [np.cos(angle), -np.sin(angle), 0], 
-                        [np.sin(angle), np.cos(angle),  0], 
-                        [0,             0,              1]))
+    return np.array(([np.cos(angle), -np.sin(angle), 0],
+                     [np.sin(angle), np.cos(angle),  0],
+                     [0,             0,              1]))

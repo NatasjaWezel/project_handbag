@@ -1,11 +1,12 @@
-import pandas as pd
-
-from helpers.headers import RADII_CSV, CENTRAL_GROUPS_CSV, DATADIR, RESULTSDIR
 import os
+
+import pandas as pd
+from helpers.headers import CENTRAL_GROUPS_CSV, RADII_CSV, RESULTSDIR
+
 
 class Settings():
     def __init__(self, inputfilename):
-        
+
         title = inputfilename.rsplit('\\')[-1].rsplit('.', 1)[0].rsplit('_aligned', 1)[0]
 
         self.parameter_csv = inputfilename.rsplit('.', 1)[0] + '.csv'
@@ -13,7 +14,7 @@ class Settings():
         self.central_group_name = title.split("_")[0]
         self.contact_group_name = title.split("_")[1]
 
-        self.output_folder_central_group = RESULTSDIR + title.split("_")[0] + "\\"   
+        self.output_folder_central_group = RESULTSDIR + title.split("_")[0] + "\\"
         output_folder_specific = self.output_folder_central_group + title + "\\"
 
         if not os.path.exists(self.output_folder_central_group):
@@ -42,7 +43,7 @@ class Settings():
 
     def set_current_tolerance(self, tolerance):
         self.tolerance = tolerance
-        
+
     def get_avg_fragment_filename(self):
         avg_fragment_filename = self.outputfile_prefix + "_avg_fragment.csv"
         return avg_fragment_filename
@@ -75,7 +76,7 @@ class Settings():
         self.to_count_contact = atom_str
 
     def get_vdw_radius(self, symbol):
-        
+
         if symbol in self.vdw_radii.keys():
             return self.vdw_radii[symbol]
         else:
@@ -87,7 +88,7 @@ class Settings():
             return vdw_radius
 
     def get_cov_radius(self, symbol):
-        
+
         if symbol in self.cov_radii.keys():
             return self.cov_radii[symbol]
         else:
@@ -98,7 +99,6 @@ class Settings():
             self.cov_radii[symbol] = cov_radius
             return cov_radius
 
-
     def alignment_labels(self):
         df = pd.read_csv(CENTRAL_GROUPS_CSV)
         df = df[df.name == self.central_group_name]
@@ -107,7 +107,9 @@ class Settings():
         self.alignment['yaxis'] = df.y_axis_label.max()
         self.alignment['xyplane'] = df.xy_plane_label.max()
 
-        return self.alignment
+        self.alignment['R'] = df.R.max()
 
-        
-        
+        if self.alignment["R"] == "-":
+            self.alignment["R"] = None
+
+        return self.alignment

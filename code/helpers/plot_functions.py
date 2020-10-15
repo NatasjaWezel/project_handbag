@@ -1,30 +1,30 @@
+import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 
-import matplotlib
 from helpers.headers import COLORS
 
-import pandas as pd
-import numpy as np
 
 def plot_density(ax, df, settings):
     df['ymiddle'] = (df['ystart'] * 2 + settings.resolution) / 2
     df['xmiddle'] = (df['xstart'] * 2 + settings.resolution) / 2
     df['zmiddle'] = (df['zstart'] * 2 + settings.resolution) / 2
 
-    # normalize per column 
+    # normalize per column
     df[settings.to_count_contact] = df[settings.to_count_contact] / df[settings.to_count_contact].sum()
 
     points = df[df[settings.to_count_contact] > 0.00001]
 
     norm = plt.Normalize(0.00001, points[settings.to_count_contact].max())
-    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue","fuchsia","red"])
-    
-    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle), 
-                                            s=list(10000 * points[settings.to_count_contact]), 
-                                            c=list(points[settings.to_count_contact]), 
-                                            cmap=cmap, 
-                                            norm=norm)
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue", "fuchsia", "red"])
+
+    p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle),
+                   s=list(10000 * points[settings.to_count_contact]),
+                   c=list(points[settings.to_count_contact]),
+                   cmap=cmap,
+                   norm=norm)
 
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
@@ -39,23 +39,27 @@ def plot_fragment_colored(ax, fragment):
     else:
         return plot_fragment(ax, fragment)
 
+
 def plot_fragment_from_df(ax, fragment_df):
     for _, atom in fragment_df.iterrows():
         if "O" in atom.atom_label:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="red", s=30, edgecolor="black")
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="red", s=100, edgecolor="black", label=atom.atom_label)
         elif "N" in atom.atom_label:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="blue", s=30, edgecolor="black")
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="blue", s=30, edgecolor="black", label=atom.atom_label)
         elif "C" in atom.atom_label:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="black", s=30, edgecolor="black")
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="black", s=100, edgecolor="black", label=atom.atom_label)
         elif "I" in atom.atom_label:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="orchid", s=30, edgecolor="black")
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="orchid", s=30, edgecolor="black", label=atom.atom_label)
+        elif "aH" in atom.atom_label:
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="fuchsia", s=50, edgecolor="black", label=atom.atom_label)
         else:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="pink", s=30, edgecolor="black")
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="pink", s=30, edgecolor="black", label=atom.atom_label)
+            
+    return ax
 
-    return ax        
 
 def plot_fragment(ax, fragment):
-    # plot the (average of the) central group 
+    # plot the (average of the) central group
     for atom in fragment.atoms.values():
         if "O" in atom.label:
             ax.scatter(atom.x, atom.y, atom.z, c="red", s=30, edgecolor="black")
@@ -74,7 +78,7 @@ def plot_fragment(ax, fragment):
 def plot_fragments(df, amount):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    
+
     i = 0
     unique = list(df.id.unique())
 
@@ -90,8 +94,9 @@ def plot_fragments(df, amount):
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
     ax.set_zlabel('Z axis')
-    
+
     plt.show()
+
 
 def plot_vdw_spheres(avg_fragment, ax, color, extra=0):
     spheres = []

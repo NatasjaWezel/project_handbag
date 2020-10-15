@@ -4,6 +4,10 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+import copy
+# import scipy
+# scipy.spatial.transform.Rotation.from_rotvec()
+
 
 def make_coordinate_df(df, settings, avg_fragment):
     try:
@@ -59,20 +63,99 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
 
 
 def make_avg_fragment_if_not_exists(settings, df):
-    try:
-        fragment = pd.read_csv(settings.get_avg_fragment_filename())
+    # try:
+    #     fragment = pd.read_csv(settings.get_avg_fragment_filename())
 
-        return fragment
-    except FileNotFoundError:
-        fragment = average_fragment(df)
+    #     return fragment
+    # except FileNotFoundError:
 
-        vdw_radii = [settings.get_vdw_radius(row.atom_symbol) for _, row in fragment.iterrows()]
+    fragment = average_fragment(df)
 
-        fragment['vdw_radius'] = vdw_radii
+    if settings.central_group_name == "RCOMe":
+        print("Adding model CH3 group")
 
-        fragment.to_csv(settings.get_avg_fragment_filename())
+        a = np.array([float(fragment[fragment.index == "O3"].atom_x),
+                      float(fragment[fragment.index == "O3"].atom_y),
+                      float(fragment[fragment.index == "O3"].atom_z)])
 
-        return fragment
+        b = np.array([float(fragment[fragment.index == "C2"].atom_x),
+                      float(fragment[fragment.index == "C2"].atom_y),
+                      float(fragment[fragment.index == "C2"].atom_z)])
+
+        c = np.array([float(fragment[fragment.index == "C4"].atom_x),
+                      float(fragment[fragment.index == "C4"].atom_y),
+                      float(fragment[fragment.index == "C4"].atom_z)])
+
+        print('a:', a, '\nb:', b, '\nc:', c)
+
+        alpha = np.radians(109.6)
+
+        ab = b-a
+        bc = c-b
+
+        print('ab:', ab)
+        print('bc:', bc)
+
+        theta = np.arccos(np.dot(ab, bc.T) / (np.linalg.norm(ab) * np.linalg.norm(bc)))
+
+        d_angle = np.radians(180) - alpha + theta
+        cd_norm = 0.97
+
+        # rotate with an axis perpendicular to both ab and bc
+        cd = rotation_from_axis_and_angle(axis=np.cross(ab, bc), angle=d_angle, rot_vec=b) * cd_norm
+
+        # the first point is created, now rotate it 20 degrees each time
+        dihedrals = np.arange(0, 360, 20)
+
+        frames = []
+        for i, angle in enumerate(dihedrals):
+            new_point = rotation_from_axis_and_angle(axis=bc, angle=np.radians(angle), rot_vec=cd)
+
+            # translate new point
+            new_point = np.add(np.add(new_point, ab), bc)
+
+            indexname = 'aH' + str(i + 2)
+
+            frame = pd.DataFrame(index=[indexname], data=[['H', new_point[0], new_point[1], new_point[2]]],
+                                 columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z'])
+
+            frames.append(copy.deepcopy(frame))
+
+        frames.append(fragment)
+        fragment = pd.concat(frames)
+
+    print(fragment.index)
+    vdw_radii = [settings.get_vdw_radius(row.atom_symbol) for _, row in fragment.iterrows()]
+
+    fragment['vdw_radius'] = vdw_radii
+
+    fragment.to_csv(settings.get_avg_fragment_filename())
+
+    return fragment
+
+
+def rotation_from_axis_and_angle(axis, angle, rot_vec):
+    axis = axis / np.linalg.norm(axis)
+    rot_vec = rot_vec / np.linalg.norm(rot_vec)
+
+    # the rotation is around the axis that is given, called u for now
+    ux, uy, uz = axis[0], axis[1], axis[2]
+    cos_a = np.cos(angle)
+    sin_a = np.sin(angle)
+
+    angle = np.radians(angle)
+
+    rot_mat = np.array([[cos_a + ux**2 * (1 - cos_a),
+                         ux * uy * (1 - cos_a) - uz * sin_a,
+                         ux * uz * (1 - cos_a) + uy * sin_a],
+                        [uy * ux * (1 - cos_a) + uz * sin_a,
+                         cos_a + uy**2 * (1 - cos_a),
+                         uy * uz * (1 - cos_a) - ux * sin_a],
+                        [uz * ux * (1 - cos_a) - uy * sin_a,
+                         uz * uy * (1 - cos_a) + ux * sin_a,
+                         cos_a + uz**2 * (1 - cos_a)]])
+
+    return np.dot(rot_mat, rot_vec)
 
 
 def average_fragment(df):

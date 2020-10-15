@@ -6,22 +6,17 @@
 # Author: Natasja Wezel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-import math
 import sys
-import time
 
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 from matplotlib.widgets import Slider
 from mpl_toolkits.mplot3d import Axes3D
-from tqdm import tqdm
 
 from classes.Settings import Settings
 from helpers.geometry_helpers import (get_vdw_distance_contact,
                                       make_avg_fragment_if_not_exists,
                                       make_coordinate_df)
-from helpers.headers import AXCOLOR, RADII_CSV
+from helpers.headers import AXCOLOR
 from helpers.helpers import read_results_alignment
 from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
 
@@ -31,7 +26,7 @@ def main():
     if len(sys.argv) != 3:
         print("Usage: python plot_all_contact_atoms.py <path/to/inputfile> <atom/center to count>")
         sys.exit(1)
-    
+
     settings = Settings(sys.argv[1])
     settings.set_atom_to_count(sys.argv[2])
 
@@ -46,15 +41,15 @@ def main():
 
     coordinate_df = make_coordinate_df(df, settings, avg_fragment)
     make_plot(avg_fragment, coordinate_df, vdw_distance_contact)
-    
+
 
 def make_plot(avg_fragment, coordinate_df, longest_vdw_contact):
     """ Plot all the surrounding contact groups around the central group. """
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    
-    # plot the (average of the) central group 
+
+    # plot the (average of the) central group
     ax = plot_fragment_colored(ax, avg_fragment)
     ax, _ = plot_vdw_spheres(avg_fragment, ax, color='pink')
 
@@ -75,7 +70,7 @@ def make_plot(avg_fragment, coordinate_df, longest_vdw_contact):
         fig.canvas.draw_idle()
 
     vdw_slider.on_changed(update)
-    
+
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
     ax.set_zlabel('Z axis')
