@@ -21,7 +21,7 @@ def main():
 
     df = read_results_alignment(settings.get_aligned_csv_filename())
 
-    first_contact_group = df[(df.id == df.id.unique()[0]) & (df.in_central_group == False)]
+    first_contact_group = df[(df.id == df.id.unique()[0]) & (df.in_central_group is False)]
     longest_vdw = calculate_longest_vdw_radius_contact(first_contact_group, settings)
 
     avg_fragment = make_avg_fragment_if_not_exists(settings, df)
