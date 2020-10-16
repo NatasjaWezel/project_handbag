@@ -25,3 +25,6 @@ Plot the 4D graph by running `python plot_density.py <inputfile.csv> <resolution
 
 [![BCH compliance](https://bettercodehub.com/edge/badge/NatasjaWezel/MasterProject?branch=master)](https://bettercodehub.com/)
 
+
+## Contributing
+
