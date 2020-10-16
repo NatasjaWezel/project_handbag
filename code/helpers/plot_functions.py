@@ -42,19 +42,19 @@ def plot_fragment_colored(ax, fragment):
 
 def plot_fragment_from_df(ax, fragment_df):
     for _, atom in fragment_df.iterrows():
-        if "O" in atom.atom_label:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="red", s=100, edgecolor="black", label=atom.atom_label)
-        elif "N" in atom.atom_label:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="blue", s=30, edgecolor="black", label=atom.atom_label)
-        elif "C" in atom.atom_label:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="black", s=100, edgecolor="black", label=atom.atom_label)
-        elif "I" in atom.atom_label:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="orchid", s=30, edgecolor="black", label=atom.atom_label)
+        if atom.atom_symbol == "O":
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="red", s=30, edgecolor="black")
+        elif atom.atom_symbol == "N":
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="blue", s=30, edgecolor="black")
+        elif atom.atom_symbol == "C":
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="black", s=30, edgecolor="black")
+        elif atom.atom_symbol == "I":
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="orchid", s=30, edgecolor="black")
         elif "aH" in atom.atom_label:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="fuchsia", s=50, edgecolor="black", label=atom.atom_label)
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="fuchsia", s=50, edgecolor="black")
         else:
-            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="pink", s=30, edgecolor="black", label=atom.atom_label)
-            
+            ax.scatter(atom.atom_x, atom.atom_y, atom.atom_z, c="pink", s=30, edgecolor="black")
+
     return ax
 
 
@@ -77,7 +77,7 @@ def plot_fragment(ax, fragment):
 
 def plot_fragments(df, amount):
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax: Axes3D = fig.add_subplot(111, projection='3d')
 
     i = 0
     unique = list(df.id.unique())
