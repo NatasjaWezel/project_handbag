@@ -63,75 +63,72 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
 
 
 def make_avg_fragment_if_not_exists(settings, df):
-    # try:
-    #     fragment = pd.read_csv(settings.get_avg_fragment_filename())
+    try:
+        fragment = pd.read_csv(settings.get_avg_fragment_filename())
 
-    #     return fragment
-    # except FileNotFoundError:
+        return fragment
+    except FileNotFoundError:
+        fragment = average_fragment(df)
 
-    fragment = average_fragment(df)
+        # TODO: use labels
+        if settings.central_group_name == "RCOMe":
+            print("Adding model CH3 group")
 
-    if settings.central_group_name == "RCOMe":
-        print("Adding model CH3 group")
+            fragment = fragment[(fragment.atom_label != "H5") & (fragment.atom_label != "H6") &
+                                (fragment.atom_label != "H7")]
 
-        a = np.array([float(fragment[fragment.index == "O3"].atom_x),
-                      float(fragment[fragment.index == "O3"].atom_y),
-                      float(fragment[fragment.index == "O3"].atom_z)])
+            a = np.array([float(fragment[fragment.index == "O3"].atom_x),
+                         float(fragment[fragment.index == "O3"].atom_y),
+                         float(fragment[fragment.index == "O3"].atom_z)])
 
-        b = np.array([float(fragment[fragment.index == "C2"].atom_x),
-                      float(fragment[fragment.index == "C2"].atom_y),
-                      float(fragment[fragment.index == "C2"].atom_z)])
+            b = np.array([float(fragment[fragment.index == "C2"].atom_x),
+                         float(fragment[fragment.index == "C2"].atom_y),
+                         float(fragment[fragment.index == "C2"].atom_z)])
 
-        c = np.array([float(fragment[fragment.index == "C4"].atom_x),
-                      float(fragment[fragment.index == "C4"].atom_y),
-                      float(fragment[fragment.index == "C4"].atom_z)])
+            c = np.array([float(fragment[fragment.index == "C4"].atom_x),
+                         float(fragment[fragment.index == "C4"].atom_y),
+                         float(fragment[fragment.index == "C4"].atom_z)])
 
-        print('a:', a, '\nb:', b, '\nc:', c)
+            alpha = np.radians(109.6)
 
-        alpha = np.radians(109.6)
+            ab, bc = b - a, c - b
 
-        ab = b-a
-        bc = c-b
+            gamma = np.arccos(np.dot(ab, bc.T) / (np.linalg.norm(ab) * np.linalg.norm(bc)))
 
-        print('ab:', ab)
-        print('bc:', bc)
+            d_angle = np.radians(180) - alpha + gamma
+            cd_norm = 0.97
 
-        theta = np.arccos(np.dot(ab, bc.T) / (np.linalg.norm(ab) * np.linalg.norm(bc)))
+            # rotate with an axis perpendicular to both ab and bc
+            cd = rotation_from_axis_and_angle(axis=np.cross(ab, bc), angle=d_angle, rot_vec=ab) * cd_norm
 
-        d_angle = np.radians(180) - alpha + theta
-        cd_norm = 0.97
+            # the first point is created, now rotate it 20 degrees each time
+            dihedrals = np.arange(0, 360, 20)
 
-        # rotate with an axis perpendicular to both ab and bc
-        cd = rotation_from_axis_and_angle(axis=np.cross(ab, bc), angle=d_angle, rot_vec=b) * cd_norm
+            frames = []
+            for i, angle in enumerate(dihedrals):
+                new_point = rotation_from_axis_and_angle(axis=bc, angle=np.radians(angle), rot_vec=cd)
 
-        # the first point is created, now rotate it 20 degrees each time
-        dihedrals = np.arange(0, 360, 20)
+                # translate new point
+                new_point = np.add(np.add(new_point, ab), bc)
 
-        frames = []
-        for i, angle in enumerate(dihedrals):
-            new_point = rotation_from_axis_and_angle(axis=bc, angle=np.radians(angle), rot_vec=cd)
+                indexname = 'aH' + str(i + 2)
 
-            # translate new point
-            new_point = np.add(np.add(new_point, ab), bc)
+                frame = pd.DataFrame(index=[indexname], data=[['H', new_point[0], new_point[1], new_point[2]]],
+                                     columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z'])
 
-            indexname = 'aH' + str(i + 2)
+                frames.append(copy.deepcopy(frame))
 
-            frame = pd.DataFrame(index=[indexname], data=[['H', new_point[0], new_point[1], new_point[2]]],
-                                 columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z'])
+            frames.append(fragment)
+            fragment = pd.concat(frames)
 
-            frames.append(copy.deepcopy(frame))
+        vdw_radii = [settings.get_vdw_radius(row.atom_symbol) for _, row in fragment.iterrows()]
 
-        frames.append(fragment)
-        fragment = pd.concat(frames)
+        fragment['vdw_radius'] = vdw_radii
+        fragment['atom_label'] = fragment.index
 
-    print(fragment.index)
-    vdw_radii = [settings.get_vdw_radius(row.atom_symbol) for _, row in fragment.iterrows()]
+        fragment.to_csv(settings.get_avg_fragment_filename())
 
-    fragment['vdw_radius'] = vdw_radii
-
-    fragment.to_csv(settings.get_avg_fragment_filename())
-
-    return fragment
+        return fragment
 
 
 def rotation_from_axis_and_angle(axis, angle, rot_vec):
@@ -166,6 +163,8 @@ def average_fragment(df):
     central_group_df = central_group_df.drop(columns=['entry_id', 'id', 'in_central_group'])
     avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'atom_x': 'mean',
                                                                   'atom_y': 'mean', 'atom_z': 'mean'})
+
+    avg_fragment_df['atom_label'] = avg_fragment_df.index
 
     return avg_fragment_df
 
