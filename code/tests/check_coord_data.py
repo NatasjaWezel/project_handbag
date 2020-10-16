@@ -1,11 +1,12 @@
 import os
 
+
 def main():
     path = "./data/"
     coord_files = os.listdir(path)
-    
+
     print()
-    
+
     for coord_file in coord_files:
         d = count_fragments_per_entry(path + coord_file)
         print(coord_file)
@@ -17,14 +18,13 @@ def main():
             if value > 1:
                 entries_more_than_one += 1
 
-        print("entries with more than one fragment: ", entries_more_than_one, end= "\n\n")
-
+        print("entries with more than one fragment: ", entries_more_than_one, end="\n\n")
 
 
 def count_fragments_per_entry(filename):
     with open(filename) as inputfile:
         lines = inputfile.readlines()
-    
+
     count_dict = {}
 
     for line in lines:
@@ -38,6 +38,7 @@ def count_fragments_per_entry(filename):
                 count_dict[entry] = 1
 
     return count_dict
+
 
 if __name__ == "__main__":
     main()
