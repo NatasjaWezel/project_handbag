@@ -1,19 +1,16 @@
 import sys
-import pandas as pd
-from helpers.geometry_helpers import make_avg_fragment_if_not_exists, calculate_longest_vdw_radius_contact
-from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
-from helpers.helpers import read_results_alignment
-
-from classes.Settings import Settings
 
 import matplotlib.pyplot as plt
+from matplotlib.widgets import CheckButtons
 from mpl_toolkits.mplot3d import Axes3D
 
-from matplotlib.widgets import RadioButtons, CheckButtons, Slider
-
-import numpy as np
-
+from classes.Settings import Settings
+from helpers.geometry_helpers import (calculate_longest_vdw_radius_contact,
+                                      make_avg_fragment_if_not_exists)
 from helpers.headers import AXCOLOR
+from helpers.helpers import read_results_alignment
+from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
+
 
 def main():
     if len(sys.argv) != 2:
@@ -36,12 +33,13 @@ def main():
 
     plot_vdw_surface(avg_fragment, longest_vdw)
 
+
 def plot_vdw_surface(avg_fragment, longest_vdw_contact):
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax: Axes3D = fig.add_subplot(111, projection='3d')
     plt.subplots_adjust(left=0.25, bottom=0.25)
 
-    ax.margins(x = 0)
+    ax.margins(x=0)
     ax = plot_fragment_colored(ax, avg_fragment)
 
     # Create vdw spheres around central group atoms
@@ -53,7 +51,7 @@ def plot_vdw_surface(avg_fragment, longest_vdw_contact):
     # Create vdw spheres around central group atoms
     ax, spheres3 = plot_vdw_spheres(avg_fragment, ax, 'pink', extra=0.5+longest_vdw_contact)
 
-    # visibility of the spheres    
+    # visibility of the spheres
     check_ax = plt.axes([0.025, 0.5, 0.15, 0.15], facecolor=AXCOLOR)
     radio = CheckButtons(check_ax, ['vdwradius', 'vdwradis + 0.5', 'vdwradius + 0.5 + contact vdw'])
 
@@ -71,7 +69,7 @@ def plot_vdw_surface(avg_fragment, longest_vdw_contact):
         fig.canvas.draw_idle()
 
     radio.on_clicked(switch_visibility)
-    
+
     ax.set_xlabel("X axis")
     ax.set_ylabel("Y axis")
     ax.set_zlabel("Z axis")
