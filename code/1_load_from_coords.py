@@ -9,6 +9,7 @@
 
 import csv
 import sys
+import os
 
 import pandas as pd
 from tqdm import tqdm
@@ -30,57 +31,60 @@ def main():
 
     settings = Settings(filename)
 
-    coordinate_lines = read_coord_file(filename=filename)
-    fragments = load_fragments_from_coords(coordinate_lines)
+    if not os.path.exists(settings.get_aligned_csv_filename()):
+        coordinate_lines = read_coord_file(filename=filename)
+        fragments = load_fragments_from_coords(coordinate_lines)
 
-    labels_contact_df = pd.read_csv(settings.parameter_csv)
+        labels_contact_df = pd.read_csv(settings.parameter_csv)
 
-    # clean column names
-    columns = labels_contact_df.columns
-    columns = [i.strip() for i in columns]
-    labels_contact_df.columns = columns
+        # clean column names
+        columns = labels_contact_df.columns
+        columns = [i.strip() for i in columns]
+        labels_contact_df.columns = columns
 
-    labels = [i for i in columns if "LAB" in i]
+        labels = [i for i in columns if "LAB" in i]
 
-    alignment_labels = settings.alignment_labels()
-    print(labels, alignment_labels)
+        alignment_labels = settings.alignment_labels()
+        print(labels, alignment_labels)
 
-    outputfile = open(settings.get_aligned_csv_filename(), 'w', newline='')
-    writer = csv.writer(outputfile)
+        outputfile = open(settings.get_aligned_csv_filename(), 'w', newline='')
+        writer = csv.writer(outputfile)
 
-    print("Aligning fragments and writing result to csv")
-    for i, fragment in enumerate(tqdm(fragments)):
-        # get contact group and relabel it
-        row = labels_contact_df[labels_contact_df.index == i]
+        print("Aligning fragments and writing result to csv")
+        for i, fragment in enumerate(tqdm(fragments)):
+            # get contact group and relabel it
+            row = labels_contact_df[labels_contact_df.index == i]
 
-        for j, label in enumerate(labels):
-            # use .max to get the string out of the row
-            atom_label = row[label].max()
-            atom = fragment.atoms[atom_label]
-            atom.add_to_central_group()
+            for j, label in enumerate(labels):
+                # use .max to get the string out of the row
+                atom_label = row[label].max()
+                atom = fragment.atoms[atom_label]
+                atom.add_to_central_group()
 
-            if label == alignment_labels['center']:
-                center_atom = atom.label
-            elif label == alignment_labels['yaxis']:
-                y_axis_atom = atom.label
-            elif label == alignment_labels['xyplane']:
-                xy_plane_atom = atom.label
+                if label == alignment_labels['center']:
+                    center_atom = atom.label
+                elif label == alignment_labels['yaxis']:
+                    y_axis_atom = atom.label
+                elif label == alignment_labels['xyplane']:
+                    xy_plane_atom = atom.label
 
-            # TODO: maybe check if this label exists in the central group........
-            if label == alignment_labels["R"]:
-                atom.label = "R" + str(j + 1)
-            else:
-                atom.label = atom.symbol + str(j + 1)
+                # TODO: maybe check if this label exists in the central group........
+                if label == alignment_labels["R"]:
+                    atom.label = "R" + str(j + 1)
+                else:
+                    atom.label = atom.symbol + str(j + 1)
 
-        # center coordinates on center and rotate it
-        fragment.center_coordinates(center_atom)
-        fragment = perform_rotations(fragment, [y_axis_atom, xy_plane_atom])
+            # center coordinates on center and rotate it
+            fragment.center_coordinates(center_atom)
+            fragment = perform_rotations(fragment, [y_axis_atom, xy_plane_atom])
 
-        fragment.invert_if_neccessary()
+            fragment.invert_if_neccessary()
 
-        write_fragment_to_csv(writer, fragment)
+            write_fragment_to_csv(writer, fragment)
 
-    outputfile.close()
+        outputfile.close()
+    else:
+        print(settings.get_aligned_csv_filename(), "already exists")
 
 
 def write_fragment_to_csv(writer, fragment):
