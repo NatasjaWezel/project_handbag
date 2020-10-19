@@ -11,17 +11,16 @@
 
 import csv
 import sys
+import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from mpl_toolkits.mplot3d import Axes3D
 from tqdm import tqdm
 
 from classes.Settings import Settings
-from helpers.geometry_helpers import make_avg_fragment_if_not_exists, get_vdw_distance_contact
+from helpers.geometry_helpers import (get_vdw_distance_contact,
+                                      make_avg_fragment_if_not_exists)
 from helpers.helpers import read_results_alignment
-from helpers.plot_functions import plot_density, plot_fragment_colored
 
 
 def main():
@@ -37,32 +36,43 @@ def main():
 
     settings.set_atom_to_count(sys.argv[3])
 
-    df = read_results_alignment(settings.get_aligned_csv_filename())
-    avg_fragment = make_avg_fragment_if_not_exists(settings, df)
-
-    df = df[df.in_central_group is False]
-
-    vdw_distance_contact = get_vdw_distance_contact(df, settings)
-
     try:
         density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
     except (FileNotFoundError, KeyError):
         print("Run calc_density first")
         sys.exit(1)
 
-    print(density_df.describe())
+    df = read_results_alignment(settings.get_aligned_csv_filename())
+    avg_fragment = make_avg_fragment_if_not_exists(settings, df)
 
-    count_bins_in_vdw(density_df, avg_fragment, settings, vdw_distance_contact)
-    calculate_80_percent(density_df, settings)
-    make_plot(avg_fragment, density_df, settings)
+    # grab only the atoms that are in the contact groups
+    df = df[df.in_central_group == False]
+
+    empty_bins, bins_80 = calculate_80_percent(density_df, settings)
+
+    vdw_distance_contact = get_vdw_distance_contact(df, settings)
+    bins_in_vdw = count_bins_in_vdw(density_df, avg_fragment, settings, vdw_distance_contact)
+
+    if not os.path.exists(settings.get_directionality_results_filename()):
+        with open(settings.get_directionality_results_filename(), 'w', newline='') as resultsfile:
+            writer = csv.writer(resultsfile)
+            writer.writerow(["centralgroup", "contactgroup", "to_count_contact", "resolution", "datapoints", "bins",
+                             "empty_bins", "bins_in_vdw", "bins_80"])
+
+    with open(settings.get_directionality_results_filename(), 'a', newline='') as resultsfile:
+        writer = csv.writer(resultsfile)
+
+        writer.writerow([settings.central_group_name, settings.contact_group_name, settings.to_count_contact,
+                         settings.resolution, density_df[settings.to_count_contact].sum(), len(density_df),
+                         empty_bins, bins_in_vdw, bins_80])
 
 
 def count_bins_in_vdw(density_df, avg_fragment, settings, vdw_distance_contact):
     bin_coordinates = np.array([density_df.xstart, density_df.ystart, density_df.zstart])
 
-    index_x, index_y, index_z = np.where(bin_coordinates[0] < 0),\
-        np.where(bin_coordinates[1] < 0),\
-        np.where(bin_coordinates[2] < 0)
+    index_x = np.where(bin_coordinates[0] < 0)
+    index_y = np.where(bin_coordinates[1] < 0)
+    index_z = np.where(bin_coordinates[2] < 0)
 
     bin_coordinates[0][index_x] += settings.resolution
     bin_coordinates[1][index_y] += settings.resolution
@@ -74,6 +84,7 @@ def count_bins_in_vdw(density_df, avg_fragment, settings, vdw_distance_contact):
 
     points_avg_f = np.array([avg_fragment.atom_x, avg_fragment.atom_y, avg_fragment.atom_z, avg_fragment.vdw_radius]).T
 
+    print("Calculating if bins are in vdw volume central group")
     for i in tqdm(range(len(points_avg_f))):
         indices = np.transpose(np.where(in_vdw_volume == 0))
 
@@ -82,9 +93,6 @@ def count_bins_in_vdw(density_df, avg_fragment, settings, vdw_distance_contact):
         calc_distances(in_vdw_volume, bin_coordinates, avg_f_p, indices, vdw_distance_contact)
 
     total = np.sum(in_vdw_volume)
-
-    print(total, '/', len(in_vdw_volume), 'bins in overlapping vdw volume + 0.5')
-    print('Thats a fraction of:', total/len(in_vdw_volume) * 100)
 
     return total
 
@@ -102,22 +110,6 @@ def calc_distances(in_vdw_volume, bin_coordinates, avg_f_p, indices, vdw_distanc
     return in_vdw_volume
 
 
-def make_plot(avg_fragment, density_df, settings):
-    plotname = settings.get_density_plotname()
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    ax = plot_fragment_colored(ax, avg_fragment)
-
-    p, ax = plot_density(ax=ax, df=density_df, settings=settings)
-
-    ax.set_title("4D density plot\n Resolution: " + str(settings.resolution))
-
-    fig.colorbar(p)
-    plt.savefig(plotname)
-    plt.show()
-
-
 def calculate_80_percent(df, settings):
     total_atoms = df[settings.to_count_contact].sum()
 
@@ -125,27 +117,17 @@ def calculate_80_percent(df, settings):
     population = list(df[df[settings.to_count_contact] > 0][settings.to_count_contact])
     population.sort(reverse=True)
 
+    empty_bins = len(df) - len(population)
+
     fraction = 0
     i = 0
 
+    print("Calculating fraction of bins containing 80% of data")
     while fraction < 0.8:
         fraction += population[i]/total_atoms
         i += 1
 
-    non_empty_bins = len(population)
-    bins = len(df)
-
-    with open(settings.get_directionality_results_filename(), 'a', newline='') as resultsfile:
-        writer = csv.writer(resultsfile)
-
-        writer.writerow([settings.central_group_name, settings.contact_group_name, settings.to_count_contact,
-                        fraction, i, non_empty_bins])
-
-    print(str(round(fraction * 100, 2)) + "% of contact group atoms is in " + str(round(i/non_empty_bins*100, 2)) +
-          "% of the non-empty bins")
-
-    print(str(round(fraction * 100, 2)) + "% of contact group atoms is in " + str(round(i/bins*100, 2)) +
-          "% of the total bins")
+    return empty_bins, i
 
 
 if __name__ == "__main__":
