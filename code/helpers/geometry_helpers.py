@@ -124,7 +124,6 @@ def make_avg_fragment_if_not_exists(settings, df):
         vdw_radii = [settings.get_vdw_radius(row.atom_symbol) for _, row in fragment.iterrows()]
 
         fragment['vdw_radius'] = vdw_radii
-        fragment['atom_label'] = fragment.index
 
         fragment.to_csv(settings.get_avg_fragment_filename())
 
@@ -163,8 +162,6 @@ def average_fragment(df):
     central_group_df = central_group_df.drop(columns=['entry_id', 'id', 'in_central_group'])
     avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'atom_x': 'mean',
                                                                   'atom_y': 'mean', 'atom_z': 'mean'})
-
-    avg_fragment_df['atom_label'] = avg_fragment_df.index
 
     return avg_fragment_df
 
