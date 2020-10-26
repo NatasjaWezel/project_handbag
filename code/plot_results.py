@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-import matplotlib.colors as mcolors
-
 
 def main():
     filename_ArCI = ".\\results\\ArCI\\ArCI_directionality_results.csv"
@@ -11,7 +9,7 @@ def main():
     df_ArCI = pd.read_csv(filename_ArCI)
     df_H2O = pd.read_csv(filename_H2O)
 
-    # plots_per_central_group(dfs=[df_ArCI, df_H2O])
+    plots_per_central_group(dfs=[df_ArCI, df_H2O])
     plots_80(df_ArCI, df_H2O)
 
 
@@ -58,8 +56,12 @@ def plots_per_central_group(dfs):
                 ax2.set_ylabel("Number of bins")
 
                 ax1.plot(part_df.resolution, part_df.bins_in_vdw/part_df.bins, label='Fraction bins in vdw')
+                
+                ax2.plot(part_df.resolution, part_df.bins_in_vdw*part_df.resolution**3, label='Volume bins in vdw')
+
                 ax1.plot(part_df.resolution, part_df.empty_bins/part_df.bins, label='Fraction empty bins')
-                ax1.plot(part_df.resolution, part_df.bins_80/part_df.bins, label="Fraction bins containing 80% of the data")
+                ax1.plot(part_df.resolution, part_df.bins_80/part_df.bins, 
+                         label="Fraction bins containing 80% of the data")
 
                 # plt.plot(part_df.resolution, (part_df.bins - part_df.empty_bins)*part_df.resolution**3,
                 #          label="%data (1) / volume cluster")
