@@ -5,8 +5,6 @@ import pandas as pd
 from tqdm import tqdm
 
 import copy
-# import scipy
-# scipy.spatial.transform.Rotation.from_rotvec()
 
 
 def make_coordinate_df(df, settings, avg_fragment):
