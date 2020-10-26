@@ -37,8 +37,6 @@ def main():
     df = read_results_alignment(settings.get_aligned_csv_filename())
     avg_fragment = make_avg_fragment_if_not_exists(settings, df)
 
-    df = df[df.in_central_group == False]
-
     try:
         density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
     except (FileNotFoundError, KeyError):
