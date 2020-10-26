@@ -22,14 +22,19 @@ def find_minimum(df):
     minz = df.atom_z.min()
 
     return minx, miny, minz
-   
+
+
 def calculate_no_bins(minimum, maximum, resolution):
-    bins_neg, bins_pos = math.ceil(abs(minimum)/resolution), math.ceil(abs(maximum)/resolution)
+    bins_neg = math.ceil(abs(minimum + 0.5 * resolution)/resolution)
+    bins_pos = math.ceil(abs(maximum - 0.5 * resolution)/resolution)
 
     minimum, maximum = -bins_neg * resolution, bins_pos * resolution
 
-    no_bins =  bins_neg + bins_pos
+    # add one extra bin so we can put the origin in the middle of a bin
+    no_bins = bins_neg + bins_pos + 1
+
     return no_bins, minimum, maximum
+
 
 def prepare_df(fragments_df, settings):
     maxx, maxy, maxz = find_maximum(fragments_df)
@@ -42,12 +47,12 @@ def prepare_df(fragments_df, settings):
     amount_bins = no_bins_x * no_bins_y * no_bins_z
     indices = [i for i in range(0, amount_bins)]
 
-    bins = [np.linspace(minx, maxx, num=no_bins_x, endpoint=False), 
-                np.linspace(miny, maxy, num=no_bins_y, endpoint=False), 
-                np.linspace(minz, maxz, num=no_bins_z, endpoint=False)] 
-    
+    bins = [np.linspace(minx, maxx, num=no_bins_x, endpoint=False),
+            np.linspace(miny, maxy, num=no_bins_y, endpoint=False),
+            np.linspace(minz, maxz, num=no_bins_z, endpoint=False)] 
+
     df = add_boundaries_per_bin(bins, indices, settings)
-   
+
     return df
 
 
@@ -60,7 +65,7 @@ def add_boundaries_per_bin(bins, indices, settings):
     xl, yl, zl = len(bins_x), len(bins_y), len(bins_z)
 
     xstart_list = np.repeat(bins_x, (yl * zl))
-    ystart_list = list(np.repeat(bins_y, zl)) * xl 
+    ystart_list = list(np.repeat(bins_y, zl)) * xl
     zstart_list = list(bins_z) * (xl * yl)
 
     df["xstart"] = xstart_list
