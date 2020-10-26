@@ -21,15 +21,10 @@ def main():
 
     df = read_results_alignment(settings.get_aligned_csv_filename())
 
-    first_contact_group = df[(df.id == df.id.unique()[0]) & (df.in_central_group is False)]
+    first_contact_group = df[(df.id == df.id.unique()[0]) & (df.in_central_group == False)]
     longest_vdw = calculate_longest_vdw_radius_contact(first_contact_group, settings)
 
     avg_fragment = make_avg_fragment_if_not_exists(settings, df)
-
-    # to plot the vdw surface we need the vdw radii
-    for atom1 in avg_fragment.atoms.values():
-        radius = settings.get_vdw_radius(atom1.symbol)
-        atom1.set_vdw_radius(radius)
 
     plot_vdw_surface(avg_fragment, longest_vdw)
 
