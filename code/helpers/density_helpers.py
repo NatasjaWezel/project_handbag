@@ -36,9 +36,9 @@ def calculate_no_bins(minimum, maximum, resolution):
     return no_bins, minimum, maximum
 
 
-def prepare_df(fragments_df, settings):
-    maxx, maxy, maxz = find_maximum(fragments_df)
-    minx, miny, minz = find_minimum(fragments_df)
+def prepare_df(df, settings):
+    maxx, maxy, maxz = find_maximum(df)
+    minx, miny, minz = find_minimum(df)
 
     no_bins_x, minx, maxx = calculate_no_bins(minx, maxx, settings.resolution)
     no_bins_y, miny, maxy = calculate_no_bins(miny, maxy, settings.resolution)
