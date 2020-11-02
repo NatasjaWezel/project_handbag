@@ -111,5 +111,3 @@ class Settings():
 
         if self.alignment["R"] == "-":
             self.alignment["R"] = None
-
-        return self.alignment
