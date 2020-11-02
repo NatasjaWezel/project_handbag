@@ -66,66 +66,69 @@ def make_avg_fragment_if_not_exists(settings, df):
 
         return fragment
     except FileNotFoundError:
-        fragment = average_fragment(df)
+        fragment = average_fragment(df, settings)
 
-        # TODO: use labels
         if settings.central_group_name == "RCOMe":
-            print("Adding model CH3 group")
-
-            fragment = fragment[(fragment.atom_label != "H5") & (fragment.atom_label != "H6") &
-                                (fragment.atom_label != "H7")]
-
-            a = np.array([float(fragment[fragment.index == "O3"].atom_x),
-                         float(fragment[fragment.index == "O3"].atom_y),
-                         float(fragment[fragment.index == "O3"].atom_z)])
-
-            b = np.array([float(fragment[fragment.index == "C2"].atom_x),
-                         float(fragment[fragment.index == "C2"].atom_y),
-                         float(fragment[fragment.index == "C2"].atom_z)])
-
-            c = np.array([float(fragment[fragment.index == "C4"].atom_x),
-                         float(fragment[fragment.index == "C4"].atom_y),
-                         float(fragment[fragment.index == "C4"].atom_z)])
-
-            alpha = np.radians(109.6)
-
-            ab, bc = b - a, c - b
-
-            gamma = np.arccos(np.dot(ab, bc.T) / (np.linalg.norm(ab) * np.linalg.norm(bc)))
-
-            d_angle = np.radians(180) - alpha + gamma
-            cd_norm = 0.97
-
-            # rotate with an axis perpendicular to both ab and bc
-            cd = rotation_from_axis_and_angle(axis=np.cross(ab, bc), angle=d_angle, rot_vec=ab) * cd_norm
-
-            # the first point is created, now rotate it 20 degrees each time
-            dihedrals = np.arange(0, 360, 20)
-
-            frames = []
-            for i, angle in enumerate(dihedrals):
-                new_point = rotation_from_axis_and_angle(axis=bc, angle=np.radians(angle), rot_vec=cd)
-
-                # translate new point
-                new_point = np.add(np.add(new_point, ab), bc)
-
-                indexname = 'aH' + str(i + 2)
-
-                frame = pd.DataFrame(index=[indexname], data=[['H', new_point[0], new_point[1], new_point[2]]],
-                                     columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z'])
-
-                frames.append(copy.deepcopy(frame))
-
-            frames.append(fragment)
-            fragment = pd.concat(frames)
-
-        vdw_radii = [settings.get_vdw_radius(row.atom_symbol) for _, row in fragment.iterrows()]
-
-        fragment['vdw_radius'] = vdw_radii
+            add_model_methyl(fragment)
 
         fragment.to_csv(settings.get_avg_fragment_filename())
 
-        return fragment
+
+def add_model_methyl(fragment, settings):
+    # TODO: use labels
+
+    print("Adding model CH3 group")
+
+    # TODO: drop old H's not hardcoded
+    fragment = fragment[(fragment.atom_label != "H5") & (fragment.atom_label != "H6") &
+                        (fragment.atom_label != "H7")]
+
+    a = np.array([float(fragment[fragment.index == "O3"].atom_x),
+                  float(fragment[fragment.index == "O3"].atom_y),
+                  float(fragment[fragment.index == "O3"].atom_z)])
+
+    b = np.array([float(fragment[fragment.index == "C2"].atom_x),
+                  float(fragment[fragment.index == "C2"].atom_y),
+                  float(fragment[fragment.index == "C2"].atom_z)])
+
+    c = np.array([float(fragment[fragment.index == "C4"].atom_x),
+                  float(fragment[fragment.index == "C4"].atom_y),
+                  float(fragment[fragment.index == "C4"].atom_z)])
+
+    alpha = np.radians(109.6)
+
+    ab, bc = b - a, c - b
+
+    gamma = np.arccos(np.dot(ab, bc.T) / (np.linalg.norm(ab) * np.linalg.norm(bc)))
+
+    d_angle = np.radians(180) - alpha + gamma
+    cd_norm = 0.97
+
+    # rotate with an axis perpendicular to both ab and bc
+    cd = rotation_from_axis_and_angle(axis=np.cross(ab, bc), angle=d_angle, rot_vec=ab) * cd_norm
+
+    # the first point is created, now rotate it 20 degrees each time
+    dihedrals = np.arange(0, 360, 20)
+
+    frames = []
+    for i, angle in enumerate(dihedrals):
+        new_point = rotation_from_axis_and_angle(axis=bc, angle=np.radians(angle), rot_vec=cd)
+
+        # translate new point
+        new_point = np.add(np.add(new_point, ab), bc)
+
+        indexname = 'aH' + str(i + 2)
+
+        frame = pd.DataFrame(index=[indexname],
+                             data=[['H', new_point[0], new_point[1], new_point[2], settings.get_vdw_radius('H')]],
+                             columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z', 'vdw_radius'])
+
+        frames.append(copy.deepcopy(frame))
+
+    frames.append(fragment)
+    fragment = pd.concat(frames)
+
+    return fragment
 
 
 def rotation_from_axis_and_angle(axis, angle, rot_vec):
@@ -152,14 +155,35 @@ def rotation_from_axis_and_angle(axis, angle, rot_vec):
     return np.dot(rot_mat, rot_vec)
 
 
-def average_fragment(df):
+def average_fragment(df, settings):
     """ Returns a fragment containing the average points of the central groups. """
 
+    settings.alignment_labels()
     central_group_df = df[df.in_central_group]
 
     central_group_df = central_group_df.drop(columns=['entry_id', 'id', 'in_central_group'])
+
+    # TODO: ruthenium? if there's an R, take the average vdw
+    if settings.alignment["R"] is not None:
+        counts = central_group_df[central_group_df['atom_label'].str.contains("R")]['atom_symbol'].value_counts()
+
+        vdw = 0
+        atoms = 0
+        for i, count in counts.items():
+            atoms += count
+            vdw += count * settings.get_vdw_radius(i)
+        avg_vdw = vdw / atoms
+
     avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'atom_x': 'mean',
-                                                                  'atom_y': 'mean', 'atom_z': 'mean'})
+                                                                  'atom_y': 'mean', 'atom_z': 'mean'}).reset_index()
+
+    avg_fragment_df["vdw_radius"] = 0
+
+    for idx, row in avg_fragment_df.iterrows():
+        if "R" in row.atom_label:
+            avg_fragment_df.loc[idx, "vdw_radius"] = avg_vdw
+        else:
+            avg_fragment_df.loc[idx, "vdw_radius"] = settings.get_vdw_radius(row.atom_symbol)
 
     return avg_fragment_df
 
