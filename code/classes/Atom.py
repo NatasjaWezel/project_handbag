@@ -3,9 +3,12 @@ class Atom:
 
     def __init__(self, label, coordinates):
         self.label = label
-        
-        # TODO: this only works for elements with an atomic lable of 1 letter
-        self.symbol = label[:1]
+
+        if label[1] in '0123456789':
+            self.symbol = label[:1]
+        else:
+            self.symbol = label[:2]
+
         self.in_central_group = False
 
         self.x = coordinates[0]
