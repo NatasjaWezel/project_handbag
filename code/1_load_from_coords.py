@@ -43,8 +43,8 @@ def main():
         labels_contact_df.columns = columns
 
         labels = [i for i in columns if "LAB" in i]
-
-        alignment_labels = settings.alignment_labels()
+        settings.alignment_labels()
+        alignment_labels = settings.alignment
         print(labels, alignment_labels)
 
         outputfile = open(settings.get_aligned_csv_filename(), 'w', newline='')
@@ -52,12 +52,14 @@ def main():
 
         print("Aligning fragments and writing result to csv")
         for i, fragment in enumerate(tqdm(fragments)):
-            # get contact group and relabel it
+            # get central group and relabel it
             row = labels_contact_df[labels_contact_df.index == i]
 
             for j, label in enumerate(labels):
                 # use .max to get the string out of the row
                 atom_label = row[label].max()
+
+                # TODO: try catch?
                 atom = fragment.atoms[atom_label]
                 atom.add_to_central_group()
 
@@ -68,7 +70,7 @@ def main():
                 elif label == alignment_labels['xyplane']:
                     xy_plane_atom = atom.label
 
-                # TODO: maybe check if this label exists in the central group........
+                # rename everything the same
                 if label == alignment_labels["R"]:
                     atom.label = "R" + str(j + 1)
                 else:
@@ -126,7 +128,7 @@ def load_fragments_from_coords(lines):
             information = line.split()
             x, y, z = information[1].split("("), information[2].split("("), information[3].split("(")
 
-            atom = Atom(label=information[0].strip("%"), coordinates=[float(x[0]), float(y[0]), float(z[0])])
+            atom = Atom(label=information[0].strip("%*"), coordinates=[float(x[0]), float(y[0]), float(z[0])])
 
             atom = check_if_label_exists(atom, fragment)
 
