@@ -14,6 +14,7 @@ def make_coordinate_df(df, settings, avg_fragment):
         return coordinate_df
     except (KeyError, FileNotFoundError):
         first_fragment_df = df[df.id == df.id.unique()[0]]
+        find_closest_contact_atom = True
 
         if settings.to_count_contact == "centroid":
             # plot centroids of all contact fragments
@@ -22,10 +23,15 @@ def make_coordinate_df(df, settings, avg_fragment):
             # atom is unique, plot all of them
             coordinate_df = df[df.atom_symbol == settings.to_count_contact].reset_index().copy()
         else:
-            # TODO: atom is not unique, find closest
-            pass
+            coordinate_df = df[df.atom_symbol == settings.to_count_contact].reset_index().copy()
+            # atom is not unique, find closest later
+            find_closest_contact_atom = True
 
         coordinate_df = distances_closest_vdw_central(coordinate_df, avg_fragment, settings)
+
+        if find_closest_contact_atom is True:
+            # find closest atom
+            coordinate_df = coordinate_df.loc[coordinate_df.groupby('id').distance.idxmin()].reset_index(drop=True)
 
         coordinate_df.to_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
 
