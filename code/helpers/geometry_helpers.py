@@ -20,7 +20,7 @@ def make_coordinate_df(df, settings, avg_fragment):
             coordinate_df = df.groupby("id").mean()
         elif len(first_fragment_df[first_fragment_df["atom_symbol"] == settings.to_count_contact]) == 1:
             # atom is unique, plot all of them
-            coordinate_df = df[df.atom_symbol == settings.to_count_contact]
+            coordinate_df = df[df.atom_symbol == settings.to_count_contact].reset_index().copy()
         else:
             # TODO: atom is not unique, find closest
             pass
@@ -54,8 +54,8 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
         closest_distances.append(min_dist)
         closest_atoms_vdw.append(min_atom_vdw)
 
-    coordinate_df["distance"] = closest_distances
-    coordinate_df["vdw_closest_atom"] = closest_atoms_vdw
+    coordinate_df.loc[:, "distance"] = closest_distances
+    coordinate_df.loc[:, "vdw_closest_atom"] = closest_atoms_vdw
 
     return coordinate_df
 
