@@ -4,7 +4,7 @@
 # surrounding space into a number of bins, depending on which resolution is
 # set. It counts how many of the contact atoms/ centers of contact groups are
 # are in each bin and normalizes that by the total amount of contact atoms or
-# groups. Then a plot is made that shows the density of the contacts in "4D".
+# groups.
 #
 # Author: Natasja Wezel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -16,8 +16,9 @@ import pandas as pd
 from tqdm import tqdm
 
 from classes.Settings import Settings
-from helpers.density_helpers import prepare_df
+from helpers.density_helpers import prepare_df, find_available_volume
 from helpers.geometry_helpers import (make_coordinate_df,
+                                      get_vdw_distance_contact,
                                       make_avg_fragment_if_not_exists)
 from helpers.helpers import read_results_alignment
 
@@ -39,13 +40,19 @@ def main():
     avg_fragment = make_avg_fragment_if_not_exists(settings, df)
 
     # grab only the atoms that are in the contact groups
-    df = df[df.in_central_group == False]
-    coordinate_df = make_coordinate_df(df, settings, avg_fragment)
+    df_central = df[~df.in_central_group]
+    coordinate_df = make_coordinate_df(df_central, settings, avg_fragment)
+
+    # find the volume of the central group
+    tolerance = 0.5
+    contact_group_radius = get_vdw_distance_contact(df, settings)
+    volume = find_available_volume(avg_fragment=avg_fragment, extra=(tolerance + contact_group_radius))
+    print('Available volume:', volume)
 
     try:
         pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
     except (FileNotFoundError, KeyError):
-        empty_density_df = prepare_df(fragments_df=coordinate_df, settings=settings)
+        empty_density_df = prepare_df(df=coordinate_df, settings=settings)
 
         density_df = count_points_per_square(df=empty_density_df, contact_points_df=coordinate_df, settings=settings)
 
