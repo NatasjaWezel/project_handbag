@@ -47,25 +47,28 @@ def make_plot(avg_fragment, coordinate_df, longest_vdw_contact):
     """ Plot all the surrounding contact groups around the central group. """
 
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax: Axes3D = fig.add_subplot(111, projection='3d')
 
     # plot the (average of the) central group
     ax = plot_fragment_colored(ax, avg_fragment)
     ax, _ = plot_vdw_spheres(avg_fragment, ax, color='pink')
 
-    points = ax.scatter(list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom + longest_vdw_contact].atom_x), 
-                        list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom + longest_vdw_contact].atom_y), 
-                        list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom + longest_vdw_contact].atom_z), s=1, c="red")
+    points = ax.scatter(list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom
+                             + longest_vdw_contact].atom_x),
+                        list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom
+                             + longest_vdw_contact].atom_y),
+                        list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom
+                             + longest_vdw_contact].atom_z), s=1, c="red")
 
     vdw_slider_ax = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=AXCOLOR)
     vdw_slider = Slider(vdw_slider_ax, 'VDW radius + ', -2, 3, valinit=0, valstep=0.1)
 
     def update(val):
         val = round(val, 2)
-       
+
         show_df = coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom + longest_vdw_contact + val]
 
-        print(len(coordinate_df) , len(show_df), val)    
+        print(len(coordinate_df), len(show_df), val)
         points._offsets3d = (list(show_df.atom_x), list(show_df.atom_y), list(show_df.atom_z))
         fig.canvas.draw_idle()
 
