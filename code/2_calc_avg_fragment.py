@@ -8,7 +8,7 @@ from helpers.helpers import read_results_alignment
 def main():
 
     if len(sys.argv) != 2:
-        print("Usage: python plot_density.py <path/to/inputfile>")
+        print("Usage: python 2_calc_avg_fragment.py <path/to/inputfile>")
         sys.exit(1)
 
     inputfilename = sys.argv[1]
