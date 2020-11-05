@@ -71,7 +71,7 @@ def calc_distances(in_vdw_volume, bin_coordinates, avg_f_p, indices, extra):
         idx = indices[i]
 
         bin_point = bin_coordinates[idx[0]]
-        distance = np.sum((bin_point - avg_f_p[:3])**2)**0.5
+        distance = np.sqrt(np.sum((bin_point - avg_f_p[:3])**2))
 
         if distance < avg_f_p[3] + extra:
             in_vdw_volume[idx] = 1
@@ -144,7 +144,6 @@ def count_bins_in_vdw(avg_fragment, extra):
 
 
 def find_available_volume(avg_fragment, extra):
-    # TODO: calculate this difference at once if you don't need the two separate anyways
     volume_max = count_bins_in_vdw(avg_fragment=avg_fragment, extra=extra)
     volume_central = count_bins_in_vdw(avg_fragment=avg_fragment, extra=0)
 
