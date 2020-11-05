@@ -18,8 +18,8 @@ from tqdm import tqdm
 from classes.Settings import Settings
 from helpers.density_helpers import prepare_df, find_available_volume
 from helpers.geometry_helpers import (make_coordinate_df,
-                                      get_vdw_distance_contact,
-                                      make_avg_fragment_if_not_exists)
+                                      get_vdw_distance_contact)
+from calc_avg_fragment import make_avg_fragment_if_not_exists
 from helpers.helpers import read_results_alignment
 
 

@@ -66,24 +66,8 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
     return coordinate_df
 
 
-def make_avg_fragment_if_not_exists(settings, df):
-    try:
-        fragment = pd.read_csv(settings.get_avg_fragment_filename())
-    except FileNotFoundError:
-        fragment = average_fragment(df, settings)
-
-        print(settings.central_group_name)
-        if settings.central_group_name == "RCOMe":
-            fragment = add_model_methyl(fragment=fragment, settings=settings)
-
-        fragment.to_csv(settings.get_avg_fragment_filename())
-
-    return fragment
-
-
 def add_model_methyl(fragment, settings):
     # TODO: use labels
-
     print("Adding model CH3 group")
 
     # TODO: drop old H's not hardcoded

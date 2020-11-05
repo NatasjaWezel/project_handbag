@@ -7,10 +7,11 @@ from numba import jit
 from numba import prange
 
 
-def calculate_no_bins(minimum, maximum, resolution):
+def calculate_no_bins(resolution, limits):
     """ Calculates the number of bins needed between a minimum and a maximum at a certain resolution.
         Returns the number of  bins, and the adjusted minimum and maximum to make the bins fit precisely. """
 
+    minimum, maximum = limits[0], limits[1]
     bins_neg = math.ceil(abs(minimum + 0.5 * resolution)/resolution)
     bins_pos = math.ceil(abs(maximum - 0.5 * resolution)/resolution)
 
@@ -26,9 +27,9 @@ def prepare_df(df, settings):
     maxx, maxy, maxz = df.atom_x.max(), df.atom_y.max(), df.atom_z.max()
     minx, miny, minz = df.atom_x.min(), df.atom_y.min(), df.atom_z.min()
 
-    no_bins_x, minx, maxx = calculate_no_bins(minx, maxx, settings.resolution)
-    no_bins_y, miny, maxy = calculate_no_bins(miny, maxy, settings.resolution)
-    no_bins_z, minz, maxz = calculate_no_bins(minz, maxz, settings.resolution)
+    no_bins_x, minx, maxx = calculate_no_bins(resolution=settings.resolution, limits=[minx, maxx])
+    no_bins_y, miny, maxy = calculate_no_bins(resolution=settings.resolution, limits=[miny, maxy])
+    no_bins_z, minz, maxz = calculate_no_bins(resolution=settings.resolution, limits=[minz, maxz])
 
     amount_bins = no_bins_x * no_bins_y * no_bins_z
     indices = [i for i in range(0, amount_bins)]
@@ -105,9 +106,9 @@ def count_bins_in_vdw(avg_fragment, extra):
     minx, miny, minz = avg_fragment['minx'].min(), avg_fragment['miny'].min(), avg_fragment['minz'].min()
     maxx, maxy, maxz = avg_fragment['maxx'].max(), avg_fragment['maxy'].max(), avg_fragment['maxz'].max()
 
-    no_bins_x, minx, maxx = calculate_no_bins(minx, maxx, resolution)
-    no_bins_y, miny, maxy = calculate_no_bins(miny, maxy, resolution)
-    no_bins_z, minz, maxz = calculate_no_bins(minz, maxz, resolution)
+    no_bins_x, minx, maxx = calculate_no_bins(resolution=resolution, limits=[minx, maxx])
+    no_bins_y, miny, maxy = calculate_no_bins(resolution=resolution, limits=[miny, maxy])
+    no_bins_z, minz, maxz = calculate_no_bins(resolution=resolution, limits=[minz, maxz])
 
     amount_bins = no_bins_x * no_bins_y * no_bins_z
     indices = [i for i in range(0, amount_bins)]

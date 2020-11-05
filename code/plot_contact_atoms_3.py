@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 from mpl_toolkits.mplot3d import Axes3D
 
+from calc_avg_fragment import make_avg_fragment_if_not_exists
 from classes.Settings import Settings
 from helpers.geometry_helpers import (get_vdw_distance_contact,
-                                      make_avg_fragment_if_not_exists,
                                       make_coordinate_df)
 from helpers.headers import AXCOLOR
 from helpers.helpers import read_results_alignment
@@ -35,7 +35,7 @@ def main():
     avg_fragment = make_avg_fragment_if_not_exists(settings, df)
 
     # grab only the atoms that are in the contact groups
-    df = df[df.in_central_group == False]
+    df = df[~df.in_central_group]
 
     vdw_distance_contact = get_vdw_distance_contact(df, settings)
 
