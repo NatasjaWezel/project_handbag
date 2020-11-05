@@ -69,15 +69,16 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
 def make_avg_fragment_if_not_exists(settings, df):
     try:
         fragment = pd.read_csv(settings.get_avg_fragment_filename())
-
-        return fragment
     except FileNotFoundError:
         fragment = average_fragment(df, settings)
 
+        print(settings.central_group_name)
         if settings.central_group_name == "RCOMe":
-            add_model_methyl(fragment)
+            fragment = add_model_methyl(fragment=fragment, settings=settings)
 
         fragment.to_csv(settings.get_avg_fragment_filename())
+
+    return fragment
 
 
 def add_model_methyl(fragment, settings):
@@ -89,17 +90,17 @@ def add_model_methyl(fragment, settings):
     fragment = fragment[(fragment.atom_label != "H5") & (fragment.atom_label != "H6") &
                         (fragment.atom_label != "H7")]
 
-    a = np.array([float(fragment[fragment.index == "O3"].atom_x),
-                  float(fragment[fragment.index == "O3"].atom_y),
-                  float(fragment[fragment.index == "O3"].atom_z)])
+    a = np.array([float(fragment[fragment.atom_label == "O3"].atom_x),
+                  float(fragment[fragment.atom_label == "O3"].atom_y),
+                  float(fragment[fragment.atom_label == "O3"].atom_z)])
 
-    b = np.array([float(fragment[fragment.index == "C2"].atom_x),
-                  float(fragment[fragment.index == "C2"].atom_y),
-                  float(fragment[fragment.index == "C2"].atom_z)])
+    b = np.array([float(fragment[fragment.atom_label == "C2"].atom_x),
+                  float(fragment[fragment.atom_label == "C2"].atom_y),
+                  float(fragment[fragment.atom_label == "C2"].atom_z)])
 
-    c = np.array([float(fragment[fragment.index == "C4"].atom_x),
-                  float(fragment[fragment.index == "C4"].atom_y),
-                  float(fragment[fragment.index == "C4"].atom_z)])
+    c = np.array([float(fragment[fragment.atom_label == "C4"].atom_x),
+                  float(fragment[fragment.atom_label == "C4"].atom_y),
+                  float(fragment[fragment.atom_label == "C4"].atom_z)])
 
     alpha = np.radians(109.6)
 
@@ -125,9 +126,9 @@ def add_model_methyl(fragment, settings):
 
         indexname = 'aH' + str(i + 2)
 
-        frame = pd.DataFrame(index=[indexname],
-                             data=[['H', new_point[0], new_point[1], new_point[2], settings.get_vdw_radius('H')]],
-                             columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z', 'vdw_radius'])
+        frame = pd.DataFrame(data=[['H', new_point[0], new_point[1], new_point[2], settings.get_vdw_radius('H'),
+                                    indexname]],
+                             columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z', 'vdw_radius', 'atom_label'])
 
         frames.append(copy.deepcopy(frame))
 
