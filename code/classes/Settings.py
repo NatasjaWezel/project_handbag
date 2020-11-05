@@ -69,7 +69,7 @@ class Settings():
         self.resolution = resolution
 
     def get_density_plotname(self):
-        density_plotname = self.outputfile_prefix + "_" + str(self.resolution) + "_density.pdf"
+        density_plotname = self.outputfile_prefix + "_" + str(self.resolution) + "_density.svg"
         return density_plotname
 
     def set_atom_to_count(self, atom_str):
