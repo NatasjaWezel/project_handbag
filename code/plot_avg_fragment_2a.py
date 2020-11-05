@@ -1,8 +1,7 @@
 import sys
 
 from classes.Settings import Settings
-from calc_avg_fragment import make_avg_fragment_if_not_exists
-from helpers.helpers import read_results_alignment
+from calc_avg_fragment_2 import make_avg_fragment_if_not_exists, read_results_alignment
 from helpers.plot_functions import plot_fragment_colored
 
 import matplotlib.pyplot as plt

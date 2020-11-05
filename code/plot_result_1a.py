@@ -1,7 +1,7 @@
 import sys
 
 from classes.Settings import Settings
-from helpers.helpers import read_results_alignment
+from calc_avg_fragment_2 import read_results_alignment
 from helpers.plot_functions import plot_fragments
 
 

@@ -12,12 +12,11 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 from mpl_toolkits.mplot3d import Axes3D
 
-from calc_avg_fragment import make_avg_fragment_if_not_exists
+from calc_avg_fragment_2 import make_avg_fragment_if_not_exists, read_results_alignment
 from classes.Settings import Settings
 from helpers.geometry_helpers import (get_vdw_distance_contact,
                                       make_coordinate_df)
 from helpers.headers import AXCOLOR
-from helpers.helpers import read_results_alignment
 from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
 
 
