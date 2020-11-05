@@ -1,1 +1,4 @@
 matplotlib==3.3.2
+seaborn
+pandas
+scipy
