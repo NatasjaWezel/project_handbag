@@ -30,7 +30,10 @@ def main():
     filename = sys.argv[1]
 
     settings = Settings(filename)
+    align_if_not_aligned_yet(settings, filename)
 
+
+def align_if_not_aligned_yet(settings, filename):
     if not os.path.exists(settings.get_aligned_csv_filename()):
         coordinate_lines = read_coord_file(filename=filename)
         fragments = load_fragments_from_coords(coordinate_lines)
