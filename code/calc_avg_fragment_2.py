@@ -8,7 +8,7 @@ from helpers.geometry_helpers import average_fragment, add_model_methyl
 def main():
 
     if len(sys.argv) != 2:
-        print("Usage: python 2_calc_avg_fragment.py <path/to/inputfile>")
+        print("Usage: python calc_avg_fragment_2.py <path/to/inputfile>")
         sys.exit(1)
 
     inputfilename = sys.argv[1]
