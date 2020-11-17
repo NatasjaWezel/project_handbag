@@ -9,10 +9,10 @@ class Settings():
 
         title = inputfilename.rsplit('\\')[-1].rsplit('.', 1)[0].rsplit('_aligned', 1)[0]
 
-        self.parameter_csv = inputfilename.rsplit('.', 1)[0] + '.csv'
-
         self.central_group_name = title.split("_")[0]
         self.contact_group_name = title.split("_")[1]
+
+        self.parameter_csv = ".\\data\\" + self.central_group_name + "\\" + title + ".csv"
 
         self.output_folder_central_group = RESULTSDIR + title.split("_")[0] + "\\"
         output_folder_specific = self.output_folder_central_group + title + "\\"
