@@ -6,6 +6,9 @@ from tqdm import tqdm
 
 import copy
 
+from numba import jit
+from numba import prange
+
 
 def make_coordinate_df(df, settings, avg_fragment):
     try:
@@ -29,36 +32,36 @@ def make_coordinate_df(df, settings, avg_fragment):
 
         coordinate_df = distances_closest_vdw_central(coordinate_df, avg_fragment, settings)
 
-        if find_closest_contact_atom is True:
+        if find_closest_contact_atom:
             # find closest atom
             coordinate_df = coordinate_df.loc[coordinate_df.groupby('id').distance.idxmin()].reset_index(drop=True)
 
-        coordinate_df.to_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
+    coordinate_df.to_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
+    
+    print("Done")
 
-        return coordinate_df
+    return coordinate_df
 
 
 def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
-    closest_distances = []
-    closest_atoms_vdw = []
+    length = len(coordinate_df)
+
+    closest_distances = np.zeros(length)
+    closest_atoms_vdw = np.zeros(length)
 
     points_avg_f = np.array([avg_fragment.atom_x, avg_fragment.atom_y, avg_fragment.atom_z]).T
+    vdw_radii = np.array(avg_fragment.vdw_radius)
 
     print("Searching for nearest atom from contact group...")
-    print(len(coordinate_df.atom_x))
-    for x, y, z in tqdm(zip(coordinate_df.atom_x, coordinate_df.atom_y, coordinate_df.atom_z)):
+    print(length)
+    
+    xcoord = np.array(coordinate_df.atom_x)
+    ycoord = np.array(coordinate_df.atom_y)
+    zcoord = np.array(coordinate_df.atom_z)
 
-        p2 = np.array([x, y, z])
-
-        dist = np.sqrt([np.sum((f - p2)**2, axis=0) for f in points_avg_f])
-
-        min_dist_idx = dist.argmin()
-        min_dist = dist[min_dist_idx]
-
-        min_atom_vdw = avg_fragment.iloc[min_dist_idx]['vdw_radius']
-
-        closest_distances.append(min_dist)
-        closest_atoms_vdw.append(min_atom_vdw)
+    closest_atoms_vdw, closest_distances = p_dist_calc(closest_atoms_vdw, closest_distances,
+                                                       xcoord, ycoord, zcoord, 
+                                                       length, points_avg_f, vdw_radii)
 
     coordinate_df.loc[:, "distance"] = closest_distances
     coordinate_df.loc[:, "vdw_closest_atom"] = closest_atoms_vdw
@@ -66,25 +69,68 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
     return coordinate_df
 
 
+@jit(nopython=True)
+def p_dist_calc(closest_atoms_vdw, closest_distances, xcoord, ycoord, zcoord, length, points_avg_f, vdw_radii):
+
+    # use prange from numba
+    for idx in range(length):
+
+        # grab x, y and z of current contact from np arrays
+        contact_point = np.array([xcoord[idx], ycoord[idx], zcoord[idx]])
+
+        # set distance to infinite so you'll find a lower distance soon
+        min_dist = 1000000000
+        min_atom_vdw = None
+
+        # calc distance with every avg fragment point, remember shortest one
+        for i, avg_fragment_point in enumerate(points_avg_f):
+            t_dist = np.sqrt(np.sum((avg_fragment_point - contact_point)**2, axis=0))
+
+            # also remember the vdw radius of the closest atom
+            if t_dist < min_dist:
+                min_dist = t_dist
+                min_atom_vdw = vdw_radii[i]
+
+        closest_distances[idx] = min_dist
+        closest_atoms_vdw[idx] = min_atom_vdw
+
+    return closest_atoms_vdw, closest_distances
+
+
+def get_dihedral_and_h(settings):
+    methyl_model = {}
+
+    with open("data/methylmodel.csv", 'r') as model_file:
+        lines = model_file.readlines()
+
+    keys = lines[0].split(",")
+    labels = lines[1].split(",")
+
+    for key, label in zip(keys, labels):
+        methyl_model[key.strip()] = label.strip()
+
+    return methyl_model
+
+
 def add_model_methyl(fragment, settings):
-    # TODO: use labels
-    print("Adding model CH3 group")
+    print("Adding model CH3 group...")
 
-    # TODO: drop old H's not hardcoded
-    fragment = fragment[(fragment.atom_label != "H5") & (fragment.atom_label != "H6") &
-                        (fragment.atom_label != "H7")]
+    methyl_model = get_dihedral_and_h(settings)
 
-    a = np.array([float(fragment[fragment.atom_label == "O3"].atom_x),
-                  float(fragment[fragment.atom_label == "O3"].atom_y),
-                  float(fragment[fragment.atom_label == "O3"].atom_z)])
+    h1, h2, h3 = methyl_model['h1'], methyl_model['h2'], methyl_model['h3']
+    fragment = fragment[(fragment.lablabel != h1) & (fragment.lablabel != h2) & (fragment.lablabel != h3)]
 
-    b = np.array([float(fragment[fragment.atom_label == "C2"].atom_x),
-                  float(fragment[fragment.atom_label == "C2"].atom_y),
-                  float(fragment[fragment.atom_label == "C2"].atom_z)])
+    a = np.array([float(fragment[fragment.lablabel == methyl_model['dihedral1']].atom_x),
+                  float(fragment[fragment.lablabel == methyl_model['dihedral1']].atom_y),
+                  float(fragment[fragment.lablabel == methyl_model['dihedral1']].atom_z)])
 
-    c = np.array([float(fragment[fragment.atom_label == "C4"].atom_x),
-                  float(fragment[fragment.atom_label == "C4"].atom_y),
-                  float(fragment[fragment.atom_label == "C4"].atom_z)])
+    b = np.array([float(fragment[fragment.lablabel == methyl_model['dihedral2']].atom_x),
+                  float(fragment[fragment.lablabel == methyl_model['dihedral2']].atom_y),
+                  float(fragment[fragment.lablabel == methyl_model['dihedral2']].atom_z)])
+
+    c = np.array([float(fragment[fragment.lablabel == methyl_model['dihedral3']].atom_x),
+                  float(fragment[fragment.lablabel == methyl_model['dihedral3']].atom_y),
+                  float(fragment[fragment.lablabel == methyl_model['dihedral3']].atom_z)])
 
     alpha = np.radians(109.6)
 
@@ -108,11 +154,11 @@ def add_model_methyl(fragment, settings):
         # translate new point
         new_point = np.add(np.add(new_point, ab), bc)
 
-        indexname = 'aH' + str(i + 2)
+        indexname = 'aH' + str(i + 1)
 
         frame = pd.DataFrame(data=[['H', new_point[0], new_point[1], new_point[2], settings.get_vdw_radius('H'),
-                                    indexname]],
-                             columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z', 'vdw_radius', 'atom_label'])
+                                    indexname, '-']],
+                             columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z', 'vdw_radius', 'atom_label', 'lablabel'])
 
         frames.append(copy.deepcopy(frame))
 
@@ -165,8 +211,10 @@ def average_fragment(df, settings):
             vdw += count * settings.get_vdw_radius(i)
         avg_vdw = vdw / atoms
 
-    avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'atom_x': 'mean',
-                                                                  'atom_y': 'mean', 'atom_z': 'mean'}).reset_index()
+    avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'lablabel': 'first', 
+                                                                  'atom_x': 'mean',
+                                                                  'atom_y': 'mean',
+                                                                  'atom_z': 'mean'}).reset_index()
 
     avg_fragment_df["vdw_radius"] = 0
 
