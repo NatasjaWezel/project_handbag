@@ -48,7 +48,6 @@ def align_if_not_aligned_yet(settings, filename):
         labels = [i for i in columns if "LAB" in i]
         settings.alignment_labels()
         alignment_labels = settings.alignment
-        print(labels, alignment_labels)
 
         outputfile = open(settings.get_aligned_csv_filename(), 'w', newline='')
         writer = csv.writer(outputfile)
@@ -79,6 +78,9 @@ def align_if_not_aligned_yet(settings, filename):
                 else:
                     atom.label = atom.symbol + str(j + 1)
 
+                # put the actual label on the atom too
+                atom.lablabel = label
+
             # center coordinates on center and rotate it
             fragment.center_coordinates(center_atom)
             fragment = perform_rotations(fragment, [y_axis_atom, xy_plane_atom])
@@ -95,7 +97,7 @@ def align_if_not_aligned_yet(settings, filename):
 def write_fragment_to_csv(writer, fragment):
     """ This function saves the information of the fragment to a CSV file. """
 
-    [writer.writerow([fragment.id, fragment.from_entry, atom.label, atom.symbol, atom.in_central_group, atom.x,
+    [writer.writerow([fragment.id, fragment.from_entry, atom.label, atom.lablabel, atom.symbol, atom.in_central_group, atom.x,
                       atom.y, atom.z]) for atom in fragment.atoms.values()]
 
 
