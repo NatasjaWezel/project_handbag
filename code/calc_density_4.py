@@ -77,7 +77,7 @@ def count_points_per_square(df, contact_points_df, settings):
 
     return df
 
-
+# TODO: @jit thisssss
 def fill_bins(amount, bin_coordinates, contact_coordinates, resolution):
     x, y, z = 0, 1, 2
     for cor in tqdm(contact_coordinates):
