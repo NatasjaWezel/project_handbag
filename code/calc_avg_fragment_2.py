@@ -22,7 +22,7 @@ def main():
 
 def read_results_alignment(inputfilename):
     df = pd.read_csv(inputfilename, header=None)
-    df.columns = ["id", "entry_id", "atom_label", "atom_symbol", "in_central_group", "atom_x", "atom_y", "atom_z"]
+    df.columns = ["id", "entry_id", "atom_label", "lablabel", "atom_symbol", "in_central_group", "atom_x", "atom_y", "atom_z"]
 
     return df
 
