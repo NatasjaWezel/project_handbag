@@ -9,6 +9,8 @@ class Atom:
         else:
             self.symbol = label[:2]
 
+        self.lablabel = "-"
+
         self.in_central_group = False
 
         self.x = coordinates[0]
