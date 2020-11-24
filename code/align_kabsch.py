@@ -7,10 +7,7 @@
 # Author: Natasja Wezel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-import csv
 import sys
-import os
-import copy
 
 import time
 
@@ -34,16 +31,16 @@ def main():
 
     # read part of the datafile first for preparation
     no_atoms, no_atoms_central, label_list = read_coord_file(filename)
-    
+
     print("Pandas is reading csv...")
     # use amount of atoms for skiprow function to read into df immediately
-    data = pd.read_csv(filename, sep='\s+', usecols=[0,1,2,3], names=['_id', 'x', 'y', 'z'], 
+    data = pd.read_csv(filename, sep='\\s+', usecols=[0, 1, 2, 3], names=['_id', 'x', 'y', 'z'],
                        header=None,
                        skiprows=lambda x: logic(x, no_atoms))
     print("Done")
 
-    data['symbol'] = data.apply(lambda row: get_atom_symbol(row), axis = 1) 
-    
+    data['symbol'] = data.apply(lambda row: get_atom_symbol(row), axis=1)
+
     amount_rows = len(data)
 
     # calc amount of fragments
@@ -58,7 +55,9 @@ def main():
     labels = label_list * fragments
     data['label'] = labels
 
-    alignment = alignment_dict(central_group_name=filename.rsplit('\\')[-1].rsplit('.', 1)[0].rsplit('_aligned', 1)[0].split("_")[0])
+    alignment = alignment_dict(central_group_name=filename.rsplit('\\')[-1].rsplit('.', 1)[0]
+                               .rsplit('_aligned', 1)[0].split("_")[0])
+
     # translate and rotate first fragment onto the origin as for nice viewing
     data[:no_atoms] = perform_translation(data[:no_atoms].copy(), alignment['center'])
     data[:no_atoms] = perform_rotations(data[:no_atoms].copy(), [alignment['yaxis'], alignment['xyplane']])
@@ -84,7 +83,7 @@ def main():
 
         # put back into overall matrix
         data_xyz_matrix[i * no_atoms: (i + 1) * no_atoms] = B_total_2
-    
+
     # put back into df
     data_xyz_matrix_T = data_xyz_matrix.T
     x_vec, y_vec, z_vec = data_xyz_matrix_T[0], data_xyz_matrix_T[1], data_xyz_matrix_T[2]
@@ -96,6 +95,7 @@ def main():
     t1 = time.time() - t0
 
     print("Duration: %.2f s." % t1)
+
 
 def alignment_dict(central_group_name):
     alignment = {}
@@ -156,7 +156,7 @@ def get_atom_symbol(row):
 
 def logic(index, amount_atoms):
     if index % (amount_atoms+1) == 0:
-       return True
+        return True
     return False
 
 
@@ -179,7 +179,7 @@ def get_translation_dict(filename):
 
 def read_coord_file(filename):
     """ Reads the first 100 lines of a file and saves them as a list. """
-    
+
     csv_filename = filename.rsplit('.', 1)[0] + '.csv'
     translation_dict = get_translation_dict(csv_filename)
 
@@ -199,7 +199,7 @@ def read_coord_file(filename):
         label_list.append(translation_dict.get(line.split(' ')[0], '-'))
         no_atoms += 1
 
-        if translation_dict.get(line.split(' ')[0], '-') is not "-":
+        if translation_dict.get(line.split(' ')[0], '-') != "-":
             no_atoms_central += 1
 
     return no_atoms, no_atoms_central, label_list
@@ -213,8 +213,8 @@ def perform_translation(fragment, label):
     fragment.loc[fragment.label == label, 'x'] = 0
     fragment.loc[fragment.label == label, 'y'] = 0
     fragment.loc[fragment.label == label, 'z'] = 0
-    
-    fragment.loc[fragment.label != label, 'x'] = fragment.loc[fragment.label != label, 'x'] + move_x 
+
+    fragment.loc[fragment.label != label, 'x'] = fragment.loc[fragment.label != label, 'x'] + move_x
     fragment.loc[fragment.label != label, 'y'] = fragment.loc[fragment.label != label, 'y'] + move_y
     fragment.loc[fragment.label != label, 'z'] = fragment.loc[fragment.label != label, 'z'] + move_z
 
@@ -241,7 +241,7 @@ def perform_rotations(fragment, labels):
     angle = find_angles(ax='x', coord_vector=coord_vector)
     angle = angle * find_rotation_direction(ax='x', atom=fragment[fragment['label'] == labels[1]])
     fragment = calculate_rotation(fragment=fragment.copy(), angle=angle, ax='x')
- 
+
     return fragment
 
 
@@ -255,8 +255,8 @@ def find_coord_vector(ax, atom):
 
 
 def find_rotation_direction(ax, atom):
-    """ Defines the direction of the rotation, clockwise or counter clockwise. """ 
-    
+    """ Defines the direction of the rotation, clockwise or counter clockwise. """
+
     if ax == "x" and float(atom.z) < 0:
         return -1
     elif ax == "y" and float(atom.z) < 0:
@@ -316,7 +316,7 @@ def calculate_rotation(fragment, angle, ax):
             coord_vector = np.dot(coord_vector, rotate_x(angle))
         elif ax == "y":
             coord_vector = np.dot(coord_vector, rotate_y(angle))
-        else:  
+        else:
             coord_vector = np.dot(coord_vector, rotate_z(angle))
 
         fragment.loc[fragment.index == i, 'x'] = coord_vector[0]
