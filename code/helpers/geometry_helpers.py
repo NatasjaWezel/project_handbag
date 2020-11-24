@@ -21,12 +21,19 @@ def make_coordinate_df(df, settings, avg_fragment):
 
         if settings.to_count_contact == "centroid":
             # plot centroids of all contact fragments
-            coordinate_df = df.groupby("id").mean()
+            longest_vdw = get_vdw_distance_contact(df, settings)
+            coordinate_df = df.groupby("id").mean().reset_index()
+
         elif len(first_fragment_df[first_fragment_df["atom_symbol"] == settings.to_count_contact]) == 1:
+            longest_vdw = get_vdw_distance_contact(df, settings)
+
             # atom is unique, plot all of them
             coordinate_df = df[df.atom_symbol == settings.to_count_contact].reset_index().copy()
+
         else:
+            longest_vdw = get_vdw_distance_contact(df, settings)
             coordinate_df = df[df.atom_symbol == settings.to_count_contact].reset_index().copy()
+
             # atom is not unique, find closest later
             find_closest_contact_atom = True
 
@@ -35,12 +42,13 @@ def make_coordinate_df(df, settings, avg_fragment):
         if find_closest_contact_atom:
             # find closest atom
             coordinate_df = coordinate_df.loc[coordinate_df.groupby('id').distance.idxmin()].reset_index(drop=True)
+        
+        coordinate_df['longest_vdw'] = longest_vdw
+        coordinate_df.to_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
 
-    coordinate_df.to_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
-    
-    print("Done")
+        print("Done")
 
-    return coordinate_df
+        return coordinate_df
 
 
 def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
@@ -236,7 +244,7 @@ def get_vdw_distance_contact(df, settings):
 
 
 def calculate_longest_vdw_radius_contact(df, settings):
-    # TODO: if there's an R, take the biggest vdw radius
+    # TODO: if there's an R, kick that one out
     longest_distance = 0
     atom_a = None
 
