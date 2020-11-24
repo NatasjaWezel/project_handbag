@@ -2,12 +2,10 @@ import math
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 import copy
 
 from numba import jit
-from numba import prange
 
 
 def make_coordinate_df(df, settings, avg_fragment):
@@ -42,7 +40,7 @@ def make_coordinate_df(df, settings, avg_fragment):
         if find_closest_contact_atom:
             # find closest atom
             coordinate_df = coordinate_df.loc[coordinate_df.groupby('id').distance.idxmin()].reset_index(drop=True)
-        
+
         coordinate_df['longest_vdw'] = longest_vdw
         coordinate_df.to_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
 
@@ -62,13 +60,13 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
 
     print("Searching for nearest atom from contact group...")
     print(length)
-    
+
     xcoord = np.array(coordinate_df.atom_x)
     ycoord = np.array(coordinate_df.atom_y)
     zcoord = np.array(coordinate_df.atom_z)
 
     closest_atoms_vdw, closest_distances = p_dist_calc(closest_atoms_vdw, closest_distances,
-                                                       xcoord, ycoord, zcoord, 
+                                                       xcoord, ycoord, zcoord,
                                                        length, points_avg_f, vdw_radii)
 
     coordinate_df.loc[:, "distance"] = closest_distances
@@ -166,7 +164,8 @@ def add_model_methyl(fragment, settings):
 
         frame = pd.DataFrame(data=[['H', new_point[0], new_point[1], new_point[2], settings.get_vdw_radius('H'),
                                     indexname, '-']],
-                             columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z', 'vdw_radius', 'atom_label', 'lablabel'])
+                             columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z', 'vdw_radius', 'atom_label',
+                                      'lablabel'])
 
         frames.append(copy.deepcopy(frame))
 
@@ -219,7 +218,7 @@ def average_fragment(df, settings):
             vdw += count * settings.get_vdw_radius(i)
         avg_vdw = vdw / atoms
 
-    avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'lablabel': 'first', 
+    avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'lablabel': 'first',
                                                                   'atom_x': 'mean',
                                                                   'atom_y': 'mean',
                                                                   'atom_z': 'mean'}).reset_index()
