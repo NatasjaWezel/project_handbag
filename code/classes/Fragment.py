@@ -1,14 +1,8 @@
-import math
-
-import pandas as pd
-
-from helpers.headers import CUT_OFF_ZERO
-
 class Fragment:
     def __init__(self, from_entry, fragment_id):
         self.from_entry = from_entry
         self.id = from_entry + str(fragment_id)
-        
+
         self.bonds = []
         self.color = "red"
         self.atoms = {}
@@ -37,18 +31,17 @@ class Fragment:
                 elif atom.z > 0:
                     atom.z = atom.z - 2*atom.z
 
-
     def center_coordinates(self, center_atom_label):
         """ This is a function that puts any atom you want at the origin of the
-            xyz coordinate system, and moves important atoms according to the change. """ 
-        
+            xyz coordinate system, and moves important atoms according to the change. """
+
         self.center_atom = self.atoms[center_atom_label]
 
         move_x, move_y, move_z = -self.center_atom.x, -self.center_atom.y, -self.center_atom.z
         self.center_atom.x, self.center_atom.y, self.center_atom.z = 0, 0, 0
 
         for atom in self.atoms.values():
-            if not atom is self.center_atom:
+            if atom is not self.center_atom:
                 atom.x += move_x
                 atom.y += move_y
                 atom.z += move_z
