@@ -1,11 +1,11 @@
 import numpy as np
-import copy
+
 
 def perform_rotations(fragment, atoms):
     """ Performs three rotations to lie three of the atoms in the xy plane, one of those
-        on the x-axis. 
-        First rotation: puts first atom on xy-plane if it already was on a plane, 
-        and above the x-axis if it wasn't by rotating around the z-axis. 
+        on the x-axis.
+        First rotation: puts first atom on xy-plane if it already was on a plane,
+        and above the x-axis if it wasn't by rotating around the z-axis.
         Second rotation: puts first atom on x-axis by rotating around y-axis.
         Third rotation: puts second atom in x-y plane by rotating around the x-axis. """
 
@@ -15,21 +15,19 @@ def perform_rotations(fragment, atoms):
     for i, atom in enumerate(atoms):
 
         coord_vector = find_coord_vector(ax=axis[i], atom=atom)
-
         angle = find_angles(ax=axis[i], coord_vector=coord_vector)
         angle = angle * find_rotation_direction(ax=axis[i], atom=atom)
-
         fragment = calculate_rotation(fragment=fragment, angle=angle, ax=axis[i])
- 
+
     return fragment
 
 
 def find_coord_vector(ax, atom):
-    """ Returns the coordinate vectore from the origin to the point. If the atom is not in 
+    """ Returns the coordinate vectore from the origin to the point. If the atom is not in
         any plane, returns the coordinate vector projected onto a plane. """
-    
+
     coord_vector = [atom.x, atom.y, atom.z]
-    
+
     # if not in any plane project it onto the xy plane for the first rotation
     if ax == "x":
         coord_vector = [0, atom.y, atom.z]
@@ -42,8 +40,8 @@ def find_coord_vector(ax, atom):
 
 
 def find_rotation_direction(ax, atom):
-    """ Defines the direction of the rotation, clockwise or counter clockwise. """ 
-    
+    """ Defines the direction of the rotation, clockwise or counter clockwise. """
+
     if ax == "x" and atom.z < 0:
         return -1
     elif ax == "y" and atom.z < 0:
@@ -86,9 +84,9 @@ def calculate_rotation(fragment, angle, ax):
             coord_vector = np.dot(coord_vector, rotate_x(angle))
         elif ax == "y":
             coord_vector = np.dot(coord_vector, rotate_y(angle))
-        else:  
+        else:
             coord_vector = np.dot(coord_vector, rotate_z(angle))
-            
+
         atom.x, atom.y, atom.z = coord_vector[0], coord_vector[1], coord_vector[2]
 
     return fragment
