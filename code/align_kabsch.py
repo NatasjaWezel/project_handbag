@@ -89,8 +89,11 @@ def main():
     x_vec, y_vec, z_vec = data_xyz_matrix_T[0], data_xyz_matrix_T[1], data_xyz_matrix_T[2]
     data.x, data.y, data.z = x_vec, y_vec, z_vec
 
+    # reindex the data to a more readable format
+    data = data.reindex(['fragment_id', '_id', 'symbol', 'label', 'x', 'y', 'z'], axis=1)
+
     # save as csv
-    data.to_csv('test.csv', index=False)
+    data.to_csv('test_kabsch.csv', index=False)
 
     t1 = time.time() - t0
 
@@ -308,16 +311,17 @@ def find_angles(coord_vector, ax):
 
 
 def calculate_rotation(fragment, angle, ax):
+    if ax == "x":
+        rotation_matrix = rotate_x(angle)
+    elif ax == "y":
+        rotation_matrix = rotate_y(angle)
+    else:
+        rotation_matrix = rotate_z(angle)
+
     # rotate all coordinates according to the previously defined rotation angle
     for i, atom in fragment.iterrows():
         coord_vector = np.array([atom.x, atom.y, atom.z])
-
-        if ax == "x":
-            coord_vector = np.dot(coord_vector, rotate_x(angle))
-        elif ax == "y":
-            coord_vector = np.dot(coord_vector, rotate_y(angle))
-        else:
-            coord_vector = np.dot(coord_vector, rotate_z(angle))
+        coord_vector = np.dot(coord_vector, rotation_matrix)
 
         fragment.loc[fragment.index == i, 'x'] = coord_vector[0]
         fragment.loc[fragment.index == i, 'y'] = coord_vector[1]
