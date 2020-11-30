@@ -1,7 +1,8 @@
 import sys
 
-from classes.Settings import Settings
-from calc_avg_fragment_2 import read_results_alignment
+import pandas as pd
+import numpy as np
+
 from helpers.plot_functions import plot_fragments
 
 
@@ -10,9 +11,15 @@ def main():
         print("Usage: python run.py <inputfilename> <fragments_to_plot>")
         sys.exit(1)
 
-    settings = Settings(sys.argv[1])
-    df = read_results_alignment(settings.get_aligned_csv_filename())
-    df = df[df.in_central_group]
+    filename = sys.argv[1]
+    title = filename.rsplit('\\')[-1].rsplit('.', 1)[0]
+    central = title.split("_")[0]
+    contact = title.split("_")[1]
+
+    df = pd.read_csv('results/' + central + '/' + central + "_" + contact + "_vdw.5/"\
+                     + central + "_" + contact + "_kabsch_aligned.csv")
+
+    # df = df[df.label != '-']
 
     amount = int(sys.argv[2])
 

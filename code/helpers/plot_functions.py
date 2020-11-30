@@ -80,13 +80,13 @@ def plot_fragments(df, amount):
     ax: Axes3D = fig.add_subplot(111, projection='3d')
 
     i = 0
-    unique = list(df.id.unique())
+    unique = list(df.fragment_id.unique())
 
     for _id in unique[:amount]:
-        fragment = df[df.id == _id]
+        fragment = df[df.fragment_id == _id]
 
         color = COLORS[i % len(COLORS)]
-        ax.scatter(fragment.atom_x, fragment.atom_y, fragment.atom_z, color=color, label=_id)
+        ax.scatter(fragment.x, fragment.y, fragment.z, color=color, label=_id)
 
         i += 1
 

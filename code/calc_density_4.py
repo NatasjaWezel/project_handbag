@@ -15,18 +15,22 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+import time
+
 from classes.Settings import Settings
 from helpers.density_helpers import prepare_df, find_available_volume
 from helpers.geometry_helpers import (make_coordinate_df,
                                       get_vdw_distance_contact)
 from calc_avg_fragment_2 import make_avg_fragment_if_not_exists, read_results_alignment
-
+from numba import jit
 
 def main():
 
     if len(sys.argv) != 4:
         print("Usage: python plot_density.py <path/to/inputfile> <resolution> <atom or center to count>")
         sys.exit(1)
+    
+    t0 = time.time()
 
     settings = Settings(sys.argv[1])
     settings.set_atom_to_count(sys.argv[3])
@@ -58,6 +62,8 @@ def main():
         # save so we can use the data but only change the plot - saves time :)
         density_df.to_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
 
+    t1 = time.time() - t0
+    print("Duration: %.2f s." % t1)
 
 def count_points_per_square(df, contact_points_df, settings):
     contact_points_df = contact_points_df
@@ -78,15 +84,22 @@ def count_points_per_square(df, contact_points_df, settings):
     return df
 
 
-# TODO: @jit thisssss
+# @jit(nopython=True)
 def fill_bins(amount, bin_coordinates, contact_coordinates, resolution):
     x, y, z = 0, 1, 2
-    for cor in tqdm(contact_coordinates):
+    i = 0
+    total = len(contact_coordinates)
+
+    for cor in contact_coordinates:
         idx = np.where((bin_coordinates[x] <= cor[x]) & (bin_coordinates[x] + resolution >= cor[x]) &
                        (bin_coordinates[y] <= cor[y]) & (bin_coordinates[y] + resolution >= cor[y]) &
                        (bin_coordinates[z] <= cor[z]) & (bin_coordinates[z] + resolution >= cor[z]))
 
         amount[idx] += 1
+
+        i += 1
+        if i % 10000 == 0:
+            print(i, "/", total)
 
     return amount
 
