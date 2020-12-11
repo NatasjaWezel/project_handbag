@@ -1,7 +1,8 @@
 import sys
 
+import pandas as pd
+
 from classes.Settings import Settings
-from calc_avg_fragment_2 import make_avg_fragment_if_not_exists, read_results_alignment
 from helpers.plot_functions import plot_fragment_colored
 
 import matplotlib.pyplot as plt
@@ -18,9 +19,7 @@ def main():
 
     settings = Settings(inputfilename)
 
-    aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
-
-    fragment = make_avg_fragment_if_not_exists(settings, aligned_fragments_df)
+    fragment = pd.read_csv(settings.get_avg_frag_filename())
 
     fig = plt.figure()
     ax: Axes3D = fig.add_subplot(111, projection='3d')
