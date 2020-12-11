@@ -16,7 +16,6 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 
 from classes.Settings import Settings
-from calc_avg_fragment_2 import make_avg_fragment_if_not_exists, read_results_alignment
 from helpers.plot_functions import plot_density, plot_fragment_colored
 
 
@@ -33,13 +32,12 @@ def main():
 
     settings.set_atom_to_count(sys.argv[3])
 
-    df = read_results_alignment(settings.get_aligned_csv_filename())
-    avg_fragment = make_avg_fragment_if_not_exists(settings, df)
-
     try:
+        avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
         density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
-    except (FileNotFoundError, KeyError):
-        print("Run calc_density first")
+    except (FileNotFoundError, KeyError) as exception:
+        print(exception)
+        print("Run avg_frag and calc_density first")
         sys.exit(1)
 
     make_plot(avg_fragment, density_df, settings)
@@ -54,7 +52,8 @@ def make_plot(avg_fragment, density_df, settings):
 
     p, ax = plot_density(ax=ax, df=density_df, settings=settings)
 
-    ax.set_title("4D density plot\n Resolution: " + str(settings.resolution))
+    ax.set_title(f"{settings.central_group_name}--{settings.contact_group_name} 4D density plot\n\
+                    Resolution: {settings.resolution}")
 
     fig.colorbar(p)
     plt.savefig(plotname)
