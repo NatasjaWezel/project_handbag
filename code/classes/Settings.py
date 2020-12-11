@@ -1,7 +1,7 @@
 import os
 
 import pandas as pd
-from helpers.headers import CENTRAL_GROUPS_CSV, RADII_CSV, RESULTSDIR
+from helpers.headers import RADII_CSV, RESULTSDIR
 
 
 class Settings():
@@ -23,13 +23,22 @@ class Settings():
         if not os.path.exists(output_folder_specific):
             os.mkdir(output_folder_specific)
 
-        self.outputfile_prefix = output_folder_specific + title
-
+        self.outputfile_prefix = output_folder_specific + title.rsplit('_', 1)[0]
         self.radii_filename = RADII_CSV
+        self.vdw_radii = {}
 
         self.alignment = {}
-        self.vdw_radii = {}
-        self.cov_radii = {}
+
+    def get_vdw_radius(self, symbol):
+        if symbol in self.vdw_radii.keys():
+            return self.vdw_radii[symbol]
+        else:
+            radii_df = pd.read_csv(self.radii_filename)
+
+            vdw_radius = float(radii_df[radii_df.symbol == symbol].vdw_radius)
+
+            self.vdw_radii[symbol] = vdw_radius
+            return vdw_radius
 
     def get_directionality_results_filename(self):
         return self.output_folder_central_group + self.central_group_name + "_directionality_results.csv"
@@ -38,19 +47,9 @@ class Settings():
         aligned_csv_name = self.outputfile_prefix + "_aligned.csv"
         return aligned_csv_name
 
-    def get_current_tolerance(self):
-        return self.tolerance
-
-    def set_current_tolerance(self, tolerance):
-        self.tolerance = tolerance
-
-    def get_avg_fragment_filename(self):
-        avg_fragment_filename = self.outputfile_prefix + "_avg_fragment.csv"
-        return avg_fragment_filename
-
-    def get_avg_fragment_hdf_filename(self):
-        avg_fragment_hdf_filename = self.outputfile_prefix + "_avg_fragment.hdf"
-        return avg_fragment_hdf_filename
+    def get_kabsch_aligned_csv_filename(self):
+        aligned_csv_name = self.outputfile_prefix + "_kabsch_aligned.csv"
+        return aligned_csv_name
 
     def get_coordinate_df_filename(self):
         return self.outputfile_prefix + "_coordinates_contact.hdf"
@@ -75,39 +74,7 @@ class Settings():
     def set_atom_to_count(self, atom_str):
         self.to_count_contact = atom_str
 
-    def get_vdw_radius(self, symbol):
-
-        if symbol in self.vdw_radii.keys():
-            return self.vdw_radii[symbol]
-        else:
-            radii_df = pd.read_csv(self.radii_filename)
-
-            vdw_radius = float(radii_df[radii_df.symbol == symbol].vdw_radius)
-
-            self.vdw_radii[symbol] = vdw_radius
-            return vdw_radius
-
-    def get_cov_radius(self, symbol):
-
-        if symbol in self.cov_radii.keys():
-            return self.cov_radii[symbol]
-        else:
-            radii_df = pd.read_csv(self.radii_filename)
-
-            cov_radius = float(radii_df[radii_df.symbol == symbol].cov_radius)
-
-            self.cov_radii[symbol] = cov_radius
-            return cov_radius
-
-    def alignment_labels(self):
-        df = pd.read_csv(CENTRAL_GROUPS_CSV)
-        df = df[df.name == self.central_group_name]
-
-        self.alignment['center'] = df.center_label.max()
-        self.alignment['yaxis'] = df.y_axis_label.max()
-        self.alignment['xyplane'] = df.xy_plane_label.max()
-
-        self.alignment['R'] = df.R.max()
-
-        if self.alignment["R"] == "-":
-            self.alignment["R"] = None
+    # TODO: this doesn't work for KABSCH or ROTATION_Aligned
+    def get_avg_frag_filename(self):
+        avg_fragment_filename = self.outputfile_prefix + "_avg_fragment.csv"
+        return avg_fragment_filename
