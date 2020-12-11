@@ -24,8 +24,8 @@ def calculate_no_bins(resolution, limits):
 
 
 def prepare_df(df, settings):
-    maxx, maxy, maxz = df.atom_x.max(), df.atom_y.max(), df.atom_z.max()
-    minx, miny, minz = df.atom_x.min(), df.atom_y.min(), df.atom_z.min()
+    maxx, maxy, maxz = df.x.max(), df.y.max(), df.z.max()
+    minx, miny, minz = df.x.min(), df.y.min(), df.z.min()
 
     no_bins_x, minx, maxx = calculate_no_bins(resolution=settings.resolution, limits=[minx, maxx])
     no_bins_y, miny, maxy = calculate_no_bins(resolution=settings.resolution, limits=[miny, maxy])
@@ -80,12 +80,12 @@ def calc_distances(in_vdw_volume, bin_coordinates, avg_f_p, indices, extra):
 
 
 def find_min_max_bounds(avg_fragment, extra):
-    avg_fragment['minx'] = avg_fragment['atom_x'] - avg_fragment['vdw_radius'] - extra
-    avg_fragment['miny'] = avg_fragment['atom_y'] - avg_fragment['vdw_radius'] - extra
-    avg_fragment['minz'] = avg_fragment['atom_z'] - avg_fragment['vdw_radius'] - extra
-    avg_fragment['maxx'] = avg_fragment['atom_x'] + avg_fragment['vdw_radius'] + extra
-    avg_fragment['maxy'] = avg_fragment['atom_y'] + avg_fragment['vdw_radius'] + extra
-    avg_fragment['maxz'] = avg_fragment['atom_z'] + avg_fragment['vdw_radius'] + extra
+    avg_fragment['minx'] = avg_fragment['x'] - avg_fragment['vdw_radius'] - extra
+    avg_fragment['miny'] = avg_fragment['y'] - avg_fragment['vdw_radius'] - extra
+    avg_fragment['minz'] = avg_fragment['z'] - avg_fragment['vdw_radius'] - extra
+    avg_fragment['maxx'] = avg_fragment['x'] + avg_fragment['vdw_radius'] + extra
+    avg_fragment['maxy'] = avg_fragment['y'] + avg_fragment['vdw_radius'] + extra
+    avg_fragment['maxz'] = avg_fragment['z'] + avg_fragment['vdw_radius'] + extra
 
     return avg_fragment
 
@@ -134,7 +134,7 @@ def count_bins_in_vdw(avg_fragment, extra):
     for i, atom in avg_fragment.iterrows():
         indices = np.transpose(np.where(in_vdw_vol == 0))
 
-        fragment_point = np.array([atom.atom_x, atom.atom_y, atom.atom_z, atom.vdw_radius])
+        fragment_point = np.array([atom.x, atom.y, atom.z, atom.vdw_radius])
 
         in_vdw_vol = calc_distances(in_vdw_vol, bin_coordinates, fragment_point, indices, extra)
 
