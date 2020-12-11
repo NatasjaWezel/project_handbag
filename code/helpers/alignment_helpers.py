@@ -4,6 +4,8 @@ import pandas as pd
 from helpers.headers import CENTRAL_GROUPS_CSV
 
 ####################################### READ FUNCTIONS ############################################
+
+
 def read_coord_file(filename):
     """ Reads the first 100 lines of a csv file to count the atoms per fragment and per central
         group and which atom will get what label from the parameter file. """
@@ -38,6 +40,7 @@ def read_raw_data(filename, no_atoms):
         and the other part reads the structure names. """
 
     print("Pandas is reading csv...")
+
     # use amount of atoms for skiprow function to read into df immediately
     data = pd.read_csv(filename, sep='\\s+', usecols=[0, 1, 2, 3], names=['_id', 'x', 'y', 'z'],
                        header=None,
@@ -46,9 +49,11 @@ def read_raw_data(filename, no_atoms):
     # get the actual symbols of each atom
     data['symbol'] = data.apply(lambda row: get_atom_symbol(row), axis=1)
 
-    structures = pd.read_csv(filename, sep='\\s+', usecols=[0], names=['structure_id'],
-                                header=None,
-                                skiprows=lambda x: not logic(x, no_atoms))
+    structures = pd.read_csv(filename, sep='*', usecols=[0], names=['structure_id'],
+                             header=None,
+                             skiprows=lambda x: not logic(x, no_atoms))
+
+    structures['structure_id'] = structures['structure_id'].str.rstrip()
 
     structures['rmse'] = 0
     structures['mirrored'] = False
@@ -68,7 +73,8 @@ def get_atom_symbol(row):
 
 
 def logic(index, amount_atoms):
-    """ Logic function to skip each header line - or read only the headers for the structure names - when reading in the data. """
+    """ Logic function to skip each header line - or read only the headers for the structure names - when reading
+        in the data. """
     if index % (amount_atoms + 1) == 0:
         return True
     return False
@@ -114,7 +120,7 @@ def kabsch_align(A, B, B2, n):
     """ Performs the kabsch algorithm on two central groups, then translates and multiplies the
         entire fragment with the calculated translation vector and rotation matrix. """\
 
-    assert len(A) == len(B)
+    assert len(A) == len(B), "Fragment 1 and fragment to align do not have the same length"
 
     # center the points
     centroid_A = np.mean(A, axis=0)
@@ -279,7 +285,7 @@ def rotate_z(angle):
 ################################### PERFORMANCE CHECK FUNCTIONS ###################################
 def calc_rmse(A, B, n):
     """ Calculate the RMSE of two matrices. """
-    
+
     err = A - B
     err = np.multiply(err, err)
     err = np.sum(err)
