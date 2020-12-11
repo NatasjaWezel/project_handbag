@@ -12,12 +12,13 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 from mpl_toolkits.mplot3d import Axes3D
 
-from calc_avg_fragment_2 import make_avg_fragment_if_not_exists, read_results_alignment
 from classes.Settings import Settings
 from helpers.geometry_helpers import (get_vdw_distance_contact,
                                       make_coordinate_df)
 from helpers.headers import AXCOLOR
 from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
+
+import pandas as pd
 
 
 def main():
@@ -29,12 +30,12 @@ def main():
     settings = Settings(sys.argv[1])
     settings.set_atom_to_count(sys.argv[2])
 
-    df = read_results_alignment(settings.get_aligned_csv_filename())
+    df = pd.read_csv(settings.get_kabsch_aligned_csv_filename())
 
-    avg_fragment = make_avg_fragment_if_not_exists(settings, df)
+    avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
 
     # grab only the atoms that are in the contact groups
-    df = df[~df.in_central_group]
+    df = df[df.label == "-"]
 
     vdw_distance_contact = get_vdw_distance_contact(df, settings)
 
@@ -53,11 +54,11 @@ def make_plot(avg_fragment, coordinate_df, longest_vdw_contact):
     ax, _ = plot_vdw_spheres(avg_fragment, ax, color='pink')
 
     points = ax.scatter(list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom
-                             + longest_vdw_contact].atom_x),
+                             + longest_vdw_contact].x),
                         list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom
-                             + longest_vdw_contact].atom_y),
+                             + longest_vdw_contact].y),
                         list(coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom
-                             + longest_vdw_contact].atom_z), s=1, c="red")
+                             + longest_vdw_contact].z), s=1, c="red")
 
     vdw_slider_ax = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=AXCOLOR)
     vdw_slider = Slider(vdw_slider_ax, 'VDW radius + ', -2, 3, valinit=0, valstep=0.1)
@@ -68,7 +69,7 @@ def make_plot(avg_fragment, coordinate_df, longest_vdw_contact):
         show_df = coordinate_df[coordinate_df.distance <= coordinate_df.vdw_closest_atom + longest_vdw_contact + val]
 
         print(len(coordinate_df), len(show_df), val)
-        points._offsets3d = (list(show_df.atom_x), list(show_df.atom_y), list(show_df.atom_z))
+        points._offsets3d = (list(show_df.x), list(show_df.y), list(show_df.z))
         fig.canvas.draw_idle()
 
     vdw_slider.on_changed(update)
