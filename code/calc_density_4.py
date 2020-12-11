@@ -10,26 +10,25 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import sys
+import time
+
+from numba import jit
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
-
-import time
 
 from classes.Settings import Settings
-from helpers.density_helpers import prepare_df, find_available_volume
-from helpers.geometry_helpers import (make_coordinate_df,
-                                      get_vdw_distance_contact)
-from calc_avg_fragment_2 import make_avg_fragment_if_not_exists, read_results_alignment
-from numba import jit
+from helpers.density_helpers import find_available_volume, prepare_df
+from helpers.geometry_helpers import (get_vdw_distance_contact,
+                                      make_coordinate_df)
+
 
 def main():
 
     if len(sys.argv) != 4:
         print("Usage: python plot_density.py <path/to/inputfile> <resolution> <atom or center to count>")
         sys.exit(1)
-    
+
     t0 = time.time()
 
     settings = Settings(sys.argv[1])
@@ -38,18 +37,21 @@ def main():
     # resolution of the bins, in Angstrom
     settings.set_resolution(float(sys.argv[2]))
 
-    df = read_results_alignment(settings.get_aligned_csv_filename())
-
-    avg_fragment = make_avg_fragment_if_not_exists(settings, df)
+    try:
+        df = pd.read_csv(settings.get_kabsch_aligned_csv_filename(), header=0)
+        avg_frag = pd.read_csv(settings.outputfile_prefix + "_avg_fragment.csv", header=0)
+    except FileNotFoundError:
+        print('First align and calculate average fragment.')
+        sys.exit(2)
 
     # grab only the atoms that are in the contact groups
-    df_central = df[~df.in_central_group]
-    coordinate_df = make_coordinate_df(df_central, settings, avg_fragment)
+    df_central = df[df['label'] == '-']
+    coordinate_df = make_coordinate_df(df_central, settings, avg_frag)
 
     # find the volume of the central group
     tolerance = 0.5
     contact_group_radius = get_vdw_distance_contact(df, settings)
-    volume = find_available_volume(avg_fragment=avg_fragment, extra=(tolerance + contact_group_radius))
+    volume = find_available_volume(avg_fragment=avg_frag, extra=(tolerance + contact_group_radius))
     print('Available volume:', volume)
 
     try:
@@ -65,6 +67,7 @@ def main():
     t1 = time.time() - t0
     print("Duration: %.2f s." % t1)
 
+
 def count_points_per_square(df, contact_points_df, settings):
     contact_points_df = contact_points_df
 
@@ -73,9 +76,9 @@ def count_points_per_square(df, contact_points_df, settings):
     amount = np.zeros(len(df))
 
     bin_coordinates = np.array([df.xstart, df.ystart, df.zstart])
-    contact_coordinates = np.transpose(np.array([contact_points_df.atom_x,
-                                                 contact_points_df.atom_y,
-                                                 contact_points_df.atom_z]))
+    contact_coordinates = np.transpose(np.array([contact_points_df.x,
+                                                 contact_points_df.y,
+                                                 contact_points_df.z]))
 
     amount = fill_bins(amount, bin_coordinates, contact_coordinates, settings.resolution)
 
@@ -84,21 +87,21 @@ def count_points_per_square(df, contact_points_df, settings):
     return df
 
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def fill_bins(amount, bin_coordinates, contact_coordinates, resolution):
     x, y, z = 0, 1, 2
     i = 0
     total = len(contact_coordinates)
 
-    for cor in contact_coordinates:
+    for i in range(total):
+        cor = contact_coordinates[i]
         idx = np.where((bin_coordinates[x] <= cor[x]) & (bin_coordinates[x] + resolution >= cor[x]) &
                        (bin_coordinates[y] <= cor[y]) & (bin_coordinates[y] + resolution >= cor[y]) &
                        (bin_coordinates[z] <= cor[z]) & (bin_coordinates[z] + resolution >= cor[z]))
 
         amount[idx] += 1
 
-        i += 1
-        if i % 10000 == 0:
+        if i % 5000 == 0:
             print(i, "/", total)
 
     return amount
