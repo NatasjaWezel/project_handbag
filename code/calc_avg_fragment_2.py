@@ -13,31 +13,18 @@ def main():
 
     inputfilename = sys.argv[1]
 
-    settings = Settings(inputfilename)
+    avg_frag_settings = Settings(inputfilename)
 
-    aligned_fragments_df = read_results_alignment(settings.get_aligned_csv_filename())
+    df = pd.read_csv(avg_frag_settings.get_kabsch_aligned_csv_filename(), header=0)
 
-    make_avg_fragment_if_not_exists(settings, aligned_fragments_df)
+    avg_frag_file = avg_frag_settings.get_avg_frag_filename()
 
+    fragment = average_fragment(df, avg_frag_settings)
 
-def read_results_alignment(inputfilename):
-    df = pd.read_csv(inputfilename, header=None)
-    df.columns = ["id", "entry_id", "atom_label", "lablabel", "atom_symbol", "in_central_group", "atom_x", "atom_y", "atom_z"]
+    if avg_frag_settings.central_group_name == "RCOMe":
+        fragment = add_model_methyl(fragment=fragment, settings=avg_frag_settings)
 
-    return df
-
-
-def make_avg_fragment_if_not_exists(settings, df):
-    try:
-        fragment = pd.read_csv(settings.get_avg_fragment_filename())
-    except FileNotFoundError:
-        fragment = average_fragment(df, settings)
-
-        print(settings.central_group_name)
-        if settings.central_group_name == "RCOMe":
-            fragment = add_model_methyl(fragment=fragment, settings=settings)
-
-        fragment.to_csv(settings.get_avg_fragment_filename())
+    fragment.to_csv(avg_frag_file, index=False)
 
     return fragment
 
