@@ -5,6 +5,8 @@ import pandas as pd
 
 import copy
 
+import time
+
 from numba import jit
 
 
@@ -14,23 +16,30 @@ def make_coordinate_df(df, settings, avg_fragment):
 
         return coordinate_df
     except (KeyError, FileNotFoundError):
-        first_fragment_df = df[df.id == df.id.unique()[0]]
-        find_closest_contact_atom = True
+        print("Searching for nearest atom from central group...")
+        t0 = time.time()
+
+        df = df[df.label == "-"]
+
+        first_fragment_df = df[df.fragment_id == df.fragment_id.unique()[0]]
+
+        print("Atoms in contact group:", len(first_fragment_df), "atom to count: ", settings.to_count_contact)
+        find_closest_contact_atom = False
 
         if settings.to_count_contact == "centroid":
             # plot centroids of all contact fragments
             longest_vdw = get_vdw_distance_contact(df, settings)
-            coordinate_df = df.groupby("id").mean().reset_index()
+            coordinate_df = df.groupby("fragment_id").mean().reset_index()
 
-        elif len(first_fragment_df[first_fragment_df["atom_symbol"] == settings.to_count_contact]) == 1:
+        elif len(first_fragment_df[first_fragment_df["symbol"] == settings.to_count_contact]) == 1:
             longest_vdw = get_vdw_distance_contact(df, settings)
 
             # atom is unique, plot all of them
-            coordinate_df = df[df.atom_symbol == settings.to_count_contact].reset_index().copy()
+            coordinate_df = df[df.symbol == settings.to_count_contact].reset_index().copy()
 
         else:
             longest_vdw = get_vdw_distance_contact(df, settings)
-            coordinate_df = df[df.atom_symbol == settings.to_count_contact].reset_index().copy()
+            coordinate_df = df[df.symbol == settings.to_count_contact].reset_index().copy()
 
             # atom is not unique, find closest later
             find_closest_contact_atom = True
@@ -39,14 +48,16 @@ def make_coordinate_df(df, settings, avg_fragment):
 
         if find_closest_contact_atom:
             # find closest atom
-            coordinate_df = coordinate_df.loc[coordinate_df.groupby('id').distance.idxmin()].reset_index(drop=True)
+            coordinate_df = coordinate_df.loc[coordinate_df.groupby('fragment_id').distance.idxmin()]\
+                                         .reset_index(drop=True)
 
         coordinate_df['longest_vdw'] = longest_vdw
         coordinate_df.to_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
 
-        print("Done")
+        t1 = time.time()
+        print("Coordinate df is made, duration:", t1-t0, 's')
 
-        return coordinate_df
+    return coordinate_df
 
 
 def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
@@ -55,15 +66,12 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
     closest_distances = np.zeros(length)
     closest_atoms_vdw = np.zeros(length)
 
-    points_avg_f = np.array([avg_fragment.atom_x, avg_fragment.atom_y, avg_fragment.atom_z]).T
+    points_avg_f = np.array([avg_fragment.x, avg_fragment.y, avg_fragment.z]).T
     vdw_radii = np.array(avg_fragment.vdw_radius)
 
-    print("Searching for nearest atom from contact group...")
-    print(length)
-
-    xcoord = np.array(coordinate_df.atom_x)
-    ycoord = np.array(coordinate_df.atom_y)
-    zcoord = np.array(coordinate_df.atom_z)
+    xcoord = np.array(coordinate_df.x)
+    ycoord = np.array(coordinate_df.y)
+    zcoord = np.array(coordinate_df.z)
 
     closest_atoms_vdw, closest_distances = p_dist_calc(closest_atoms_vdw, closest_distances,
                                                        xcoord, ycoord, zcoord,
@@ -103,7 +111,7 @@ def p_dist_calc(closest_atoms_vdw, closest_distances, xcoord, ycoord, zcoord, le
     return closest_atoms_vdw, closest_distances
 
 
-def get_dihedral_and_h(settings):
+def get_dihedral_and_h():
     methyl_model = {}
 
     with open("data/methylmodel.csv", 'r') as model_file:
@@ -119,24 +127,24 @@ def get_dihedral_and_h(settings):
 
 
 def add_model_methyl(fragment, settings):
-    print("Adding model CH3 group...")
+    print("Adding model CH3 group...", end=" ")
 
-    methyl_model = get_dihedral_and_h(settings)
+    methyl_model = get_dihedral_and_h()
 
-    h1, h2, h3 = methyl_model['h1'], methyl_model['h2'], methyl_model['h3']
-    fragment = fragment[(fragment.lablabel != h1) & (fragment.lablabel != h2) & (fragment.lablabel != h3)]
+    # h1, h2, h3 = methyl_model['h1'], methyl_model['h2'], methyl_model['h3']
+    # fragment = fragment[(fragment.label != h1) & (fragment.label != h2) & (fragment.label != h3)]
 
-    a = np.array([float(fragment[fragment.lablabel == methyl_model['dihedral1']].atom_x),
-                  float(fragment[fragment.lablabel == methyl_model['dihedral1']].atom_y),
-                  float(fragment[fragment.lablabel == methyl_model['dihedral1']].atom_z)])
+    a = np.array([float(fragment[fragment.label == methyl_model['dihedral1']].x),
+                  float(fragment[fragment.label == methyl_model['dihedral1']].y),
+                  float(fragment[fragment.label == methyl_model['dihedral1']].z)])
 
-    b = np.array([float(fragment[fragment.lablabel == methyl_model['dihedral2']].atom_x),
-                  float(fragment[fragment.lablabel == methyl_model['dihedral2']].atom_y),
-                  float(fragment[fragment.lablabel == methyl_model['dihedral2']].atom_z)])
+    b = np.array([float(fragment[fragment.label == methyl_model['dihedral2']].x),
+                  float(fragment[fragment.label == methyl_model['dihedral2']].y),
+                  float(fragment[fragment.label == methyl_model['dihedral2']].z)])
 
-    c = np.array([float(fragment[fragment.lablabel == methyl_model['dihedral3']].atom_x),
-                  float(fragment[fragment.lablabel == methyl_model['dihedral3']].atom_y),
-                  float(fragment[fragment.lablabel == methyl_model['dihedral3']].atom_z)])
+    c = np.array([float(fragment[fragment.label == methyl_model['dihedral3']].x),
+                  float(fragment[fragment.label == methyl_model['dihedral3']].y),
+                  float(fragment[fragment.label == methyl_model['dihedral3']].z)])
 
     alpha = np.radians(109.6)
 
@@ -158,19 +166,20 @@ def add_model_methyl(fragment, settings):
         new_point = rotation_from_axis_and_angle(axis=bc, angle=np.radians(angle), rot_vec=cd)
 
         # translate new point
-        new_point = np.add(np.add(new_point, ab), bc)
+        new_point = np.add(np.add(np.add(new_point, a), ab), bc)
 
         indexname = 'aH' + str(i + 1)
 
-        frame = pd.DataFrame(data=[['H', new_point[0], new_point[1], new_point[2], settings.get_vdw_radius('H'),
-                                    indexname, '-']],
-                             columns=['atom_symbol', 'atom_x', 'atom_y', 'atom_z', 'vdw_radius', 'atom_label',
-                                      'lablabel'])
+        frame = pd.DataFrame(data=[['H', indexname, new_point[0], new_point[1], new_point[2],
+                                    settings.get_vdw_radius('H')]],
+                             columns=['symbol', 'label', 'x', 'y', 'z', 'vdw_radius'])
 
         frames.append(copy.deepcopy(frame))
 
     frames.append(fragment)
     fragment = pd.concat(frames)
+
+    print("Done")
 
     return fragment
 
@@ -202,15 +211,11 @@ def rotation_from_axis_and_angle(axis, angle, rot_vec):
 def average_fragment(df, settings):
     """ Returns a fragment containing the average points of the central groups. """
 
-    settings.alignment_labels()
-    central_group_df = df[df.in_central_group]
+    central_group_df = df[df['label'] != '-']
 
-    central_group_df = central_group_df.drop(columns=['entry_id', 'id', 'in_central_group'])
-
-    # TODO: ruthenium? if there's an R, take the average vdw
-    if settings.alignment["R"] is not None:
-        counts = central_group_df[central_group_df['atom_label'].str.contains("R")]['atom_symbol'].value_counts()
-
+    # take average R vdw radius
+    counts = central_group_df[central_group_df['label'].str.contains("R")]['symbol'].value_counts()
+    if len(counts) > 0:
         vdw = 0
         atoms = 0
         for i, count in counts.items():
@@ -218,18 +223,18 @@ def average_fragment(df, settings):
             vdw += count * settings.get_vdw_radius(i)
         avg_vdw = vdw / atoms
 
-    avg_fragment_df = central_group_df.groupby('atom_label').agg({'atom_symbol': 'first', 'lablabel': 'first',
-                                                                  'atom_x': 'mean',
-                                                                  'atom_y': 'mean',
-                                                                  'atom_z': 'mean'}).reset_index()
+    avg_fragment_df = central_group_df.groupby('label').agg({'symbol': 'first',
+                                                             'x': 'mean',
+                                                             'y': 'mean',
+                                                             'z': 'mean'}).reset_index()
 
     avg_fragment_df["vdw_radius"] = 0
 
     for idx, row in avg_fragment_df.iterrows():
-        if "R" in row.atom_label:
+        if "R" in row.label:
             avg_fragment_df.loc[idx, "vdw_radius"] = avg_vdw
         else:
-            avg_fragment_df.loc[idx, "vdw_radius"] = settings.get_vdw_radius(row.atom_symbol)
+            avg_fragment_df.loc[idx, "vdw_radius"] = settings.get_vdw_radius(row.symbol)
 
     return avg_fragment_df
 
@@ -248,18 +253,18 @@ def calculate_longest_vdw_radius_contact(df, settings):
     atom_a = None
 
     # take the first fragment and it's centroid
-    first_fragment_df = df[df.id == df.id.unique()[0]]
-    centroid = first_fragment_df.groupby('id').mean()
+    first_fragment_df = df[df._id == df._id.unique()[0]]
+    centroid = first_fragment_df.groupby('_id').mean()
 
     for _, atom in first_fragment_df.iterrows():
-        if not atom.in_central_group:
-            distance = math.sqrt((atom.atom_x - centroid.atom_x)**2 + (atom.atom_y - centroid.atom_y)**2 +
-                                 (atom.atom_z - centroid.atom_z)**2)
+        if atom.label == '-':
+            distance = math.sqrt((atom.x - centroid.x)**2 + (atom.y - centroid.y)**2 +
+                                 (atom.z - centroid.z)**2)
 
             if distance > longest_distance:
                 longest_distance = distance
                 atom_a = atom
 
-    longest_vdw_distance = (longest_distance + settings.get_vdw_radius(atom_a.atom_symbol))
+    longest_vdw_distance = (longest_distance + settings.get_vdw_radius(atom_a.symbol))
 
     return longest_vdw_distance
