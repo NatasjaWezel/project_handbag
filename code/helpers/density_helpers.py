@@ -54,10 +54,9 @@ def add_boundaries_per_bin(bins, indices):
     ystart_list = list(np.repeat(bins_y, zl)) * xl
     zstart_list = list(bins_z) * (xl * yl)
 
-
     df = pd.DataFrame(np.array([xstart_list, ystart_list, zstart_list]).T,
-                        columns=['xstart', 'ystart', 'zstart'],
-                        index=indices)
+                      columns=['xstart', 'ystart', 'zstart'],
+                      index=indices)
 
     df = df.apply(pd.to_numeric, downcast='float', errors='coerce')
 
