@@ -27,6 +27,15 @@ def main():
     # plot the (average of the) central group
     ax = plot_fragment_colored(ax, fragment)
 
+    zlim = list(ax.get_zlim())
+
+    if zlim[0] > -0.1:
+        zlim[0] = -0.1
+    if zlim[1] < 0.1:
+        zlim[1] = 0.1
+
+    ax.set_zlim(zlim)
+
     ax.set_xlabel('X axis')
     ax.set_ylabel('Y axis')
     ax.set_zlabel('Z axis')
