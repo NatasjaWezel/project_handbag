@@ -46,15 +46,19 @@ def do_kabsch_align(filename, settings):
 
     alignment = alignment_dict(central_group_name=central)
 
-    # rename label for R group to 'R'
+    # rename label for R group to 'Ri'
     if alignment['R']:
-        label_list[label_list.index(alignment['R'])] = 'R'
-        old_R_label = alignment['R']
-        alignment['R'] = 'R'
+        R_atoms = alignment['R'].split('-')
 
-        for key, value in alignment.items():
-            if value == old_R_label:
-                alignment[key] = 'R'
+        for i, Rlabel in enumerate(R_atoms):
+            new_Rlabel = 'R' + str(i+1)
+            label_list[label_list.index(Rlabel)] = new_Rlabel
+
+            alignment[Rlabel] = Rlabel
+
+            for key, value in alignment.items():
+                if value == Rlabel:
+                    alignment[key] = new_Rlabel
 
     data, structures = read_raw_data(filename, no_atoms)
     fragments, data = prepare_data(data, no_atoms, label_list)
