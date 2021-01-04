@@ -96,7 +96,7 @@ def count_bins_in_vdw(avg_fragment, extra):
         Output: dataframe with defined bins and whether they are in the volume or not, and the amount of bins that is
         in the vdw volume. """
 
-    # 0.1 is accurate and semi-instantaneous calculation, see thesis
+    # 0.1 provides an accurate and semi-instantaneous calculation, see thesis
     resolution = 0.1
 
     avg_fragment = find_min_max_bounds(avg_fragment, extra)
@@ -143,7 +143,15 @@ def count_bins_in_vdw(avg_fragment, extra):
 
 
 def find_available_volume(avg_fragment, extra):
-    volume_max = count_bins_in_vdw(avg_fragment=avg_fragment, extra=extra)
-    volume_central = count_bins_in_vdw(avg_fragment=avg_fragment, extra=0)
+    avg_fragment_without_R = avg_fragment[~avg_fragment.label.str.contains("R")].copy()
+    only_R = avg_fragment[avg_fragment.label.str.contains("R")].copy()
 
-    return volume_max - volume_central
+    volume_central = count_bins_in_vdw(avg_fragment=avg_fragment, extra=0)
+    volume_max = count_bins_in_vdw(avg_fragment=avg_fragment_without_R, extra=extra)
+
+    if len(only_R) == 0:
+        volume_R_min = 0
+    else:
+        volume_R_min = count_bins_in_vdw(avg_fragment=only_R, extra=0)
+
+    return (volume_max) - (volume_central - volume_R_min/2)

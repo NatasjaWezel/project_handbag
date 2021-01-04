@@ -253,8 +253,8 @@ def calculate_longest_vdw_radius_contact(df, settings):
     atom_a = None
 
     # take the first fragment and it's centroid
-    first_fragment_df = df[df._id == df._id.unique()[0]]
-    centroid = first_fragment_df.groupby('_id').mean()
+    first_fragment_df = df[df.fragment_id == df.fragment_id.unique()[0]]
+    centroid = first_fragment_df.groupby('fragment_id').mean()
 
     for _, atom in first_fragment_df.iterrows():
         if atom.label == '-':
