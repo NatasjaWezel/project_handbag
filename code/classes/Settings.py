@@ -1,11 +1,10 @@
 import os
 
 import pandas as pd
-from helpers.headers import RADII_CSV, RESULTSDIR
 
 
 class Settings():
-    def __init__(self, inputfilename):
+    def __init__(self, RESULTSDIR, RADII_CSV, inputfilename):
 
         title = inputfilename.rsplit('\\')[-1].rsplit('.', 1)[0].rsplit('_aligned', 1)[0]
 
@@ -14,7 +13,7 @@ class Settings():
 
         self.parameter_csv = ".\\data\\" + self.central_group_name + "\\" + title + ".csv"
 
-        self.output_folder_central_group = RESULTSDIR + title.split("_")[0] + "\\"
+        self.output_folder_central_group = RESULTSDIR + "\\" + title.split("_")[0] + "\\"
         output_folder_specific = self.output_folder_central_group + title + "\\"
 
         if not os.path.exists(self.output_folder_central_group):
