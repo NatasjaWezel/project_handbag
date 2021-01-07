@@ -1,39 +1,6 @@
 import numpy as np
 import pandas as pd
 
-from helpers.headers import CENTRAL_GROUPS_CSV
-
-####################################### READ FUNCTIONS ############################################
-
-
-def read_coord_file(filename):
-    """ Reads the first 100 lines of a csv file to count the atoms per fragment and per central
-        group and which atom will get what label from the parameter file. """
-
-    csv_filename = filename.rsplit('.', 1)[0] + '.csv'
-    translation_dict = get_translation_dict(csv_filename)
-
-    with open(filename) as inputfile:
-        lines = [next(inputfile) for x in range(100)]
-
-    label_list = []
-
-    # count number of atoms in a fragment
-    no_atoms = 0
-    no_atoms_central = 0
-
-    for line in lines[1:]:
-        if "FRAG" in line:
-            break
-
-        label_list.append(translation_dict.get(line.split(' ')[0], '-'))
-        no_atoms += 1
-
-        if translation_dict.get(line.split(' ')[0], '-') != "-":
-            no_atoms_central += 1
-
-    return no_atoms, no_atoms_central, label_list
-
 
 def read_raw_data(filename, no_atoms):
     """ Reads the raw datafiles making use of a logical function. One part reads the fragments their coordinates
@@ -80,42 +47,6 @@ def logic(index, amount_atoms):
     return False
 
 
-def alignment_dict(central_group_name):
-    """ """
-    alignment = {}
-    df = pd.read_csv(CENTRAL_GROUPS_CSV)
-    df = df[df.name == central_group_name]
-
-    alignment['center'] = df.center_label.max()
-    alignment['yaxis'] = df.y_axis_label.max()
-    alignment['xyplane'] = df.xy_plane_label.max()
-
-    alignment['R'] = df.R.max()
-
-    if alignment["R"] == "-":
-        alignment["R"] = None
-
-    return alignment
-
-
-def get_translation_dict(filename):
-
-    with open(filename) as inputfile:
-        lines = [next(inputfile) for x in range(2)]
-
-    translation_dict = {}
-
-    labels = lines[0].split(',')
-    atoms = lines[1].split(',')
-
-    for label, atom in zip(labels, atoms):
-        if "LAB" in label:
-            translation_dict[atom.strip()] = label.strip()
-
-    return translation_dict
-
-
-####################################### KABSCH FUNCTIONS ##########################################
 def kabsch_align(A, B, B2, n):
     """ Performs the kabsch algorithm on two central groups, then translates and multiplies the
         entire fragment with the calculated translation vector and rotation matrix. """\
@@ -149,7 +80,6 @@ def kabsch_align(A, B, B2, n):
     return B2.T
 
 
-################################### ROTATION FUNCTIONS ############################################
 def perform_translation(fragment, index_center):
     """ Lays the atom on index_center on the origin and moves the rest of the atoms as well. """
 
@@ -282,7 +212,6 @@ def rotate_z(angle):
                      [0,             0,              1]))
 
 
-################################### PERFORMANCE CHECK FUNCTIONS ###################################
 def calc_rmse(A, B, n):
     """ Calculate the RMSE of two matrices. """
 

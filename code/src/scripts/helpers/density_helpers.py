@@ -142,7 +142,7 @@ def count_bins_in_vdw(avg_fragment, extra):
     return total * resolution**3
 
 
-def find_available_volume(avg_fragment, extra):
+def find_available_volume(avg_fragment, extra, total=False):
     avg_fragment_without_R = avg_fragment[~avg_fragment.label.str.contains("R")].copy()
     only_R = avg_fragment[avg_fragment.label.str.contains("R")].copy()
 
@@ -153,5 +153,8 @@ def find_available_volume(avg_fragment, extra):
         volume_R_min = 0
     else:
         volume_R_min = count_bins_in_vdw(avg_fragment=only_R, extra=0)
+
+    if total:
+        return volume_max
 
     return (volume_max) - (volume_central - volume_R_min/2)
