@@ -4,8 +4,6 @@ import numpy as np
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 
-from helpers.headers import COLORS
-
 
 def plot_density(ax, df, settings, lower_lim=0.0001):
     df['ymiddle'] = (df['ystart'] * 2 + settings.resolution) / 2
@@ -75,7 +73,7 @@ def plot_fragment(ax, fragment):
     return ax
 
 
-def plot_fragments(df, amount):
+def plot_fragments(df, amount, COLORS):
     fig = plt.figure()
     ax: Axes3D = fig.add_subplot(111, projection='3d')
 
