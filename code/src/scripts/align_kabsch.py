@@ -85,15 +85,13 @@ def split_file_if_too_big(filename, no_atoms):
 
 
 def rotate_first_fragment(settings):
-    no_atoms = settings.no_atoms
-
     data, structures = read_raw_data(settings.coordinate_data, settings.no_atoms)
-    fragments, data = prepare_data(settings, data)
+    settings, fragments, data = prepare_data(settings, data)
 
     # restructure df to matrix
-    data_xyz_matrix = np.array([np.array(data.x), np.array(data.y), np.array(data.z)]).T
+    data_matrix = np.array([np.array(data.x), np.array(data.y), np.array(data.z)]).T
+    A = data_matrix[:settings.no_atoms]
 
-    A = data_xyz_matrix[:no_atoms]
     # translate and rotate first fragment onto the origin as for nice viewing
     A = perform_translation(A.copy(), settings.get_index_alignment_atom('center'))
     A = perform_rotations(A.copy(), [settings.get_index_alignment_atom('yaxis'),
@@ -104,11 +102,11 @@ def rotate_first_fragment(settings):
     if mirrored:
         structures.loc[structures.index == 0, 'mirrored'] = True
 
-    data_xyz_matrix[:no_atoms] = A
+    data_matrix[:settings.no_atoms] = A
 
-    A = data_xyz_matrix[0:settings.no_atoms_central]
+    A = data_matrix[0:settings.no_atoms_central]
 
-    return data, structures, data_xyz_matrix, A
+    return data, structures, data_matrix, A
 
 
 def mirror(matrix):
@@ -168,13 +166,17 @@ def prepare_data(settings, data):
     labels = settings.label_list * no_fragments
     data['label'] = labels
 
-    if not settings.alignment['bin'] == '-':
+    if settings.alignment['bin'] != '-':
+        print(f"Throwing away {len(settings.alignment['bin'])} atoms.")
         settings.no_atoms -= len(settings.alignment['bin'])
         settings.no_atoms_central -= len(settings.alignment['bin'])
 
+        for label in settings.alignment['bin']:
+            settings.label_list.remove(label)
+
         data = data[~data.label.isin(settings.alignment['bin'])].reset_index()
 
-    return no_fragments, data
+    return settings, no_fragments, data
 
 
 if __name__ == "__main__":
