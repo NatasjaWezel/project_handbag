@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 import pandas as pd
 
@@ -10,7 +8,7 @@ import time
 from numba import jit
 
 
-def make_coordinate_df(df, settings, avg_fragment):
+def make_coordinate_df(df, settings, avg_fragment, radii):
     try:
         coordinate_df = pd.read_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
 
@@ -28,17 +26,17 @@ def make_coordinate_df(df, settings, avg_fragment):
 
         if settings.to_count_contact == "centroid":
             # plot centroids of all contact fragments
-            longest_vdw = get_vdw_distance_contact(df, settings)
+            longest_vdw = radii.get_vdw_distance_contact(df, settings)
             coordinate_df = df.groupby("fragment_id").mean().reset_index()
 
         elif len(first_fragment_df[first_fragment_df["symbol"] == settings.to_count_contact]) == 1:
-            longest_vdw = get_vdw_distance_contact(df, settings)
+            longest_vdw = radii.get_vdw_distance_contact(df, settings)
 
             # atom is unique, plot all of them
             coordinate_df = df[df.symbol == settings.to_count_contact].reset_index().copy()
 
         else:
-            longest_vdw = get_vdw_distance_contact(df, settings)
+            longest_vdw = radii.get_vdw_distance_contact(df, settings)
             coordinate_df = df[df.symbol == settings.to_count_contact].reset_index().copy()
 
             # atom is not unique, find closest later
@@ -208,7 +206,7 @@ def rotation_from_axis_and_angle(axis, angle, rot_vec):
     return np.dot(rot_mat, rot_vec)
 
 
-def average_fragment(df, settings):
+def average_fragment(df, settings, radii):
     """ Returns a fragment containing the average points of the central groups. """
 
     central_group_df = df[df['label'] != '-']
@@ -220,7 +218,7 @@ def average_fragment(df, settings):
         atoms = 0
         for i, count in counts.items():
             atoms += count
-            vdw += count * settings.get_vdw_radius(i)
+            vdw += count * radii.get_vdw_radius(i)
         avg_vdw = vdw / atoms
 
     avg_fragment_df = central_group_df.groupby('label').agg({'symbol': 'first',
@@ -234,6 +232,6 @@ def average_fragment(df, settings):
         if "R" in row.label:
             avg_fragment_df.loc[idx, "vdw_radius"] = avg_vdw
         else:
-            avg_fragment_df.loc[idx, "vdw_radius"] = settings.get_vdw_radius(row.symbol)
+            avg_fragment_df.loc[idx, "vdw_radius"] = radii.get_vdw_radius(row.symbol)
 
     return avg_fragment_df
