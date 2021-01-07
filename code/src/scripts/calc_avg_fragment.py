@@ -1,8 +1,10 @@
 import sys
 import pandas as pd
 
-from classes.Settings import Settings
+from classes.Settings import Settings, Radii
 from helpers.geometry_helpers import average_fragment, add_model_methyl
+
+from constants.paths import WORKDIR, RADII_CSV
 
 
 def main():
@@ -13,17 +15,19 @@ def main():
 
     inputfilename = sys.argv[1]
 
-    avg_frag_settings = Settings(inputfilename)
+    avg_frag_settings = Settings(WORKDIR, inputfilename)
 
-    df = pd.read_csv(avg_frag_settings.get_kabsch_aligned_csv_filename(), header=0)
+    df = pd.read_csv(avg_frag_settings.get_aligned_csv_filename(), header=0)
 
-    avg_frag_file = avg_frag_settings.get_avg_frag_filename()
-
-    fragment = average_fragment(df, avg_frag_settings)
+    # make radii object to get vdw radii
+    radii = Radii(RADII_CSV)
+    fragment = average_fragment(df, avg_frag_settings, radii)
 
     if avg_frag_settings.central_group_name == "RCOMe":
         fragment = add_model_methyl(fragment=fragment, settings=avg_frag_settings)
 
+    # get name and save average fragment
+    avg_frag_file = avg_frag_settings.get_avg_frag_filename()
     fragment.to_csv(avg_frag_file, index=False)
 
     return fragment
