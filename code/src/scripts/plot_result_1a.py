@@ -1,9 +1,11 @@
 import sys
 
 import pandas as pd
-import numpy as np
 
 from helpers.plot_functions import plot_fragments
+
+from constants.paths import WORKDIR
+from constants.colors import COLORS
 
 
 def main():
@@ -16,14 +18,14 @@ def main():
     central = title.split("_")[0]
     contact = title.split("_")[1]
 
-    df = pd.read_csv('results/' + central + '/' + central + "_" + contact + "_vdw.5/"\
-                     + central + "_" + contact + "_kabsch_aligned.csv")
+    df = pd.read_csv('../../results/' + central + '/' + central + "_" + contact + "_vdw.5/"\
+                     + central + "_" + contact + "_aligned.csv")
 
     # df = df[df.label != '-']
 
     amount = int(sys.argv[2])
 
-    plot_fragments(df, amount)
+    plot_fragments(df, amount, COLORS)
 
 
 if __name__ == "__main__":

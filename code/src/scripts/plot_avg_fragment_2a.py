@@ -8,6 +8,8 @@ from helpers.plot_functions import plot_fragment_colored
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+from constants.paths import WORKDIR
+
 
 def main():
 
@@ -17,7 +19,7 @@ def main():
 
     inputfilename = sys.argv[1]
 
-    settings = Settings(inputfilename)
+    settings = Settings(WORKDIR, inputfilename)
 
     fragment = pd.read_csv(settings.get_avg_frag_filename())
 
