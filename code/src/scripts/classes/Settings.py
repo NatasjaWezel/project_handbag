@@ -5,10 +5,9 @@ import math
 
 
 class Settings():
-    def __init__(self, WORKDIR, coordinate_file, labelfile):
+    def __init__(self, WORKDIR, coordinate_file):
 
         self.coordinate_data = coordinate_file
-        self.label_data = labelfile
 
         names = coordinate_file.rsplit('\\')[-1].rsplit('.', 1)[0].rsplit('_aligned', 1)[0]
 
@@ -31,7 +30,7 @@ class Settings():
         return self.output_folder_central_group + self.central_group_name + "_directionality_results.csv"
 
     def get_aligned_csv_filename(self):
-        return self.outputfile_prefix + "_kabsch_aligned.csv"
+        return self.outputfile_prefix + "_aligned.csv"
 
     def get_coordinate_df_filename(self):
         return self.outputfile_prefix + "_coordinates_contact.hdf"
@@ -108,8 +107,9 @@ class Radii():
 
 class AlignmentSettings(Settings):
     def __init__(self, WORKDIR, coordinate_file, labelfile):
-        Settings.__init__(self, WORKDIR, coordinate_file, labelfile)
+        Settings.__init__(self, WORKDIR, coordinate_file)
 
+        self.label_data = labelfile
         self.alignment = {}
 
     def set_central_group_csv(self, filename):
@@ -117,6 +117,12 @@ class AlignmentSettings(Settings):
 
     def get_central_group_csv(self):
         return self.central_group_csv
+
+    def set_no_fragments(self, no_fragments):
+        self.no_fragments = no_fragments
+
+    def get_no_fragments(self):
+        return self.no_fragments
 
     def get_aligned_csv_filenames(self):
         aligned_csv = self.outputfile_prefix + "_aligned.csv"
@@ -140,6 +146,7 @@ class AlignmentSettings(Settings):
 
         # count number of atoms in a fragment
         self.no_atoms = 0
+        self.no_atoms_central = 0
 
         # loop through the atoms until next fragment is found
         for line in lines[1:]:
@@ -149,6 +156,9 @@ class AlignmentSettings(Settings):
             # append to the label list which label the atom has, if any, else '-'
             self.label_list.append(translation_dict.get(line.split(' ')[0], '-'))
             self.no_atoms += 1
+
+            if translation_dict.get(line.split(' ')[0], '-') != '-':
+                self.no_atoms_central += 1
 
     def atoms_to_labels(self):
         # read the first two lines to figure out the label and atom ordeer
@@ -185,9 +195,10 @@ class AlignmentSettings(Settings):
             self.alignment['bin'] = self.alignment['bin'].split('-')
 
         self.alignment['R'] = df.R.max() + '-' + df.not_R.max()
+        self.alignment['R'] = self.alignment['R'].lstrip('-').rstrip('-')
 
         # rename label for R group to 'Ri'
-        if self.alignment['R'] != '-':
+        if self.alignment['R'] != '-' and self.alignment['R'] != '':
             R_atoms = self.alignment['R'].split('-')
 
             for i, Rlabel in enumerate(R_atoms):
