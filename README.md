@@ -6,8 +6,8 @@ Supervisor: dhr. dr. T.J. (Tiddo) Mooibroek
 Auteur: Natasja Wezel (BSc)
 
 
-### Installation
-pip install requirements.txt
+### Installation - Scripting
+```pip install -r docs/requirements.txt```
 
 ### Preparation
 Search query in conquest, export fragments xyz coordinates.
