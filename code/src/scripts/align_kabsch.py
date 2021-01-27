@@ -10,6 +10,8 @@ import sys
 import os
 import time
 
+import pandas as pd
+
 import numpy as np
 from classes.Settings import AlignmentSettings
 from constants.paths import CENTRAL_GROUPS_CSV, WORKDIR
@@ -39,13 +41,31 @@ def main():
     settings.set_central_group_csv(CENTRAL_GROUPS_CSV)
     settings.prepare_alignment()
 
-    split_file_if_too_big(coordinate_file, settings.no_atoms)
+    split_file_if_too_big(settings.coordinate_file, settings.no_atoms)
+    settings.update_coordinate_filename()
+
+    # TODO: build check for existing alignment
+    align_all_fragments(settings)
+
+    t1 = time.time() - t0
+
+    print("Duration: %.2f s." % t1)
+
+
+def align_all_fragments(settings, to_mirror=True):
+    # get filenames
+    aligned_csv_filename, structures_csv_filename = settings.get_aligned_csv_filenames()
+
+    # check if already aligned
+    if os.path.exists(aligned_csv_filename):
+        print("The fragments are already aligned")
+        return
 
     # TODO: count files
-    data, structures, data_matrix, first_fragment = rotate_first_fragment(settings)
+    data, structures, data_matrix, first_fragment = rotate_first_fragment(settings, to_mirror)
 
     # align all fragments
-    structures, data_matrix = do_kabsch_align(settings, data_matrix, structures, first_fragment)
+    structures, data_matrix = do_kabsch_align(settings, data_matrix, structures, first_fragment, to_mirror)
 
     # put back into df
     data_matrix = data_matrix.T
@@ -55,16 +75,9 @@ def main():
     # reindex the data to a more readable format
     data = data.reindex(['fragment_id', '_id', 'symbol', 'label', 'x', 'y', 'z'], axis=1)
 
-    # get filenames
-    aligned_csv_filename, structures_csv_filename = settings.get_aligned_csv_filenames()
-
     # save as csv
     structures.to_csv(structures_csv_filename, index=False)
     data.to_csv(aligned_csv_filename, index=False)
-
-    t1 = time.time() - t0
-
-    print("Duration: %.2f s." % t1)
 
 
 def split_file_if_too_big(filename, no_atoms):
@@ -84,8 +97,10 @@ def split_file_if_too_big(filename, no_atoms):
               output_name_template=output_name_template, output_path='.')
 
 
-def rotate_first_fragment(settings):
-    data, structures = read_raw_data(settings.coordinate_data, settings.no_atoms)
+def rotate_first_fragment(settings, to_mirror):
+    data, structures = read_raw_data(settings.coordinate_file, settings.no_atoms)
+
+    # bin atoms to be binned
     settings, fragments, data = prepare_data(settings, data)
 
     # restructure df to matrix
@@ -97,10 +112,11 @@ def rotate_first_fragment(settings):
     A = perform_rotations(A.copy(), [settings.get_index_alignment_atom('yaxis'),
                                      settings.get_index_alignment_atom('xyplane')])
 
-    mirrored, A = mirror(A)
+    if to_mirror:
+        mirrored, A = mirror(A)
 
-    if mirrored:
-        structures.loc[structures.index == 0, 'mirrored'] = True
+        if mirrored:
+            structures.loc[structures.index == 0, 'mirrored'] = True
 
     data_matrix[:settings.no_atoms] = A
 
@@ -120,7 +136,7 @@ def mirror(matrix):
     return False, matrix
 
 
-def do_kabsch_align(settings, data_matrix, structures, A):
+def do_kabsch_align(settings, data_matrix, structures, A, to_mirror):
     no_atoms = settings.no_atoms
     no_atoms_central = settings.no_atoms_central
 
@@ -134,10 +150,11 @@ def do_kabsch_align(settings, data_matrix, structures, A):
         # run kabsch, shift frame in data each time
         B_total_2 = kabsch_align(A, B_central, B_total, n)
 
-        mirrored, B_total_2 = mirror(B_total_2)
+        if to_mirror:
+            mirrored, B_total_2 = mirror(B_total_2)
 
-        if mirrored:
-            structures.loc[structures.index == i, 'mirrored'] = True
+            if mirrored:
+                structures.loc[structures.index == i, 'mirrored'] = True
 
         # calculate and save error
         rmse = calc_rmse(A, B_total_2[:no_atoms_central], n)
