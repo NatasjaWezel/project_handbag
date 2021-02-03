@@ -7,7 +7,7 @@ import math
 class Settings():
     def __init__(self, WORKDIR, coordinate_file):
 
-        self.coordinate_data = coordinate_file
+        self.coordinate_file = coordinate_file
 
         names = coordinate_file.rsplit('\\')[-1].rsplit('.', 1)[0].rsplit('_aligned', 1)[0]
 
@@ -15,7 +15,7 @@ class Settings():
         self.contact_group_name = names.split("_")[1]
 
         # setup results files
-        self.output_folder_central_group = WORKDIR + "\\results\\" + names.split("_")[0] + "\\"
+        self.output_folder_central_group = WORKDIR + "\\results\\pairs\\" + names.split("_")[0] + "\\"
         output_folder_specific = self.output_folder_central_group + names + "\\"
 
         if not os.path.exists(self.output_folder_central_group):
@@ -31,6 +31,9 @@ class Settings():
 
     def get_aligned_csv_filename(self):
         return self.outputfile_prefix + "_aligned.csv"
+
+    def get_structure_csv_filename(self):
+        return self.outputfile_prefix + "_structures.csv"
 
     def get_coordinate_df_filename(self):
         return self.outputfile_prefix + "_coordinates_contact.hdf"
@@ -58,51 +61,6 @@ class Settings():
     def get_avg_frag_filename(self):
         avg_fragment_filename = self.outputfile_prefix + "_avg_fragment.csv"
         return avg_fragment_filename
-
-
-class Radii():
-    def __init__(self, RADII_CSV):
-        self.radii_filename = RADII_CSV
-        self.vdw_radii = {}
-
-    def get_vdw_radius(self, symbol):
-        if symbol not in self.vdw_radii.keys():
-            radii_df = pd.read_csv(self.radii_filename)
-
-            vdw_radius = float(radii_df[radii_df.symbol == symbol].vdw_radius)
-
-            self.vdw_radii[symbol] = vdw_radius
-
-        return self.vdw_radii[symbol]
-
-    def get_vdw_distance_contact(self, df, settings):
-        if settings.to_count_contact == "centroid":
-            return self.calculate_longest_vdw_radius_contact(df, settings)
-
-        # else return vdw radius of the atom the user is interested in
-        return self.get_vdw_radius(settings.to_count_contact)
-
-    def calculate_longest_vdw_radius_contact(self, df, settings):
-        # TODO: if there's an R, kick that one out
-        longest_distance = 0
-        atom_a = None
-
-        # take the first fragment and it's centroid
-        first_fragment_df = df[df.fragment_id == df.fragment_id.unique()[0]]
-        centroid = first_fragment_df.groupby('fragment_id').mean()
-
-        for _, atom in first_fragment_df.iterrows():
-            if atom.label == '-':
-                distance = math.sqrt((atom.x - centroid.x)**2 + (atom.y - centroid.y)**2 +
-                                     (atom.z - centroid.z)**2)
-
-                if distance > longest_distance:
-                    longest_distance = distance
-                    atom_a = atom
-
-        longest_vdw_distance = (longest_distance + self.get_vdw_radius(atom_a.symbol))
-
-        return longest_vdw_distance
 
 
 class AlignmentSettings(Settings):
@@ -133,13 +91,21 @@ class AlignmentSettings(Settings):
         self.read_coord_file()
         self.make_alignment_dict()
 
+    def update_coordinate_filename(self):
+        # TODO: fix dit met multiple files and original file too big enzo
+        if self.central_group_name == "RC6H5" and (self.contact_group_name == "ArCH" or
+                                                   self.contact_group_name == "RC6H5"):
+
+            self.coordinate_file = self.coordinate_file.rsplit('.', 1)[0] + "_1."\
+                                   + self.coordinate_file.rsplit('.', 1)[1]
+
     def read_coord_file(self):
         """ Reads the first 100 lines of a csv file to count the atoms per fragment and per central
             group and which atom will get what label from the parameter file. """
 
         translation_dict = self.atoms_to_labels()
 
-        with open(self.coordinate_data) as inputfile:
+        with open(self.coordinate_file) as inputfile:
             lines = [next(inputfile) for x in range(100)]
 
         self.label_list = []
@@ -202,7 +168,7 @@ class AlignmentSettings(Settings):
             R_atoms = self.alignment['R'].split('-')
 
             for i, Rlabel in enumerate(R_atoms):
-                new_Rlabel = 'R' + str(i+1)
+                new_Rlabel = Rlabel + '-R' + str(i + 1)
                 self.label_list[self.label_list.index(Rlabel)] = new_Rlabel
 
                 self.alignment[Rlabel] = Rlabel
