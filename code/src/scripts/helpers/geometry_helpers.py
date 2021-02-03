@@ -11,8 +11,7 @@ from numba import jit
 def make_coordinate_df(df, settings, avg_fragment, radii):
     try:
         coordinate_df = pd.read_hdf(settings.get_coordinate_df_filename(), settings.get_coordinate_df_key())
-
-        return coordinate_df
+        print("Coordinate df already existed, loaded from file")
     except (KeyError, FileNotFoundError):
         print("Searching for nearest atom from central group...")
         t0 = time.time()
@@ -26,7 +25,7 @@ def make_coordinate_df(df, settings, avg_fragment, radii):
 
         if settings.to_count_contact == "centroid":
             # plot centroids of all contact fragments
-            longest_vdw = radii.get_vdw_distance_contact(df, settings)
+            longest_vdw = radii.get_vdw_radius("C")
             coordinate_df = df.groupby("fragment_id").mean().reset_index()
 
         elif len(first_fragment_df[first_fragment_df["symbol"] == settings.to_count_contact]) == 1:
@@ -42,7 +41,7 @@ def make_coordinate_df(df, settings, avg_fragment, radii):
             # atom is not unique, find closest later
             find_closest_contact_atom = True
 
-        coordinate_df = distances_closest_vdw_central(coordinate_df, avg_fragment, settings)
+        coordinate_df = distances_closest_vdw_central(coordinate_df, avg_fragment)
 
         if find_closest_contact_atom:
             # find closest atom
@@ -58,7 +57,7 @@ def make_coordinate_df(df, settings, avg_fragment, radii):
     return coordinate_df
 
 
-def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
+def distances_closest_vdw_central(coordinate_df, avg_fragment):
     length = len(coordinate_df)
 
     closest_distances = np.zeros(length)
@@ -84,7 +83,6 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment, settings):
 @jit(nopython=True)
 def p_dist_calc(closest_atoms_vdw, closest_distances, xcoord, ycoord, zcoord, length, points_avg_f, vdw_radii):
 
-    # use prange from numba
     for idx in range(length):
 
         # grab x, y and z of current contact from np arrays
@@ -109,40 +107,39 @@ def p_dist_calc(closest_atoms_vdw, closest_distances, xcoord, ycoord, zcoord, le
     return closest_atoms_vdw, closest_distances
 
 
-def get_dihedral_and_h():
+def get_dihedral_and_h(CSV, central_group_name):
     methyl_model = {}
 
-    with open("data/methylmodel.csv", 'r') as model_file:
-        lines = model_file.readlines()
+    df = pd.read_csv(CSV, header=0)
 
-    keys = lines[0].split(",")
-    labels = lines[1].split(",")
+    df = df[df.central_group == central_group_name]
 
-    for key, label in zip(keys, labels):
-        methyl_model[key.strip()] = label.strip()
+    methyl_model["dihedral1"] = df.dihedral1.item()
+    methyl_model["dihedral2"] = df.dihedral2.item()
+    methyl_model["dihedral3"] = df.dihedral3.item()
 
     return methyl_model
 
 
-def add_model_methyl(fragment, settings):
+def add_model_methyl(CSV, fragment, settings, radii):
     print("Adding model CH3 group...", end=" ")
 
-    methyl_model = get_dihedral_and_h()
+    methyl_model = get_dihedral_and_h(CSV, settings.central_group_name)
 
-    # h1, h2, h3 = methyl_model['h1'], methyl_model['h2'], methyl_model['h3']
-    # fragment = fragment[(fragment.label != h1) & (fragment.label != h2) & (fragment.label != h3)]
+    # if labels have been switched by kmeans, look at old labels
+    column = "label"
 
-    a = np.array([float(fragment[fragment.label == methyl_model['dihedral1']].x),
-                  float(fragment[fragment.label == methyl_model['dihedral1']].y),
-                  float(fragment[fragment.label == methyl_model['dihedral1']].z)])
+    a = np.array([float(fragment[fragment[column].str.contains(methyl_model['dihedral1'])].x),
+                  float(fragment[fragment[column].str.contains(methyl_model['dihedral1'])].y),
+                  float(fragment[fragment[column].str.contains(methyl_model['dihedral1'])].z)])
 
-    b = np.array([float(fragment[fragment.label == methyl_model['dihedral2']].x),
-                  float(fragment[fragment.label == methyl_model['dihedral2']].y),
-                  float(fragment[fragment.label == methyl_model['dihedral2']].z)])
+    b = np.array([float(fragment[fragment[column].str.contains(methyl_model['dihedral2'])].x),
+                  float(fragment[fragment[column].str.contains(methyl_model['dihedral2'])].y),
+                  float(fragment[fragment[column].str.contains(methyl_model['dihedral2'])].z)])
 
-    c = np.array([float(fragment[fragment.label == methyl_model['dihedral3']].x),
-                  float(fragment[fragment.label == methyl_model['dihedral3']].y),
-                  float(fragment[fragment.label == methyl_model['dihedral3']].z)])
+    c = np.array([float(fragment[fragment[column].str.contains(methyl_model['dihedral3'])].x),
+                  float(fragment[fragment[column].str.contains(methyl_model['dihedral3'])].y),
+                  float(fragment[fragment[column].str.contains(methyl_model['dihedral3'])].z)])
 
     alpha = np.radians(109.6)
 
@@ -169,7 +166,7 @@ def add_model_methyl(fragment, settings):
         indexname = 'aH' + str(i + 1)
 
         frame = pd.DataFrame(data=[['H', indexname, new_point[0], new_point[1], new_point[2],
-                                    settings.get_vdw_radius('H')]],
+                                    radii.get_vdw_radius('H')]],
                              columns=['symbol', 'label', 'x', 'y', 'z', 'vdw_radius'])
 
         frames.append(copy.deepcopy(frame))
@@ -213,25 +210,54 @@ def average_fragment(df, settings, radii):
 
     # take average R vdw radius
     counts = central_group_df[central_group_df['label'].str.contains("R")]['symbol'].value_counts()
+
     if len(counts) > 0:
-        vdw = 0
+        # TODO: what happens if multiple R?
+        if 'kmeans_label' not in central_group_df.columns:
+            print("\nR consists of:")
+            elements = counts.index.to_list()
+            counts_list = counts.to_list()
+            percentages = [count/np.sum(counts) for count in counts_list]
+
+            for element in elements:
+                print(element.ljust(10), end="")
+            print()
+            for percentage in percentages:
+                print(f"{percentage * 100 :.2f}%    ".ljust(10), end="")
+            print('\n')
+
+        vdw, cov = 0, 0
         atoms = 0
         for i, count in counts.items():
             atoms += count
             vdw += count * radii.get_vdw_radius(i)
+            cov += count * radii.get_cov_radius(i)
         avg_vdw = vdw / atoms
+        avg_cov = cov / atoms
 
-    avg_fragment_df = central_group_df.groupby('label').agg({'symbol': 'first',
-                                                             'x': 'mean',
-                                                             'y': 'mean',
-                                                             'z': 'mean'}).reset_index()
+    if 'kmeans_label' not in central_group_df.columns:
+        # sort must be false to preserve the order of the rows/labels
+        avg_fragment_df = central_group_df.groupby('label', sort=False).agg({'symbol': 'first',
+                                                                             'x': 'mean',
+                                                                             'y': 'mean',
+                                                                             'z': 'mean'}).reset_index()
+    else:
+        # sort must be false to preserve the order of the rows/labels
+        avg_fragment_df = central_group_df.groupby('kmeans_label', sort=False).agg({'symbol': 'first',
+                                                                                    'label': 'first',
+                                                                                    'x': 'mean',
+                                                                                    'y': 'mean',
+                                                                                    'z': 'mean'}).reset_index()
 
     avg_fragment_df["vdw_radius"] = 0
+    avg_fragment_df["cov_radius"] = 0
 
     for idx, row in avg_fragment_df.iterrows():
         if "R" in row.label:
             avg_fragment_df.loc[idx, "vdw_radius"] = avg_vdw
+            avg_fragment_df.loc[idx, "cov_radius"] = avg_cov
         else:
             avg_fragment_df.loc[idx, "vdw_radius"] = radii.get_vdw_radius(row.symbol)
+            avg_fragment_df.loc[idx, "cov_radius"] = radii.get_cov_radius(row.symbol)
 
     return avg_fragment_df
