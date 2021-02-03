@@ -12,3 +12,5 @@ debug.log
 planning.xlsx
 
 *.pptx
+code/src/notebooks/compression_test_H2O_XH_O.hdf
+.gitignore
