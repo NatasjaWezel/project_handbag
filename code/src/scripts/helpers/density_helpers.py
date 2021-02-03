@@ -23,6 +23,60 @@ def calculate_no_bins(resolution, limits):
     return no_bins, minimum, maximum
 
 
+@jit(nopython=True)
+def fill_bins(amount, bin_coordinates, contact_coordinates, resolution):
+    x, y, z = 0, 1, 2
+    i = 0
+    total = len(contact_coordinates)
+
+    for i in range(total):
+        cor = contact_coordinates[i]
+        idx = np.where((bin_coordinates[x] <= cor[x]) & (bin_coordinates[x] + resolution >= cor[x]) &
+                       (bin_coordinates[y] <= cor[y]) & (bin_coordinates[y] + resolution >= cor[y]) &
+                       (bin_coordinates[z] <= cor[z]) & (bin_coordinates[z] + resolution >= cor[z]))
+
+        amount[idx] += 1
+
+        if i % 5000 == 0:
+            print(i, "/", total)
+
+    return amount
+
+
+def make_density_df(settings, coordinate_df):
+    try:
+        density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
+        print("Density df already existed, loaded from file")
+    except (FileNotFoundError, KeyError):
+        empty_density_df = prepare_df(df=coordinate_df, settings=settings)
+
+        density_df = count_points_per_square(df=empty_density_df, contact_points_df=coordinate_df, settings=settings)
+
+        # save so we can use the data but only change the plot - saves time :)
+        density_df.to_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
+
+    return density_df
+
+
+def count_points_per_square(df, contact_points_df, settings):
+    contact_points_df = contact_points_df
+
+    print("Counting points per bin: ")
+    # prepare vector that will contain the amount
+    amount = np.zeros(len(df))
+
+    bin_coordinates = np.array([df.xstart, df.ystart, df.zstart])
+    contact_coordinates = np.transpose(np.array([contact_points_df.x,
+                                                 contact_points_df.y,
+                                                 contact_points_df.z]))
+
+    amount = fill_bins(amount, bin_coordinates, contact_coordinates, settings.resolution)
+
+    df[settings.to_count_contact] = amount
+
+    return df
+
+
 def prepare_df(df, settings):
     maxx, maxy, maxz = df.x.max(), df.y.max(), df.z.max()
     minx, miny, minz = df.x.min(), df.y.min(), df.z.min()
@@ -32,6 +86,10 @@ def prepare_df(df, settings):
     no_bins_z, minz, maxz = calculate_no_bins(resolution=settings.resolution, limits=[minz, maxz])
 
     amount_bins = no_bins_x * no_bins_y * no_bins_z
+
+    print(f"Preparing df, amount of bins: {amount_bins}")
+    print(f"X Range: ({minx :.2f},{maxx :.2f}), Y Range: ({miny :.2f},{maxy :.2f}), Z Range: ({minz :.2f},{maxz :.2f})")
+
     indices = [i for i in range(0, amount_bins)]
 
     bins = [np.linspace(minx, maxx, num=no_bins_x, endpoint=False),
