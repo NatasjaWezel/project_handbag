@@ -16,7 +16,9 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 
 from classes.Settings import Settings
-from helpers.plot_functions import plot_density, plot_fragment_colored
+from helpers.plot_functions import plot_density, plot_fragment_colored, plot_vdw_spheres
+
+from constants.paths import WORKDIR
 
 
 def main():
@@ -25,7 +27,7 @@ def main():
         print("Usage: python analyze_density.py <path/to/inputfile> <resolution> <atom or center to count>")
         sys.exit(1)
 
-    settings = Settings(sys.argv[1])
+    settings = Settings(WORKDIR, sys.argv[1])
 
     # resolution of the bins, in Angstrom
     settings.set_resolution(float(sys.argv[2]))
@@ -49,11 +51,20 @@ def make_plot(avg_fragment, density_df, settings):
     ax: Axes3D = fig.add_subplot(111, projection='3d')
 
     ax = plot_fragment_colored(ax, avg_fragment)
-
     p, ax = plot_density(ax=ax, df=density_df, settings=settings)
+    ax, _ = plot_vdw_spheres(avg_fragment, ax)
 
-    ax.set_title(f"{settings.central_group_name}--{settings.contact_group_name} 4D density plot\n\
-                    Resolution: {settings.resolution}")
+    title = "4D density plot of " + settings.central_group_name + "--" + settings.contact_group_name +\
+        "(" + settings.to_count_contact + ")\n" + "Resolution: " + f"{settings.resolution :.2f}"
+    ax.set_title(title)
+
+    xlim, ylim, zlim = list(ax.get_xlim()), list(ax.get_ylim()), list(ax.get_zlim())
+    minn = min([xlim[0], ylim[0], zlim[0]])
+    maxx = max([xlim[1], ylim[1], zlim[1]])
+
+    ax.set_xlim((minn, maxx))
+    ax.set_ylim((minn, maxx))
+    ax.set_zlim((minn, maxx))
 
     fig.colorbar(p)
     plt.savefig(plotname)
