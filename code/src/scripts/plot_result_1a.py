@@ -4,7 +4,6 @@ import pandas as pd
 
 from helpers.plot_functions import plot_fragments
 
-from constants.paths import WORKDIR
 from constants.colors import COLORS
 
 
@@ -18,7 +17,7 @@ def main():
     central = title.split("_")[0]
     contact = title.split("_")[1]
 
-    df = pd.read_csv('../../results/' + central + '/' + central + "_" + contact + "_vdw.5/"\
+    df = pd.read_csv('../../results/pairs/' + central + '/' + central + "_" + contact + "_vdw.5/"\
                      + central + "_" + contact + "_aligned.csv")
 
     # df = df[df.label != '-']
