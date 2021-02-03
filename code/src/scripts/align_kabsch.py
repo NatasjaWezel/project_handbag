@@ -10,8 +10,6 @@ import sys
 import os
 import time
 
-import pandas as pd
-
 import numpy as np
 from classes.Settings import AlignmentSettings
 from constants.paths import CENTRAL_GROUPS_CSV, WORKDIR
