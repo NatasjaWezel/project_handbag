@@ -15,7 +15,8 @@ import time
 
 import pandas as pd
 
-from classes.Settings import Settings, Radii
+from classes.Settings import Settings
+from classes.Radii import Radii
 from helpers.density_helpers import make_density_df, find_available_volume
 from helpers.geometry_helpers import (make_coordinate_df)
 
