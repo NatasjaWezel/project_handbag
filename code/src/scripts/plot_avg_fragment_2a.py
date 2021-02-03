@@ -26,21 +26,22 @@ def main():
     fig = plt.figure()
     ax: Axes3D = fig.add_subplot(111, projection='3d')
 
+    ax.set_title(f"Average {settings.central_group_name}--{settings.contact_group_name} Fragment")
+
     # plot the (average of the) central group
     ax = plot_fragment_colored(ax, fragment)
 
-    zlim = list(ax.get_zlim())
+    xlim, ylim, zlim = list(ax.get_xlim()), list(ax.get_ylim()), list(ax.get_zlim())
+    minn = min([xlim[0], ylim[0], zlim[0]])
+    maxx = max([xlim[1], ylim[1], zlim[1]])
 
-    if zlim[0] > -0.1:
-        zlim[0] = -0.1
-    if zlim[1] < 0.1:
-        zlim[1] = 0.1
+    ax.set_xlim((minn, maxx))
+    ax.set_ylim((minn, maxx))
+    ax.set_zlim((minn, maxx))
 
-    ax.set_zlim(zlim)
-
-    ax.set_xlabel('X axis')
-    ax.set_ylabel('Y axis')
-    ax.set_zlabel('Z axis')
+    ax.set_xlabel('X axis ($\\AA$)')
+    ax.set_ylabel('Y axis ($\\AA$)')
+    ax.set_zlabel('Z axis ($\\AA$)')
 
     plt.show()
 
