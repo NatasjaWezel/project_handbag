@@ -6,7 +6,7 @@ def read_raw_data(filename, no_atoms):
     """ Reads the raw datafiles making use of a logical function. One part reads the fragments their coordinates
         and the other part reads the structure names. """
 
-    print("Pandas is reading csv...")
+    print("Pandas is reading csv..." + filename)
 
     # use amount of atoms for skiprow function to read into df immediately
     data = pd.read_csv(filename, sep='\\s+', usecols=[0, 1, 2, 3], names=['_id', 'x', 'y', 'z'],
@@ -218,4 +218,5 @@ def calc_rmse(A, B, n):
     err = A - B
     err = np.multiply(err, err)
     err = np.sum(err)
+
     return np.sqrt(err / n)
