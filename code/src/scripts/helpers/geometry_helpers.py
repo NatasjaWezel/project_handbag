@@ -25,17 +25,17 @@ def make_coordinate_df(df, settings, avg_fragment, radii):
 
         if settings.to_count_contact == "centroid":
             # plot centroids of all contact fragments
-            longest_vdw = radii.get_vdw_radius("C")
+            longest_vdw = radii.get_vdw_distance_contact(settings.to_count_contact)
             coordinate_df = df.groupby("fragment_id").mean().reset_index()
 
         elif len(first_fragment_df[first_fragment_df["symbol"] == settings.to_count_contact]) == 1:
-            longest_vdw = radii.get_vdw_distance_contact(df, settings)
+            longest_vdw = radii.get_vdw_distance_contact(settings.to_count_contact)
 
             # atom is unique, plot all of them
             coordinate_df = df[df.symbol == settings.to_count_contact].reset_index().copy()
 
         else:
-            longest_vdw = radii.get_vdw_distance_contact(df, settings)
+            longest_vdw = radii.get_vdw_distance_contact(settings.to_count_contact)
             coordinate_df = df[df.symbol == settings.to_count_contact].reset_index().copy()
 
             # atom is not unique, find closest later
@@ -57,7 +57,7 @@ def make_coordinate_df(df, settings, avg_fragment, radii):
     return coordinate_df
 
 
-def distances_closest_vdw_central(coordinate_df, avg_fragment):
+def distances_closest_vdw_central(coordinate_df, avg_fragment, labels=""):
     length = len(coordinate_df)
 
     closest_distances = np.zeros(length)
@@ -74,8 +74,9 @@ def distances_closest_vdw_central(coordinate_df, avg_fragment):
                                                        xcoord, ycoord, zcoord,
                                                        length, points_avg_f, vdw_radii)
 
-    coordinate_df.loc[:, "distance"] = closest_distances
-    coordinate_df.loc[:, "vdw_closest_atom"] = closest_atoms_vdw
+    # add the label to the column name for fingerprints: so they don't overwrite other columns
+    coordinate_df.loc[:, "distance" + labels] = closest_distances
+    coordinate_df.loc[:, "vdw_closest_atom" + labels] = closest_atoms_vdw
 
     return coordinate_df
 
@@ -152,13 +153,14 @@ def add_model_methyl(CSV, fragment, settings, radii):
 
     # rotate with an axis perpendicular to both ab and bc
     cd = rotation_from_axis_and_angle(axis=np.cross(ab, bc), angle=d_angle, rot_vec=ab) * cd_norm
+    # print(f'Norm of first added H atom: {np.linalg.norm(cd)}')
 
     # the first point is created, now rotate it 20 degrees each time
     dihedrals = np.arange(0, 360, 20)
 
     frames = []
     for i, angle in enumerate(dihedrals):
-        new_point = rotation_from_axis_and_angle(axis=bc, angle=np.radians(angle), rot_vec=cd)
+        new_point = rotation_from_axis_and_angle(axis=bc, angle=np.radians(angle), rot_vec=cd) * cd_norm
 
         # translate new point
         new_point = np.add(np.add(np.add(new_point, a), ab), bc)
@@ -166,8 +168,8 @@ def add_model_methyl(CSV, fragment, settings, radii):
         indexname = 'aH' + str(i + 1)
 
         frame = pd.DataFrame(data=[['H', indexname, new_point[0], new_point[1], new_point[2],
-                                    radii.get_vdw_radius('H')]],
-                             columns=['symbol', 'label', 'x', 'y', 'z', 'vdw_radius'])
+                                    radii.get_vdw_radius('H'), radii.get_cov_radius('H')]],
+                             columns=['symbol', 'label', 'x', 'y', 'z', 'vdw_radius', 'cov_radius'])
 
         frames.append(copy.deepcopy(frame))
 
@@ -219,12 +221,12 @@ def average_fragment(df, settings, radii):
             counts_list = counts.to_list()
             percentages = [count/np.sum(counts) for count in counts_list]
 
-            for element in elements:
+            for element in elements[:5]:
                 print(element.ljust(10), end="")
-            print()
-            for percentage in percentages:
+            print("other      ")
+            for percentage in percentages[:5]:
                 print(f"{percentage * 100 :.2f}%    ".ljust(10), end="")
-            print('\n')
+            print(f'{np.sum(percentages[5:] * 100) :.2f}%\n')
 
         vdw, cov = 0, 0
         atoms = 0
