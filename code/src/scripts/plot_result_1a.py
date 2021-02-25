@@ -17,10 +17,10 @@ def main():
     central = title.split("_")[0]
     contact = title.split("_")[1]
 
-    df = pd.read_csv('../../results/pairs/' + central + '/' + central + "_" + contact + "_vdw.5/"\
+    df = pd.read_csv('../../results/pairs/' + central + '/' + central + "_" + contact + "_vdw.5/"
                      + central + "_" + contact + "_aligned.csv")
 
-    # df = df[df.label != '-']
+    df = df[df.label != '-']
 
     amount = int(sys.argv[2])
 
