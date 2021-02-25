@@ -35,4 +35,3 @@ class Radii():
 
         # else return vdw radius of the atom the user is interested in
         return self.get_vdw_radius(to_count_contact)
-
