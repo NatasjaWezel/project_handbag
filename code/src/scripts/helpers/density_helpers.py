@@ -147,15 +147,15 @@ def find_min_max_bounds(avg_fragment, extra):
     return avg_fragment
 
 
-def count_bins_in_vdw(avg_fragment, extra):
+def count_bins_in_vdw(avg_fragment, extra, resolution):
     """ Input: the coordinates of the average fragment, the resolution on which we are calculating and the radius
         of the contact group + 0.5.
 
         Output: dataframe with defined bins and whether they are in the volume or not, and the amount of bins that is
-        in the vdw volume. """
+        in the vdw volume.
 
-    # 0.1 provides an accurate and semi-instantaneous calculation, see thesis
-    resolution = 0.1
+        0.1 provides an accurate and semi-instantaneous calculation, see thesis
+    """
 
     avg_fragment = find_min_max_bounds(avg_fragment, extra)
 
@@ -200,19 +200,19 @@ def count_bins_in_vdw(avg_fragment, extra):
     return total * resolution**3
 
 
-def find_available_volume(avg_fragment, extra, total=False):
+def find_available_volume(avg_fragment, extra, total=False, resolution=0.1):
     avg_fragment_without_R = avg_fragment[~avg_fragment.label.str.contains("R")].copy()
     only_R = avg_fragment[avg_fragment.label.str.contains("R")].copy()
 
-    volume_central = count_bins_in_vdw(avg_fragment=avg_fragment, extra=0)
-    volume_max = count_bins_in_vdw(avg_fragment=avg_fragment_without_R, extra=extra)
+    if total:
+        return count_bins_in_vdw(avg_fragment=avg_fragment, extra=extra, resolution=resolution)
+
+    volume_central = count_bins_in_vdw(avg_fragment=avg_fragment, extra=0, resolution=resolution)
+    volume_max = count_bins_in_vdw(avg_fragment=avg_fragment_without_R, extra=extra, resolution=resolution)
 
     if len(only_R) == 0:
         volume_R_min = 0
     else:
-        volume_R_min = count_bins_in_vdw(avg_fragment=only_R, extra=0)
-
-    if total:
-        return volume_max
+        volume_R_min = count_bins_in_vdw(avg_fragment=only_R, extra=0, resolution=resolution)
 
     return (volume_max) - (volume_central - volume_R_min/2)
