@@ -5,7 +5,7 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def plot_density(ax, df, settings, lower_lim=0.0001):
+def plot_density(ax, df, settings):
     df['ymiddle'] = (df['ystart'] * 2 + settings.resolution) / 2
     df['xmiddle'] = (df['xstart'] * 2 + settings.resolution) / 2
     df['zmiddle'] = (df['zstart'] * 2 + settings.resolution) / 2
@@ -13,6 +13,8 @@ def plot_density(ax, df, settings, lower_lim=0.0001):
     # normalize column
     df[settings.to_count_contact + "_normalized"] = df[settings.to_count_contact] / df[settings.to_count_contact].sum()
 
+    # use threshold to determine lower limit
+    lower_lim = settings.threshold * df[settings.to_count_contact + "_normalized"].max()
     points = df[df[settings.to_count_contact + "_normalized"] > lower_lim]
 
     norm = plt.Normalize(lower_lim, points[settings.to_count_contact + "_normalized"].max())
@@ -37,10 +39,14 @@ def plot_fragment_colored(ax, fragment):
 
         ax.scatter(atom.x, atom.y, atom.z, c=color, s=atom.cov_radius*500, edgecolor="black")
 
+    return ax
+
 
 def get_atom_color(atom_row):
     if atom_row.symbol == "O":
         return "red"
+    elif "aH" in atom_row.label:
+        return "Fuchsia"
     elif atom_row.symbol == "H":
         return "white"
     elif atom_row.symbol == "N":
@@ -49,8 +55,6 @@ def get_atom_color(atom_row):
         return "black"
     elif atom_row.symbol == "I":
         return "yellow"
-    elif "aH" in atom_row.label:
-        return "Fuchsia"
     else:
         return "Pink"
 
@@ -71,9 +75,18 @@ def plot_fragments(df, amount, COLORS):
         i += 1
 
     ax.legend()
-    ax.set_xlabel('X axis')
-    ax.set_ylabel('Y axis')
-    ax.set_zlabel('Z axis')
+
+    xlim, ylim, zlim = list(ax.get_xlim()), list(ax.get_ylim()), list(ax.get_zlim())
+    minn = min([xlim[0], ylim[0], zlim[0]])
+    maxx = max([xlim[1], ylim[1], zlim[1]])
+
+    ax.set_xlim((minn, maxx))
+    ax.set_ylim((minn, maxx))
+    ax.set_zlim((minn, maxx))
+
+    ax.set_xlabel('X axis ($\\AA$)')
+    ax.set_ylabel('Y axis ($\\AA$)')
+    ax.set_zlabel('Z axis ($\\AA$)')
 
     plt.show()
 
