@@ -42,7 +42,9 @@ def main():
     split_file_if_too_big(settings.coordinate_file, settings.no_atoms)
     settings.update_coordinate_filename()
 
-    # TODO: build check for existing alignment
+    # settings.set_custom_alignment_filename("REt_R2CO_kmeans_ch3_test.csv")
+    # settings.set_custom_structures_filename("REt_R2CO_kmeans_ch3_test_structures.csv")
+
     align_all_fragments(settings)
 
     t1 = time.time() - t0
@@ -146,20 +148,20 @@ def do_kabsch_align(settings, data_matrix, structures, A, to_mirror):
         B_total = data_matrix[i * no_atoms: (i + 1) * no_atoms]
 
         # run kabsch, shift frame in data each time
-        B_total_2 = kabsch_align(A, B_central, B_total, n)
+        B_total = kabsch_align(A, B_central, B_total, n)
 
         if to_mirror:
-            mirrored, B_total_2 = mirror(B_total_2)
+            mirrored, B_total = mirror(B_total)
 
             if mirrored:
                 structures.loc[structures.index == i, 'mirrored'] = True
 
         # calculate and save error
-        rmse = calc_rmse(A, B_total_2[:no_atoms_central], n)
+        rmse = calc_rmse(A, B_total[:no_atoms_central], n)
         structures.loc[structures.index == i, 'rmse'] = rmse
 
         # put back into overall matrix
-        data_matrix[i * no_atoms: (i + 1) * no_atoms] = B_total_2
+        data_matrix[i * no_atoms: (i + 1) * no_atoms] = B_total
 
     return structures, data_matrix
 
