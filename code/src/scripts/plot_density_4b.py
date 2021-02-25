@@ -23,16 +23,17 @@ from constants.paths import WORKDIR
 
 def main():
 
-    if len(sys.argv) != 4:
-        print("Usage: python analyze_density.py <path/to/inputfile> <resolution> <atom or center to count>")
+    if len(sys.argv) != 5:
+        print("Usage: python analyze_density.py <path/to/inputfile> <resolution> <threshold> <atom or center to count>")
         sys.exit(1)
 
     settings = Settings(WORKDIR, sys.argv[1])
 
     # resolution of the bins, in Angstrom
     settings.set_resolution(float(sys.argv[2]))
+    settings.set_threshold(float(sys.argv[3]))
 
-    settings.set_atom_to_count(sys.argv[3])
+    settings.set_atom_to_count(sys.argv[4])
 
     try:
         avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
@@ -52,10 +53,12 @@ def make_plot(avg_fragment, density_df, settings):
 
     ax = plot_fragment_colored(ax, avg_fragment)
     p, ax = plot_density(ax=ax, df=density_df, settings=settings)
-    ax, _ = plot_vdw_spheres(avg_fragment, ax)
 
-    title = "4D density plot of " + settings.central_group_name + "--" + settings.contact_group_name +\
-        "(" + settings.to_count_contact + ")\n" + "Resolution: " + f"{settings.resolution :.2f}"
+    # ax, _ = plot_vdw_spheres(avg_fragment, ax)
+
+    title = f"{settings.central_group_name}--{settings.contact_group_name} ({settings.to_count_contact}) density\n"
+    title += f"Resolution: {settings.resolution :.2f}, fraction: {settings.threshold :.2f}"
+
     ax.set_title(title)
 
     xlim, ylim, zlim = list(ax.get_xlim()), list(ax.get_ylim()), list(ax.get_zlim())
@@ -66,7 +69,14 @@ def make_plot(avg_fragment, density_df, settings):
     ax.set_ylim((minn, maxx))
     ax.set_zlim((minn, maxx))
 
-    fig.colorbar(p)
+    ax.view_init(elev=90, azim=90)
+
+    cbar = plt.colorbar(p)
+
+    # format colorbar ticks into percentages
+    cbar.set_ticks(cbar.ax.get_yticks())
+    cbar.ax.set_yticklabels(['{:.2f}%'.format(x * 100) for x in cbar.get_ticks()])
+
     plt.savefig(plotname)
     plt.show()
 
