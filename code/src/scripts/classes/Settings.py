@@ -1,7 +1,6 @@
 import os
 
 import pandas as pd
-import math
 
 
 class Settings():
@@ -14,25 +13,49 @@ class Settings():
         self.central_group_name = names.split("_")[0]
         self.contact_group_name = names.split("_")[1]
 
-        # setup results files
-        self.output_folder_central_group = WORKDIR + "\\results\\pairs\\" + names.split("_")[0] + "\\"
-        output_folder_specific = self.output_folder_central_group + names + "\\"
+        self.custom_alignment_file = False
+        self.custom_structure_file = False
+        self.threshold = 0.1
+        self.resolution = False
 
-        if not os.path.exists(self.output_folder_central_group):
-            os.mkdir(self.output_folder_central_group)
+        if 'data' in coordinate_file:
+            # setup results files
+            self.output_folder_central_group = WORKDIR + "\\results\\pairs\\" + names.split("_")[0] + "\\"
+            self.output_folder_specific = self.output_folder_central_group + names + "\\"
 
-        if not os.path.exists(output_folder_specific):
-            os.mkdir(output_folder_specific)
+            if not os.path.exists(self.output_folder_central_group):
+                os.mkdir(self.output_folder_central_group)
 
-        self.outputfile_prefix = output_folder_specific + names.rsplit('_', 1)[0]
+            self.outputfile_prefix = self.output_folder_specific + names.rsplit('_', 1)[0]
+        else:
+            # setup results files
+            self.output_folder_specific = coordinate_file.rsplit('\\', 1)[0] + '\\'
+            self.outputfile_prefix = self.output_folder_specific + names
+
+        if not os.path.exists(self.output_folder_specific):
+            os.mkdir(self.output_folder_specific)
 
     def get_directionality_results_filename(self):
         return self.output_folder_central_group + self.central_group_name + "_directionality_results.csv"
 
+    def set_custom_alignment_filename(self, name):
+        self.custom_alignment_file = self.output_folder_specific + name
+        return self.custom_alignment_file
+
+    def set_custom_structures_filename(self, name):
+        self.custom_structure_file = self.output_folder_specific + name
+        return self.custom_structure_file
+
     def get_aligned_csv_filename(self):
+        if self.custom_alignment_file:
+            return self.custom_alignment_file
+
         return self.outputfile_prefix + "_aligned.csv"
 
     def get_structure_csv_filename(self):
+        if self.custom_structure_file:
+            return self.custom_structure_file
+
         return self.outputfile_prefix + "_structures.csv"
 
     def get_coordinate_df_filename(self):
@@ -50,6 +73,9 @@ class Settings():
 
     def set_resolution(self, resolution):
         self.resolution = resolution
+
+    def set_threshold(self, threshold):
+        self.threshold = threshold
 
     def get_density_plotname(self):
         density_plotname = self.outputfile_prefix + "_" + str(self.resolution) + "_density.svg"
@@ -83,8 +109,8 @@ class AlignmentSettings(Settings):
         return self.no_fragments
 
     def get_aligned_csv_filenames(self):
-        aligned_csv = self.outputfile_prefix + "_aligned.csv"
-        structures_csv = self.outputfile_prefix + "_structures.csv"
+        aligned_csv = self.get_aligned_csv_filename()
+        structures_csv = self.get_structure_csv_filename()
         return aligned_csv, structures_csv
 
     def prepare_alignment(self):
@@ -160,8 +186,8 @@ class AlignmentSettings(Settings):
         if self.alignment['bin'] != '-':
             self.alignment['bin'] = self.alignment['bin'].split('-')
 
-        self.alignment['R'] = df.R.max() + '-' + df.not_R.max()
-        self.alignment['R'] = self.alignment['R'].lstrip('-').rstrip('-')
+        self.alignment['R'] = df.R.max()
+        self.alignment['r'] = df.not_R.max()
 
         # rename label for R group to 'Ri'
         if self.alignment['R'] != '-' and self.alignment['R'] != '':
@@ -169,6 +195,19 @@ class AlignmentSettings(Settings):
 
             for i, Rlabel in enumerate(R_atoms):
                 new_Rlabel = Rlabel + '-R' + str(i + 1)
+                self.label_list[self.label_list.index(Rlabel)] = new_Rlabel
+
+                self.alignment[Rlabel] = Rlabel
+
+                for key, value in self.alignment.items():
+                    if value == Rlabel:
+                        self.alignment[key] = new_Rlabel
+
+        if self.alignment['r'] != '-' and self.alignment['r'] != '':
+            R_atoms = self.alignment['r'].split('-')
+
+            for i, Rlabel in enumerate(R_atoms):
+                new_Rlabel = Rlabel + '-r' + str(i + 1)
                 self.label_list[self.label_list.index(Rlabel)] = new_Rlabel
 
                 self.alignment[Rlabel] = Rlabel
