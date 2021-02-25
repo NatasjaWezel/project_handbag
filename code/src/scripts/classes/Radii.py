@@ -1,5 +1,4 @@
 import pandas as pd
-import math
 
 
 class Radii():
@@ -30,32 +29,10 @@ class Radii():
 
         return self.cov_radii[symbol]
 
-    def get_vdw_distance_contact(self, df, settings):
-        if settings.to_count_contact == "centroid":
+    def get_vdw_distance_contact(self, to_count_contact):
+        if to_count_contact == "centroid":
             return self.get_vdw_radius("C")
-            # return self.calculate_longest_vdw_radius_contact(df, settings)
 
         # else return vdw radius of the atom the user is interested in
-        return self.get_vdw_radius(settings.to_count_contact)
+        return self.get_vdw_radius(to_count_contact)
 
-    def calculate_longest_vdw_radius_contact(self, df, settings):
-        # TODO: if there's an R, kick that one out
-        longest_distance = 0
-        atom_a = None
-
-        # take the first fragment and it's centroid
-        first_fragment_df = df[df.fragment_id == df.fragment_id.unique()[0]]
-        centroid = first_fragment_df.groupby('fragment_id').mean()
-
-        for _, atom in first_fragment_df.iterrows():
-            if atom.label == '-':
-                distance = math.sqrt((atom.x - centroid.x)**2 + (atom.y - centroid.y)**2 +
-                                     (atom.z - centroid.z)**2)
-
-                if distance > longest_distance:
-                    longest_distance = distance
-                    atom_a = atom
-
-        longest_vdw_distance = (longest_distance + self.get_vdw_radius(atom_a.symbol))
-
-        return longest_vdw_distance
