@@ -181,11 +181,6 @@ class AlignmentSettings(Settings):
         self.alignment['yaxis'] = df.y_axis_label.max()
         self.alignment['xyplane'] = df.xy_plane_label.max()
 
-        self.alignment['bin'] = df.bin.max()
-
-        if self.alignment['bin'] != '-':
-            self.alignment['bin'] = self.alignment['bin'].split('-')
-
         self.alignment['R'] = df.R.max()
         self.alignment['r'] = df.not_R.max()
 
