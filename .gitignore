@@ -1,20 +1,20 @@
+# ignore all data - this is too big for git
 data/
-old_method/
-__pycache__/
+
+# ignore results - this is also too big for git
 results/
+
+# ignore some old files
+old_method/
 bak/
 
-.vscode
+# local backups
+__pycache__/
 .ipynb_checkpoints/
-code/debug.log
-debug.log
 
-planning.xlsx
+.vscode
 
 *.pptx
-code/src/notebooks/compression_test_H2O_XH_O.hdf
-code/src/notebooks/compression_test_H2O_XH_H.hdf
-new_planning.xlsx
-~$new_planning.xlsx
+*.xlsx
 
 src/notebooks/directionalities_10_03_rcome_ret_kmeans.csv
