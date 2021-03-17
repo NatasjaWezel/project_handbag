@@ -13,7 +13,7 @@ Contains the code that is used to calculate the RMSE of average fragment.
 
 ```calc_all_directionalities```
 Contains the code that is used to make directionality tables for all contact pairs. A result would look like the following table.
-![Directionality table](figures/plots/directionalities_10_03_rcome_ret_kmeans_res05_free_volume.svg)
+![Directionality table](../../figures/plots/directionalities_10_03_rcome_ret_kmeans_res05_free_volume.svg)
 
 Density calculations need to be already performed, and the volumes of the contact pairs need also already to be calculated.
 
@@ -22,7 +22,7 @@ Density calculations need to be already performed, and the volumes of the contac
 In this notebook, we find out what the best way is to align the fragments. We do this by comparing different rmse's of different superimposition (alignment) methods.
 
 One of the results is the following:
-![RMSEs of different alignments](figures/plots/comparing_rmse_kabsch_rotation_rc6h5_r2co.svg)
+![RMSEs of different alignments](../../figures/plots/comparing_rmse_kabsch_rotation_rc6h5_r2co.svg)
 
 
 ```compression_test```
@@ -35,13 +35,13 @@ compression test example
 
 
 ```volume_central_groups```
-![Volume errors](figures/plots/volumes_error.svg)
+![Volume errors](../../figures/plots/volumes_error.svg)
 
 
 ```volume_R_groups```
 Reasoning about why R groups should be half in the min volume, and not in the max volume. This is done with pictures like the following:
-![R groups](figures/plots/overlap_R_volumes_RNO2.png)
 
+<img src="../../figures/plots/RNO2_overlap_R_volumes.png" width="500">
 RNO2
 with R (total)                : 248.6
 with half R                   : 140.3      43.55 % difference
