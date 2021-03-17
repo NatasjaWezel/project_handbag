@@ -16,3 +16,5 @@ code/src/notebooks/compression_test_H2O_XH_O.hdf
 code/src/notebooks/compression_test_H2O_XH_H.hdf
 new_planning.xlsx
 ~$new_planning.xlsx
+
+src/notebooks/directionalities_10_03_rcome_ret_kmeans.csv
