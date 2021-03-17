@@ -5,19 +5,24 @@ Supervisor: dhr. dr. T.J. (Tiddo) Mooibroek
 
 Auteur: Natasja Wezel (BSc)
 
-
-### Installation - Scripting
-```pip install -r docs/requirements.txt```
-
-### Preparation
-Search query in conquest, export fragments xyz coordinates.
-
 ### What it does
 It takes as input orthogonal data from fragments. You can specify the central and contact groups.
+
+### Installation - Scripting
+Install python here
+Install terminal here
+Follow the detailed tutorial here if you're not used to working with terminal.
+
+Download the source code, open a terminal in the src folder
+Start your virtual environment ```python venv qiyana```
+Install dependencies of the project: ```pip install -r requirements.txt```
+
+Start the program with ```python quantify.py --input INPUTFILE --to_count TO_COUNT```
 
 ### Running
 
 #### Step 1: Getting data from the CSD
+Search query in conquest, export fragments xyz coordinates.
 ConQuest search. Definitions of the groups used.
 
 #### Step 2: Aligning fragments
@@ -39,4 +44,4 @@ Get the directionality coefficient
 
 ## Contributing
 Pull request templates are provided. Issues and pull requests are always welcome.
-For other questions, you can always contact me!
+For other questions, you can always contact me at natasjawezel@gmail.com!
