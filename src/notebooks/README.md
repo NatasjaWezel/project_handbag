@@ -1,10 +1,20 @@
 # Notebooks
-Most of these notebooks are only interesting if you have the original data. They are meant to be able to repeat the experiments and to calculate large amounts of directionalities at once, instead of having to go through the pipeline step-by-step for each contact pair
+The first couple of notebooks can be quite handy if you want to quantify large amounts of directionalities. Instead of having to go through the pipeline step-by-step for each contact pair, you can run these notebooks.
+
+The rest of these notebooks are only interesting if you have the original data, or if you want to repeat the experiments as performed in my thesis and/or the paper.
 
 ## Obtaining (large amounts of) data
+Running every directionality by hand through the pipeline can be a lot of work. Some scripts are provided to do everything automatically back-to-back. 
+
+### See all the labels: ```plot_fragments_with_labels```
+If you don't remember the labels from ConQuest, you can see all the labels for a list of fragments here.
+
 ### Run everything: ```run_all_computational_time```
 
+
 ## Alignment and central group model
+To remake all figures as per the paper of my thesis, a lot of notebooks are provided. Of course, these notebooks can also be adjusted to make the same figures, but to also include your own contact pairs, or only include your own contact pairs.
+
 ### Compare RMSE of different alignments (kabsch, rotation): ```compare_rmses_alignment```
 In this notebook, we find out what the best way is to align the fragments. We do this by comparing different rmse's of different superimposition (alignment) methods.
 
@@ -45,14 +55,4 @@ This notebook not only plots already existing results, but also runs the compres
 bla bla
 
 compression test example
-
-
-
-
-
-
-
-
-```plot_fragments_with_labels```
-
 
