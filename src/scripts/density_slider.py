@@ -21,7 +21,7 @@ def main():
     # resolution of the bins, in Angstrom
     settings.set_resolution(round(0.2, 2))
     settings.set_threshold(round(0.1, 2))
-    settings.set_atom_to_count(sys.argv[2])
+    settings.set_contact_reference_point(sys.argv[2])
 
     avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
 
@@ -30,9 +30,9 @@ def main():
 
 def make_plot(avg_fragment, settings):
     df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
-    df[settings.to_count_contact] = df[settings.to_count_contact] / df[settings.to_count_contact].sum()
+    df[settings.contact_rp] = df[settings.contact_rp] / df[settings.contact_rp].sum()
 
-    maximum = df[settings.to_count_contact].max()
+    maximum = df[settings.contact_rp].max()
 
     fig = plt.figure(figsize=(8, 5))
 
@@ -44,7 +44,7 @@ def make_plot(avg_fragment, settings):
     global p
     p, ax = plot_density(ax=ax, df=df, settings=settings)
 
-    title = f"{settings.central_name}--{settings.contact_name} ({settings.to_count_contact}) density\n"
+    title = f"{settings.central_name}--{settings.contact_name} ({settings.contact_rp}) density\n"
     title += f"Resolution: {settings.resolution :.2f}, fraction: {settings.threshold :.2f}"
 
     ax.set_title(title)
@@ -67,8 +67,8 @@ def make_plot(avg_fragment, settings):
     ax_lowerlim = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
     lowerlim = Slider(ax_lowerlim, 'Lim', 0, 1, valinit=settings.threshold, valstep=0.01)
 
-    percentage = round(df[df[settings.to_count_contact] >=
-                          settings.threshold * maximum][settings.to_count_contact].sum() * 100, 2)
+    percentage = round(df[df[settings.contact_rp] >=
+                          settings.threshold * maximum][settings.contact_rp].sum() * 100, 2)
     text_holder = fig.text(.25, .05, f"Showing {percentage}% of all data")
 
     # update everything
@@ -77,8 +77,8 @@ def make_plot(avg_fragment, settings):
         settings.set_resolution(round(val, 2))
         print(f"Threshold: {settings.threshold}")
         df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
-        df[settings.to_count_contact] = df[settings.to_count_contact] / df[settings.to_count_contact].sum()
-        maximum = df[settings.to_count_contact].max()
+        df[settings.contact_rp] = df[settings.contact_rp] / df[settings.contact_rp].sum()
+        maximum = df[settings.contact_rp].max()
 
         global p
 
@@ -89,15 +89,15 @@ def make_plot(avg_fragment, settings):
         ax.set_ylim(ylim)
         ax.set_zlim(zlim)
 
-        title = f"{settings.central_name}--{settings.contact_name} ({settings.to_count_contact}) density\n"
+        title = f"{settings.central_name}--{settings.contact_name} ({settings.contact_rp}) density\n"
         title += f"Resolution: {settings.resolution :.2f}, fraction: {settings.threshold :.2f}"
         ax.set_title(title)
 
         p, ax1 = plot_density(ax=ax, df=df, settings=settings)
         ax1 = plot_fragment_colored(ax1, avg_fragment)
 
-        percentage = round(df[df[settings.to_count_contact] >=
-                              settings.threshold * maximum][settings.to_count_contact].sum() * 100, 2)
+        percentage = round(df[df[settings.contact_rp] >=
+                              settings.threshold * maximum][settings.contact_rp].sum() * 100, 2)
         text_holder.set_text(f"Showing {percentage}% of all data")
 
         fig.colorbar(p, cax=cax, pad=0.2)
@@ -108,8 +108,8 @@ def make_plot(avg_fragment, settings):
         global p
 
         df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
-        df[settings.to_count_contact] = df[settings.to_count_contact] / df[settings.to_count_contact].sum()
-        maximum = df[settings.to_count_contact].max()
+        df[settings.contact_rp] = df[settings.contact_rp] / df[settings.contact_rp].sum()
+        maximum = df[settings.contact_rp].max()
 
         settings.set_threshold(round(val, 2))
 
@@ -123,16 +123,14 @@ def make_plot(avg_fragment, settings):
         _, ax1 = plot_density(ax=ax, df=df, settings=settings)
         ax1 = plot_fragment_colored(ax1, avg_fragment)
 
-        title = f"{settings.central_name}--{settings.contact_name} ({settings.to_count_contact}) density\n"
+        title = f"{settings.central_name}--{settings.contact_name} ({settings.contact_rp}) density\n"
         title += f"Resolution: {settings.resolution :.2f}, fraction: {settings.threshold :.2f}"
         ax.set_title(title)
 
-        
+        no_bins_cluster = len(df[df[settings.contact_rp] >= settings.threshold * maximum])
+        bins_cluster = df[df[settings.contact_rp] >= settings.threshold * maximum]
 
-        no_bins_cluster = len(df[df[settings.to_count_contact] >= settings.threshold * maximum])
-        bins_cluster = df[df[settings.to_count_contact] >= settings.threshold * maximum]
-
-        percentage = round(bins_cluster[settings.to_count_contact].sum() * 100, 2)
+        percentage = round(bins_cluster[settings.contact_rp].sum() * 100, 2)
 
         text_holder.set_text(f"Showing {percentage}% of all data")
 

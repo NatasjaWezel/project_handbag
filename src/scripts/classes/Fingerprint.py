@@ -2,21 +2,31 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import numpy as np
+import os
 
 
 class Fingerprint():
-    def __init__(self, fingerprintcsv, settings):
-        self.central = settings.central_group_name
-        self.contact = settings.contact_group_name
-        self.to_count = settings.to_count_contact
+    def __init__(self, settings):
+        self.central = settings.central_name
+        self.contact = settings.contact_name
+        self.contact_rp = settings.contact_rp
 
-        self.csv = fingerprintcsv
-
-        df = pd.read_csv(fingerprintcsv)
+        self.csv = settings.get_finger_print_filename()
 
         self.counter = -1
 
+        df = pd.read_csv(self.csv)
         self.specific = df[df.central == self.central].reset_index()
+
+        if not os.path.exists('../../results/'):
+            os.mkdir('../../results')
+            os.mkdir('../../results/fingerprints')
+            os.mkdir(f'../../results/fingerprints/{self.central}/')
+        elif not os.path.exists('../../results/fingerprints'):
+            os.mkdir('../../results/fingerprints')
+            os.mkdir(f'../../results/fingerprints/{self.central}/')
+        elif not os.path.exists(f'../../results/fingerprints/{self.central}/'):
+            os.mkdir(f'../../results/fingerprints/{self.central}/')
 
     def get_labels(self):
         if self.counter == -1:
@@ -41,7 +51,7 @@ class Fingerprint():
     def make_plot(self, coordinate_df):
         fig = plt.figure(figsize=(8, 4))
         fig.subplots_adjust(bottom=0.3)
-        plt.title(f"Fingerprint of {self.central} ({self.get_description()})--{self.contact} ({self.to_count})")
+        plt.title(f"Fingerprint of {self.central} ({self.get_description()})--{self.contact} ({self.contact_rp})")
 
         test_neg = coordinate_df[coordinate_df["moved"] < 0]
         test_pos = coordinate_df[coordinate_df["moved"] >= 0]
@@ -71,7 +81,7 @@ class Fingerprint():
 
         plt.legend()
 
-        title = f'../../results/fingerprints/{self.central}_{self.contact}_{self.to_count}'
+        title = f'../../results/fingerprints/{self.central}/{self.central}_{self.contact}_{self.contact_rp}'
         title += f'_fingerprint_{self.get_labels()}.png'
         plt.savefig(title)
         plt.close(fig)

@@ -75,14 +75,14 @@ class Settings():
         return self.outputfile_prefix + "_coordinates_contact.hdf"
 
     def get_coordinate_df_key(self):
-        return self.to_count_contact
+        return self.contact_rp
 
     def get_density_df_filename(self):
         density_df_filename = self.outputfile_prefix + "_density.hdf"
         return density_df_filename
 
     def get_density_df_key(self):
-        return self.to_count_contact + str(self.resolution).rstrip("0").replace(".", "")
+        return self.contact_rp + str(self.resolution).rstrip("0").replace(".", "")
 
     def set_resolution(self, resolution):
         self.resolution = resolution
@@ -94,8 +94,8 @@ class Settings():
         density_plotname = self.outputfile_prefix + "_" + str(self.resolution) + "_density.svg"
         return density_plotname
 
-    def set_atom_to_count(self, atom_str):
-        self.to_count_contact = atom_str
+    def set_contact_reference_point(self, atom_str):
+        self.contact_rp = atom_str
 
     def get_avg_frag_filename(self):
         avg_fragment_filename = self.outputfile_prefix + "_avg_fragment.csv"

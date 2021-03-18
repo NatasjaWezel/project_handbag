@@ -29,9 +29,9 @@ class Radii():
 
         return self.cov_radii[symbol]
 
-    def get_vdw_distance_contact(self, to_count_contact):
-        if to_count_contact == "centroid":
+    def get_vdw_distance_contact(self, contact_rp):
+        if contact_rp == "centroid":
             return self.get_vdw_radius("C")
 
         # else return vdw radius of the atom the user is interested in
-        return self.get_vdw_radius(to_count_contact)
+        return self.get_vdw_radius(contact_rp)

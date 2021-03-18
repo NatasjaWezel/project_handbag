@@ -71,8 +71,8 @@ def make_density_df(settings, coordinate_df, again=False):
         density_df = count_points_per_square(df=empty_density_df, contact_points_df=coordinate_df, settings=settings)
 
         # normalize
-        density_df['datafrac_normalized'] = (density_df[settings.to_count_contact] /
-                                             density_df[settings.to_count_contact].sum())
+        density_df['datafrac_normalized'] = (density_df[settings.contact_rp] /
+                                             density_df[settings.contact_rp].sum())
 
         # save so we can use the data but only change the plot - saves time :)
         density_df.to_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
@@ -97,7 +97,7 @@ def count_points_per_square(df, contact_points_df, settings):
     assert amount.sum() == len(contact_points_df), "Something went wrong with filling bins" + str(amount.sum())\
         + " " + str(len(contact_points_df))
 
-    df[settings.to_count_contact] = amount
+    df[settings.contact_rp] = amount
 
     return df
 
@@ -122,7 +122,7 @@ def prepare_df(df, settings):
             np.linspace(minz, maxz, num=no_bins_z, endpoint=False)]
 
     df = add_boundaries_per_bin(bins, indices)
-    df[settings.to_count_contact] = 0
+    df[settings.contact_rp] = 0
 
     return df
 

@@ -32,7 +32,7 @@ def main():
     t0 = time.time()
 
     settings = Settings(WORKDIR, sys.argv[1])
-    settings.set_atom_to_count(sys.argv[3])
+    settings.set_contact_reference_point(sys.argv[3])
 
     # resolution of the bins, in Angstrom
     settings.set_resolution(float(sys.argv[2]))
@@ -55,7 +55,7 @@ def main():
 
     # find the volume of the central group
     tolerance = 0.5
-    contact_group_radius = radii.get_vdw_distance_contact(settings.to_count_contact)
+    contact_group_radius = radii.get_vdw_distance_contact(settings.contact_rp)
     Vavailable = find_available_volume(avg_fragment=avg_frag, extra=(tolerance + contact_group_radius))
     print('Available volume:', Vavailable)
 
@@ -69,7 +69,7 @@ def main():
     directionality = datafrac / Vcluster * (Vavailable/2)
 
     print(f"Directionality: {directionality}")
-    print(density_df[settings.to_count_contact].sum(), datafrac, Vcluster, Vavailable)
+    print(density_df[settings.contact_rp].sum(), datafrac, Vcluster, Vavailable)
 
 
 if __name__ == "__main__":

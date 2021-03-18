@@ -11,18 +11,18 @@ def plot_density(ax, df, settings):
     df['zmiddle'] = (df['zstart'] * 2 + settings.resolution) / 2
 
     # normalize column
-    df[settings.to_count_contact + "_normalized"] = df[settings.to_count_contact] / df[settings.to_count_contact].sum()
+    df[settings.contact_rp + "_normalized"] = df[settings.contact_rp] / df[settings.contact_rp].sum()
 
     # use threshold to determine lower limit
-    lower_lim = settings.threshold * df[settings.to_count_contact + "_normalized"].max()
-    points = df[df[settings.to_count_contact + "_normalized"] > lower_lim]
+    lower_lim = settings.threshold * df[settings.contact_rp + "_normalized"].max()
+    points = df[df[settings.contact_rp + "_normalized"] > lower_lim]
 
-    norm = plt.Normalize(lower_lim, points[settings.to_count_contact + "_normalized"].max())
+    norm = plt.Normalize(lower_lim, points[settings.contact_rp + "_normalized"].max())
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightblue", "fuchsia", "red"])
 
     p = ax.scatter(list(points.xmiddle), list(points.ymiddle), list(points.zmiddle),
-                   s=list(10000 * points[settings.to_count_contact + "_normalized"]),
-                   c=list(points[settings.to_count_contact + "_normalized"]),
+                   s=list(10000 * points[settings.contact_rp + "_normalized"]),
+                   c=list(points[settings.contact_rp + "_normalized"]),
                    cmap=cmap,
                    norm=norm)
 

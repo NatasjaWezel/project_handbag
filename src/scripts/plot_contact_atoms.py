@@ -30,7 +30,7 @@ def main():
         sys.exit(1)
 
     settings = Settings(WORKDIR, sys.argv[1])
-    settings.set_atom_to_count(sys.argv[2])
+    settings.set_contact_reference_point(sys.argv[2])
 
     df = pd.read_csv(settings.get_aligned_csv_filename())
 
@@ -40,14 +40,14 @@ def main():
     df = df[df.label == "-"]
 
     radii = Radii(RADII_CSV)
-    vdw_distance_contact = radii.get_vdw_distance_contact(settings.to_count_contact)
+    vdw_distance_contact = radii.get_vdw_distance_contact(settings.contact_rp)
 
     coordinate_df = make_coordinate_df(df, settings, avg_fragment, radii)
     print(coordinate_df.x.max(), coordinate_df.y.max(), coordinate_df.z.max())
     print(coordinate_df[coordinate_df.x == coordinate_df.x.max()])
 
     title = "Central fragment: " + settings.central_name + "\n" +\
-            "Scattered contact atoms: " + settings.contact_name + "(" + settings.to_count_contact + ")"
+            "Scattered contact atoms: " + settings.contact_name + "(" + settings.contact_rp + ")"
     make_plot(avg_fragment, coordinate_df, vdw_distance_contact, title)
 
 
@@ -66,7 +66,8 @@ def make_plot(avg_fragment, coordinate_df, longest_vdw_contact, title):
     ax = plot_fragment_colored(ax, avg_fragment)
 
     # TODO: make checkbox
-    # ax, _ = plot_vdw_spheres(avg_fragment, ax)
+    if plot_vdw_spheres:
+        ax, _ = plot_vdw_spheres(avg_fragment, ax)
 
     xlim, ylim, zlim = list(ax.get_xlim()), list(ax.get_ylim()), list(ax.get_zlim())
     minn = min([xlim[0], ylim[0], zlim[0]])

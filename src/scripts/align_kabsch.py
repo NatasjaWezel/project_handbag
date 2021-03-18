@@ -1,10 +1,12 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# This script loads the coordinates of the fragments exported from a conquest query
-# and aligns the central groups with the kabsch algorithm.
-# It then saves the new coordinates in a .csv file.
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This script is part of the quantification pipeline of 3D experimental data of crystal structures
+# that I wrote for my thesis in the Master Computational Science, University of Amsterdam, 2021.
+#
+# `align_kabsch.py` loads the coordinates of the fragments exported from a conquest query and aligns
+# the central groups with the kabsch algorithm. It then saves the new coordinates in a .csv file.
 #
 # Author: Natasja Wezel
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import sys
 import os
@@ -49,12 +51,12 @@ def main():
     print("Duration: %.2f s." % t1)
 
 
-def align_all_fragments(settings, to_mirror=True):
+def align_all_fragments(settings, to_mirror=True, again=False):
     # get filenames
     aligned_csv_filename, structures_csv_filename = settings.get_aligned_csv_filenames()
 
     # check if already aligned
-    if os.path.exists(aligned_csv_filename):
+    if not again and os.path.exists(aligned_csv_filename):
         print("The fragments are already aligned")
         return pd.read_csv(aligned_csv_filename)
 
@@ -92,7 +94,7 @@ def split_file_if_too_big(filename, no_atoms):
         # split after fragments, each fragment has no_atoms + 1 header line
         row_limit = 6e6 - (6e6 % (no_atoms + 1))
 
-        # TODO: make sure it doesn't split if file is small enough
+        # splits if file is too big
         split(open(filename), delimiter=',', row_limit=row_limit,
               output_name_template=output_name_template, output_path='.')
 

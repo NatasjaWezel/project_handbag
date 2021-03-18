@@ -33,7 +33,7 @@ def main():
     settings.set_resolution(float(sys.argv[2]))
     settings.set_threshold(float(sys.argv[3]))
 
-    settings.set_atom_to_count(sys.argv[4])
+    settings.set_contact_reference_point(sys.argv[4])
 
     try:
         avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
@@ -58,7 +58,7 @@ def make_plot(avg_fragment, density_df, settings):
     if plot_spheres:
         ax, _ = plot_vdw_spheres(avg_fragment, ax)
 
-    title = f"{settings.central_group_name}--{settings.contact_group_name} ({settings.to_count_contact}) density\n"
+    title = f"{settings.central_name}--{settings.contact_name} ({settings.contact_rp}) density\n"
     title += f"Resolution: {settings.resolution :.2f}, fraction: {settings.threshold :.2f}"
 
     ax.set_title(title)
