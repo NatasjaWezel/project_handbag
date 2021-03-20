@@ -11,6 +11,7 @@ import sys
 sys.path.append(".//scripts")
 
 import pandas as pd
+import numpy as np
 
 from classes.LoadArgsFromFile import LoadArgsFromFile
 from classes.Settings import AlignmentSettings
@@ -114,9 +115,26 @@ def perform_option(option, settings):
 
         make_contact_rps_plot(avg_fragment, coordinate_df, settings)
     elif option == 6:
-        avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
+        default = "Y"
+        confimation = ask_bool_input("The program still has to calculate non-standard resolutions. This may take some time. Continue? [Y]\\N\n", default)
+        print()
+        if (confimation.lower() == "y"):
+            alligned_df = pd.read_csv(settings.get_aligned_csv_filename())
+            central_model = pd.read_csv(settings.get_avg_frag_filename())
+            radii = Radii(settings.get_radii_csv_name())
+            coordinate_df = make_coordinate_df(alligned_df, settings, central_model, radii)
+            for res in np.arange(0.2, 1.05, 0.05):
+                print("RES: ",res)
+                settings.set_resolution(res
+                make_density_df(settings, coordinate_df)
+            
+            # TODO 0.3 now hardcoded
+            settings.set_resolution(0.3)
+            avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
+            make_density_slider_plot(avg_fragment, settings)
 
-        make_density_slider_plot(avg_fragment, settings)
+
+        
 
 def ask_bool_input(message, default):
     option = input(message)
