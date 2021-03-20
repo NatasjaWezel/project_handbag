@@ -43,7 +43,7 @@ def main():
         print("Run avg_frag and calc_density first")
         sys.exit(1)
 
-    make_plot(avg_fragment, density_df, settings)
+    make_density_plot(avg_fragment, density_df, settings)
 
 
 def make_density_plot(avg_fragment, density_df, settings):
