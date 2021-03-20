@@ -62,11 +62,12 @@ def main():
 
     # Pipeline step 7: Directionality
     directionality = datafrac / Vcluster * (Vavailable/2)
-    print(f"The directionality of {settings.central_name}--{settings.contact_name} ({settings.contact_rp}) is {directionality}")
+    print(f"The directionality of {settings.central_name}--{settings.contact_name} ({settings.contact_rp}) is {directionality}\n")
 
     # when done running, give option menu
     print_menu()
-    option = ask_input("What do you want to plot?")
+    possible_inputs = [1, 2, 3, 4, 5, 6, 7]
+    option = ask_int_input("What do you want to plot?", possible_inputs)
     while not option == 7 or option == 'exit' or 'q' in option:
         perform_option(option, settings)
         print_menu()
@@ -98,14 +99,19 @@ def perform_option(option, settings):
         pass
 
 
-def ask_input(string):
-    option = input(string + "\n")
+def ask_int_input(message, possible_inputs):
+    option = input(message + "\n")
 
-    possible_inputs = [1, 2, 3, 4, 5, 6, 7]
-
-    # TODO: test if it's an integer
-    while not int(option) in possible_inputs:
-        option = input("Type the integer belonging to your choice.\n")
+    valid = False
+    while(not valid):
+        try:
+            val = int(option)
+            if val in possible_inputs:
+                valid = True
+            else:
+                raise ValueError
+        except ValueError:
+            option = input("Type the integer belonging to your choice.\n")
 
     print()
     return int(option)
@@ -151,7 +157,7 @@ def make_settings_with_args(args):
     split_file_if_too_big(settings.coordinate_file, settings.no_atoms)
     settings.update_coordinate_filename()
 
-    print(f"Find your results in the output folder: {settings.output_folder_central_group}")
+    print(f"Find your results in the output folder: {settings.output_folder_central_group}\n")
 
     return settings
 
