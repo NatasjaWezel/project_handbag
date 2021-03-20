@@ -1,0 +1,16 @@
+# This file contains information about the central groups that are feeded into the program.
+# Make sure to fill in each column, separating multiple labels with a dash '-'.
+# The columsn are defined as follows:
+# name: the name of the central group
+# center_label: the label of the atom that needs to be put on the origin
+# y_axis_label, xy_plane_label: the labels of the atoms that need to be on the y axis and in the xy plane.
+# 
+name,center_label,y_axis_label,xy_plane_label,treat_as_R,R,bin
+ArCI,LAB1,LAB2,LAB3,LAB3-LAB4,LAB5-LAB6,-
+NO3,LAB1,LAB2,LAB3,-,-,-
+H2O,LAB3,LAB2,LAB1,-,-,-
+RCOMe,LAB1,LAB2,LAB3,-,LAB4,LAB5-LAB6-LAB7
+RC6H5,LAB2,LAB4,LAB6,-,LAB1,-
+RC6F5,LAB1,LAB2,LAB3,-,LAB12,-
+RNO2,LAB1,LAB2,LAB3,-,LAB1,-
+REt,LAB1,LAB5,LAB8,-,LAB8,LAB2-LAB3-LAB4

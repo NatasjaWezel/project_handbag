@@ -48,11 +48,11 @@ def main():
 
     # Pipeline step 5: Density calculation
     density_df = make_density_df(settings, coordinate_df)
-    density_df['datafrac_normalized'] = density_df[settings.to_count_contact] / density_df[settings.to_count_contact].sum()
+    density_df['datafrac_normalized'] = density_df[settings.contact_rp] / density_df[settings.contact_rp].sum()
 
     # Pipeline step 6: Volumes
     tolerance = 0.5
-    contact_group_radius = radii.get_vdw_distance_contact(settings.to_count_contact)
+    contact_group_radius = radii.get_vdw_distance_contact(settings.contact_rp)
     Vavailable = find_available_volume(avg_fragment=central_model, extra=(tolerance + contact_group_radius))
     threshold_calc = density_df.datafrac_normalized.max() * settings.threshold
     in_cluster = density_df[density_df.datafrac_normalized >= threshold_calc]
@@ -62,7 +62,7 @@ def main():
 
     # Pipeline step 7: Directionality
     directionality = datafrac / Vcluster * (Vavailable/2)
-    print(f"The directionality of {settings.central_name}--{settings.contact_name} ({settings.to_count_contact}) is {directionality}")
+    print(f"The directionality of {settings.central_name}--{settings.contact_name} ({settings.contact_rp}) is {directionality}")
 
     # when done running, give option menu
     print_menu()
@@ -132,7 +132,7 @@ def print_menu():
 
 def make_settings_with_args(args):
     settings = AlignmentSettings(WORKDIR=WORKDIR_MAIN, coordinate_file=args.input)
-    settings.set_atom_to_count(args.to_count.upper())
+    settings.set_contact_reference_point(args.contact_rp.upper())
     settings.set_resolution(round(0.2, 2))
 
     if args.labels is not None:
@@ -159,14 +159,14 @@ def make_settings_with_args(args):
 def check_args(parser):
     args = parser.parse_args()
 
-    if args.input is None and args.to_count is None:
-        print('quantify.py: error: the following arguments are required: -i/--input, -tc/--to_count')
+    if args.input is None and args.contact_rp is None:
+        print('quantify.py: error: the following arguments are required: -i/--input, -crp/--contact_rp')
         sys.exit(1)
-    elif args.to_count is None:
-        print('quantify.py: error: the following arguments are required: -tc/--to_count')
+    elif args.contact_rp is None:
+        print('quantify.py: error: the following arguments are required: -crp/--contact_rp')
         sys.exit(1)
     elif args.input is None:
-        print('quantify.py: error: the following arguments are required: -i/--input, -tc/--to_count')
+        print('quantify.py: error: the following arguments are required: -i/--input, -crp/--contact_rp')
         sys.exit(1)
 
     return args
@@ -181,7 +181,7 @@ def initiate_parser():
     required = parser.add_argument_group('required arguments')
 
     required.add_argument('-i', '--input', help='data input file from conquest')
-    required.add_argument('-tc', '--to_count', help='atom or center of contact group of which we want the density')
+    required.add_argument('-crp', '--contact_rp', help='atom or center of contact group of which we want the density')
 
     optional = parser.add_argument_group('optional arguments')
 
