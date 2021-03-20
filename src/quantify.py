@@ -84,12 +84,16 @@ def main():
 def perform_option(option, settings):
     # do something
     if option == 1:
-        # TODO: input validation
-        amount = int(input("How many superimposed fragments would you like to plot?\n(Recommended < 100)\n"))
-        only_central = input("Do you want to plot the contact groups as well? [Y]es\\[N]o\n")
-        print()
         data = pd.read_csv(settings.get_aligned_csv_filename())
-        if 'y' not in only_central.lower():
+        max_frags = len(data.fragment_id.unique())
+        possible_inputs = range(0,max_frags+1)    
+        amount = ask_int_input("How many superimposed fragments would you like to plot?\n(Recommended < 100)\n",possible_inputs)
+        
+        default = "Y"
+        only_central = ask_bool_input("Do you want to plot the contact groups as well? [Y]\\N\n", default)
+        print()
+        
+        if "y" == only_central.lower():
             data = data[data.label != "-"]
         plot_fragments(data, amount, COLORS)
     elif option == 2:
@@ -114,6 +118,25 @@ def perform_option(option, settings):
 
         make_density_slider_plot(avg_fragment, settings)
 
+def ask_bool_input(message, default):
+    option = input(message)
+    valid = False
+    while(not valid):
+        try:
+            if (option.lower() == "y" or option.lower() == "n"):
+                valid = True
+            elif (option.lower() == "yes" or option.lower() == "no"):
+                valid = True
+                option = option[0]
+            elif option == "":
+                option = default
+                valid = True
+            else:
+                raise ValueError
+        except ValueError:
+            option = input("Please type Y or N. \n")
+        
+    return option
 
 def ask_int_input(message, possible_inputs):
     option = input(message + "\n")
