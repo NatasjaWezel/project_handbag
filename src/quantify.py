@@ -108,14 +108,17 @@ def perform_option(option, settings):
 
 def ask_bool_input(message, default):
     option = input(message)
-
     valid = False
     while(not valid):
         try:
-            if (option == "Y" or option == "N"):
+            if (option.lower() == "y" or option.lower() == "n"):
                 valid = True
-            elif option == "\n":
+            elif (option.lower() == "yes" or option.lower() == "no"):
+                valid = True
+                option = option[0]
+            elif option == "":
                 option = default
+                valid = True
             else:
                 raise ValueError
         except ValueError:
