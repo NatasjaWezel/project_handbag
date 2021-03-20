@@ -20,7 +20,10 @@ def main():
     inputfilename = sys.argv[1]
 
     settings = Settings(WORKDIR, inputfilename)
+    plot_avg_fragment(settings)
 
+
+def plot_avg_fragment(settings):
     fragment = pd.read_csv(settings.get_avg_frag_filename())
 
     fig = plt.figure()
@@ -32,8 +35,8 @@ def main():
     ax = plot_fragment_colored(ax, fragment)
 
     xlim, ylim, zlim = list(ax.get_xlim()), list(ax.get_ylim()), list(ax.get_zlim())
-    minn = min([xlim[0], ylim[0], zlim[0]])
-    maxx = max([xlim[1], ylim[1], zlim[1]])
+    minn = min([xlim[0], ylim[0], zlim[0]]) - 1
+    maxx = max([xlim[1], ylim[1], zlim[1]]) + 1
 
     ax.set_xlim((minn, maxx))
     ax.set_ylim((minn, maxx))

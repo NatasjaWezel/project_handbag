@@ -46,7 +46,7 @@ def main():
     make_plot(avg_fragment, density_df, settings)
 
 
-def make_plot(avg_fragment, density_df, settings):
+def make_density_plot(avg_fragment, density_df, settings):
     plot_spheres = True
     plotname = settings.get_density_plotname()
     fig = plt.figure()

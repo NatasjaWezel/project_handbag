@@ -22,6 +22,8 @@ from constants.colors import COLORS
 from helpers.plot_functions import plot_fragments
 
 from align_kabsch import split_file_if_too_big, align_all_fragments
+from plot_density import make_density_plot
+from scripts.plot_avg_fragment_2a import plot_avg_fragment
 from calc_avg_fragment import calc_avg_frag
 
 from helpers.density_helpers import make_density_df, find_available_volume
@@ -87,11 +89,13 @@ def perform_option(option, settings):
             data = data[data.label != "-"]
         plot_fragments(data, amount, COLORS)
     elif option == 2:
-        pass
+        plot_avg_fragment(settings)
     elif option == 3:
         pass
     elif option == 4:
-        pass
+        avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
+        density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
+        make_density_plot(avg_fragment, density_df, settings)
     elif option == 5:
         pass
     elif option == 6:
@@ -126,7 +130,7 @@ def print_menu():
     print("Interactive plots")
     print("\t5 - coordinates contact group")
     print("\t6 - density around central group")
-    print("7 - or exit/[q]uit to end the program")
+    print("7 - to end the program")
     print()
 
 

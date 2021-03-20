@@ -43,8 +43,6 @@ def main():
     vdw_distance_contact = radii.get_vdw_distance_contact(settings.contact_rp)
 
     coordinate_df = make_coordinate_df(df, settings, avg_fragment, radii)
-    print(coordinate_df.x.max(), coordinate_df.y.max(), coordinate_df.z.max())
-    print(coordinate_df[coordinate_df.x == coordinate_df.x.max()])
 
     title = "Central fragment: " + settings.central_name + "\n" +\
             "Scattered contact atoms: " + settings.contact_name + "(" + settings.contact_rp + ")"
