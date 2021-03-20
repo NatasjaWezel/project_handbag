@@ -68,7 +68,8 @@ def main():
 
     # Pipeline step 7: Directionality
     directionality = datafrac / Vcluster * (Vavailable/2)
-    print(f"The directionality of {settings.central_name}--{settings.contact_name} ({settings.contact_rp}) is {directionality}\n")
+    print(f"The directionality of {settings.central_name}--{settings.contact_name} ({settings.contact_rp}) is\
+            {directionality}\n")
 
     # when done running, give option menu
     print_menu()
@@ -87,13 +88,14 @@ def perform_option(option, settings):
     if option == 1:
         data = pd.read_csv(settings.get_aligned_csv_filename())
         max_frags = len(data.fragment_id.unique())
-        possible_inputs = range(0,max_frags+1)    
-        amount = ask_int_input("How many superimposed fragments would you like to plot?\n(Recommended < 100)\n",possible_inputs)
-        
+        possible_inputs = range(0, max_frags + 1)
+        amount = ask_int_input("How many superimposed fragments would you like to plot?\n(Recommended < 100)\n",
+                               possible_inputs)
+
         default = "Y"
         only_central = ask_bool_input("Do you want to plot the contact groups as well? [Y]\\N\n", default)
         print()
-        
+
         if "y" == only_central.lower():
             data = data[data.label != "-"]
         plot_fragments(data, amount, COLORS)
@@ -116,7 +118,8 @@ def perform_option(option, settings):
         make_contact_rps_plot(avg_fragment, coordinate_df, settings)
     elif option == 6:
         default = "Y"
-        confimation = ask_bool_input("The program still has to calculate non-standard resolutions. This may take some time. Continue? [Y]\\N\n", default)
+        confimation = ask_bool_input("The program still has to calculate non-standard resolutions." +
+                                     "This may take some time. Do you want to continue? [Y]\\N\n", default)
         print()
         if (confimation.lower() == "y"):
             alligned_df = pd.read_csv(settings.get_aligned_csv_filename())
@@ -124,17 +127,14 @@ def perform_option(option, settings):
             radii = Radii(settings.get_radii_csv_name())
             coordinate_df = make_coordinate_df(alligned_df, settings, central_model, radii)
             for res in np.arange(0.2, 1.05, 0.05):
-                print("RES: ",res)
-                settings.set_resolution(res
+                settings.set_resolution(res)
                 make_density_df(settings, coordinate_df)
-            
+
             # TODO 0.3 now hardcoded
             settings.set_resolution(0.3)
             avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
             make_density_slider_plot(avg_fragment, settings)
 
-
-        
 
 def ask_bool_input(message, default):
     option = input(message)
@@ -153,8 +153,9 @@ def ask_bool_input(message, default):
                 raise ValueError
         except ValueError:
             option = input("Please type Y or N. \n")
-        
+
     return option
+
 
 def ask_int_input(message, possible_inputs):
     option = input(message + "\n")

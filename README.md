@@ -1,43 +1,20 @@
-# Finding and quantifying the directionality of intermolecular interactions
-This is a project that I do for 't van het Hoff Institute for Molecular Sciences at the UvA.
+# Handbag: Handbag assesses new directionality of bimolecular aggregates
+This is the implementation of project Handbag. It finds and quantifies the directionality of intermolecular interactions.
+
+This project is developed for the thesis that I did for 't van het Hoff Institute for Molecular Sciences at the UvA.
 
 Supervisor: dhr. dr. T.J. (Tiddo) Mooibroek
 
-Auteur: Natasja Wezel (BSc)
+Author: Natasja Wezel (BSc)
 
-### What it does
+## What it does
 It takes as input orthogonal data from fragments. You can specify the central and contact groups.
 
-### Installation - Scripting
-Install python here
-Install terminal here
-Follow the detailed tutorial here if you're not used to working with terminal.
+Also contains a CLI: command line inteface.
 
-Download the source code, open a terminal in the src folder
-Start your virtual environment ```python venv qiyana```
-Install dependencies of the project: ```pip install -r requirements.txt```
+## Installation
+For installation guidelines, click [here](INSTALLATION.md).
 
-Start the program with ```python quantify.py --input INPUTFILE --to_count TO_COUNT```
-
-### Running
-
-#### Step 1: Getting data from the CSD
-Search query in conquest, export fragments xyz coordinates.
-ConQuest search. Definitions of the groups used.
-
-#### Step 2: Aligning fragments
-Align the fragments by running `python load_from_coords.py <inputfile.xyz> <outputfile.csv>`. 
-
-Choosing atoms to align on
-
-Plot the overlapping fragments by running `python plot_result.py <inputfile.csv>`.
-
-#### Step 3: Plot density
-Plot the 4D graph by running `python plot_density.py <inputfile.csv> <resolution>`.
-Plot the density
-
-#### Step 4: Analyzing the density - are there any clusters?
-Get the directionality coefficient
 
 [![BCH compliance](https://bettercodehub.com/edge/badge/NatasjaWezel/MasterProject?branch=master)](https://bettercodehub.com/)
 

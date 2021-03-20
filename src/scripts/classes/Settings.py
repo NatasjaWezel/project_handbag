@@ -22,10 +22,13 @@ class Settings():
 
         if 'data' in coordinate_file:
             # setup results files
-            if not os.path.exists(WORKDIR +"\\results"):
+            if not os.path.exists(WORKDIR + "\\results"):
                 os.mkdir(WORKDIR + "\\results")
                 os.mkdir(WORKDIR + "\\results\\pairs")
-                
+
+            if not os.path.exists(WORKDIR + "\\results\\pairs"):
+                os.mkdir(WORKDIR + "\\results\\pairs")
+
             self.output_folder_central_group = WORKDIR + "\\results\\pairs\\" + name.split("_")[0] + "\\"
             self.output_folder_specific = self.output_folder_central_group + name + "\\"
 
@@ -89,10 +92,10 @@ class Settings():
         return self.contact_rp + str(self.resolution).rstrip("0").replace(".", "")
 
     def set_resolution(self, resolution):
-        self.resolution = resolution
+        self.resolution = round(resolution, 2)
 
     def set_threshold(self, threshold):
-        self.threshold = threshold
+        self.threshold = round(threshold, 2)
 
     def get_density_plotname(self):
         density_plotname = self.outputfile_prefix + "_" + str(self.resolution) + "_density.svg"
@@ -186,7 +189,7 @@ class AlignmentSettings(Settings):
         """ """
 
         # get alignment info from file
-        df = pd.read_csv(self.get_central_groups_csv_filename())
+        df = pd.read_csv(self.get_central_groups_csv_filename(), comment="#")
         df = df[df.name == self.central_name]
 
         # set up alignment dictionary
