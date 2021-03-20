@@ -1,3 +1,5 @@
 matplotlib==3.3.2
 pandas
-scipy
+sklearn
+numba
+tqdm
