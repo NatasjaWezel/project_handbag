@@ -41,16 +41,16 @@ class Settings():
             os.mkdir(self.output_folder_specific)
 
     def get_central_groups_csv_filename(self):
-        return self.WORKDIR + "\\src\\data\\central_groups.csv"
+        return self.WORKDIR + "\\src\\files\\central_groups.csv"
 
     def get_methyl_csv_filename(self):
-        return self.WORKDIR + "\\src\\data\\methylmodel.csv"
+        return self.WORKDIR + "\\src\\files\\methylmodel.csv"
 
     def get_finger_print_filename(self):
-        return self.WORKDIR + "\\src\\data\\fingerprints.csv"
+        return self.WORKDIR + "\\src\\files\\fingerprints.csv"
 
     def get_radii_csv_name(self):
-        return self.WORKDIR + "\\src\\data\\radii.csv"
+        return self.WORKDIR + "\\src\\files\\radii.csv"
 
     def get_directionality_results_filename(self):
         return self.output_folder_central_group + self.central_name + "_directionality_results.csv"
@@ -201,7 +201,7 @@ class AlignmentSettings(Settings):
             self.alignment['bin'] = self.alignment['bin'].split('-')
 
         self.alignment['R'] = df.R.max()
-        self.alignment['r'] = df.not_R.max()
+        self.alignment['r'] = df.treat_as_R.max()
 
         # rename label for R group to 'Ri'
         if self.alignment['R'] != '-' and self.alignment['R'] != '':
