@@ -22,6 +22,10 @@ class Settings():
 
         if 'data' in coordinate_file:
             # setup results files
+            if not os.path.exists(WORKDIR +"\\results"):
+                os.mkdir(WORKDIR + "\\results")
+                os.mkdir(WORKDIR + "\\results\\pairs")
+                
             self.output_folder_central_group = WORKDIR + "\\results\\pairs\\" + name.split("_")[0] + "\\"
             self.output_folder_specific = self.output_folder_central_group + name + "\\"
 
