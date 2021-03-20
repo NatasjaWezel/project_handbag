@@ -25,10 +25,10 @@ def main():
 
     avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
 
-    make_plot(avg_fragment, settings)
+    make_density_slider_plot(avg_fragment, settings)
 
 
-def make_plot(avg_fragment, settings):
+def make_density_slider_plot(avg_fragment, settings):
     df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
     df[settings.contact_rp] = df[settings.contact_rp] / df[settings.contact_rp].sum()
 
@@ -62,7 +62,7 @@ def make_plot(avg_fragment, settings):
 
     axcolor = 'lightgoldenrodyellow'
     ax_resolution = plt.axes([0.25, 0.15, 0.65, 0.03], facecolor=axcolor)
-    resolution = Slider(ax_resolution, 'Res', 0.2, 1, valinit=0.5, valstep=0.05)
+    resolution = Slider(ax_resolution, 'Res', 0.2, 1, valinit=settings.resolution, valstep=0.05)
 
     ax_lowerlim = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
     lowerlim = Slider(ax_lowerlim, 'Lim', 0, 1, valinit=settings.threshold, valstep=0.01)

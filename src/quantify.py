@@ -25,6 +25,9 @@ from align_kabsch import split_file_if_too_big, align_all_fragments
 from plot_density import make_density_plot
 from scripts.plot_avg_fragment_2a import plot_avg_fragment
 from calc_avg_fragment import calc_avg_frag
+from plot_contact_atoms import make_contact_rps_plot
+
+from density_slider import make_density_slider_plot
 
 from helpers.density_helpers import make_density_df, find_available_volume
 from helpers.geometry_helpers import make_coordinate_df
@@ -70,10 +73,10 @@ def main():
     print_menu()
     possible_inputs = [1, 2, 3, 4, 5, 6, 7]
     option = ask_int_input("What do you want to plot?", possible_inputs)
-    while not option == 7 or option == 'exit' or 'q' in option:
+    while not option == 7:
         perform_option(option, settings)
         print_menu()
-        option = ask_input("Do you want to plot something else?")
+        option = ask_int_input("What do you want to plot?", possible_inputs)
 
     print_epilog()
 
@@ -98,9 +101,18 @@ def perform_option(option, settings):
         density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
         make_density_plot(avg_fragment, density_df, settings)
     elif option == 5:
-        pass
+        df = pd.read_csv(settings.get_aligned_csv_filename())
+
+        avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
+
+        radii = Radii(settings.get_radii_csv_name())
+        coordinate_df = make_coordinate_df(df, settings, avg_fragment, radii)
+
+        make_contact_rps_plot(avg_fragment, coordinate_df, settings)
     elif option == 6:
-        pass
+        avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
+
+        make_density_slider_plot(avg_fragment, settings)
 
 
 def ask_int_input(message, possible_inputs):
@@ -122,7 +134,7 @@ def ask_int_input(message, possible_inputs):
 
 
 def print_epilog():
-    print("Thank you for using our program!\nNatasja Wezel, Tiddo Mooibroek\nE-mail your suggestions, remarks and/or"
+    print("Thank you for using our program!\nNatasja Wezel, Tiddo Mooibroek\nE-mail your suggestions, remarks and/or "
           + "questions to natasjawezel@gmail.com\nFind the source code at www.github.com/NatasjaWezel/MasterProject")
 
 
@@ -143,7 +155,8 @@ def print_menu():
 def make_settings_with_args(args):
     settings = AlignmentSettings(WORKDIR=WORKDIR_MAIN, coordinate_file=args.input)
     settings.set_contact_reference_point(args.contact_rp.upper())
-    settings.set_resolution(round(0.2, 2))
+    settings.set_resolution(round(0.3, 2))
+    settings.set_threshold(round(0.1, 2))
 
     if args.labels is not None:
         settings.set_label_file(args.labels)
