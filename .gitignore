@@ -16,9 +16,13 @@ __pycache__/
 handbag-env/
 test-env/
 
+# ignore personal changes in central_group csv
+src/files/central_groups.csv
+
 .vscode
 
 *.pptx
 *.xlsx
 
 src/notebooks/directionalities_10_03_rcome_ret_kmeans.csv
+src/files/central_groups.csv
