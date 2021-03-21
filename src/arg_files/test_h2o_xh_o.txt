@@ -1,2 +1,2 @@
 --input .\testdata\H2O\H2O_XH_vdw.5_test.cor
--crp O
+--contact_rp O
