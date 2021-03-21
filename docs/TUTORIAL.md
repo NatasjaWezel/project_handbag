@@ -27,7 +27,7 @@ Test if everything works with running: ```python .\quantify.py -f .\arg_files\te
 Arrow up: using the arrow up on your keyboard you can "scroll" through the latest commands you entered, and executing them again by pressing enter.
 
 ## How the program runs
-How does the command: ```python .\quantify.py -f .\arg_files\test_h2o_xh_o.txt``` work? The flag ```-f``` specifies a file that contains the input arguments for the program.
+You tested the program with the command: ```python .\quantify.py -f .\arg_files\test_h2o_xh_o.txt```, but how does this command work? The flag ```-f``` specifies a file that contains the input arguments for the program.
 
 Start with running: ```python .\quantify.py --help```. Here you can see the input arguments that the program needs. There are two required arguments: you need to specify the path to the input file with the flag `-i/--input`, and secondly you need to specify the reference point from the contact group with the `-crp/--contact_rp`. The other flags are optional and we will dive into them later.
 
@@ -127,3 +127,50 @@ Then look at the entries in the file. Underneath, a table is given to show the r
 
 Note: multiple answers are correct. As long as the first three atoms are not on a line, and LAB1 is in the column 'R'.
 </details>
+
+Now that you've added this line to the central_groups.csv, it is possible to run the program with this central group as well.
+
+#### Question: How would you run the program with RC6H5, with as contact reference point the oxygen atom of CO?
+<details>
+  <summary>How would you </summary>
+  On the command line, run:
+
+  ```python .\quantify.py -i .\testdata\RC6H5\RC6H5_R2CO_vdw.5_test.cor -crp O```
+  
+  or make an argument file and run:
+  
+  ```python .\quantify.py -f .\arg_files\test_rc6h5_r2co_o.txt```
+</details>
+
+## And what happens when the .cor file doesn't have the right format (CENTRAL_CONTACT_blabla.cor)? 
+As a final example, we'll try to run the program for the 'search6' data. Of course, you know what data it contains: you did the conquest search. It contains the data of a carbonyl and a methyl group (let's call it rcome) and an aryl group. However, you didn't give a name in the right format. (In this case, search6 is not that helpful at all to remember what search this was.)
+
+First, add the labels to the central_groups.csv file. We want to ignore the hydrogen atoms of the methyl group. (See thesis/article for the reasoning about this.)
+![labels rcome](../figures/tutorial/labels_rcome.png)
+
+#### Question: What would you fill in in central_groups.csv for RCOMe, as shown in the picture above?
+Tip: You can fill in multiple labels in a single column by separating them with a dash: '-'.
+<details>
+  <summary>Labels RCOMe</summary>
+  In raw text format: 
+
+  ```RCOMe,LAB1,LAB2,LAB3,-,LAB4,LAB5-LAB6-LAB7```
+
+Note: multiple answers are correct. As long as the first three atoms are not on a line, and LAB1 is in the column 'R'.
+</details>
+
+#### Question: How would you now run this program?
+You can make use of the ```--central/--contact``` input flags. Try to write an input argument file named ```.\arg_files\test_rcome_r2co_o.txt```.
+
+<details>
+  <summary>Input argument file for search6 (RCOMe_R2CO) </summary>
+  The file must contain:
+
+  ```--input .\testdata\test\search6.cor 
+     --contact_rp O
+     --central RCOMe
+     --contact R2CO
+  ```
+</details>
+
+> If the .csv containing the parameters from the conquest search has another name, you can specify that as well with using the --labels flag. So say search6.csv was called search6_labels.csv instead, the program is not able to find it automatically. You'd need to specify --labels search6_labels.csv (or rename the file).
