@@ -11,11 +11,5 @@
 # calculation, etc.)
 # bin: the label(s) of the atom(s) that you want to throw away before 
 name,center_label,y_axis_label,xy_plane_label,treat_as_R,R,bin
-ArCI,LAB1,LAB2,LAB3,LAB3-LAB4,LAB5-LAB6,-
 NO3,LAB1,LAB2,LAB3,-,-,-
 H2O,LAB3,LAB2,LAB1,-,-,-
-RCOMe,LAB1,LAB2,LAB3,-,LAB4,LAB5-LAB6-LAB7
-RC6H5,LAB2,LAB4,LAB6,-,LAB1,-
-RC6F5,LAB1,LAB2,LAB3,-,LAB12,-
-RNO2,LAB1,LAB2,LAB3,-,LAB1,-
-REt,LAB1,LAB5,LAB8,-,LAB8,LAB2-LAB3-LAB4
