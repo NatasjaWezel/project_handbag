@@ -16,6 +16,14 @@ Also contains a CLI: command line inteface.
 For installation guidelines, click [here](INSTALLATION.md).
 
 
+## Results
+
+
+## Replicating experiments
+Code is found here
+Data is found here
+
+
 [![BCH compliance](https://bettercodehub.com/edge/badge/NatasjaWezel/MasterProject?branch=master)](https://bettercodehub.com/)
 
 

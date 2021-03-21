@@ -12,6 +12,10 @@ bak/
 __pycache__/
 .ipynb_checkpoints/
 
+# local virtual environment
+handbag-env/
+test-env/
+
 .vscode
 
 *.pptx
