@@ -214,10 +214,11 @@ You can make use of the ```--central/--contact``` input flags. Try to write an i
   <summary>Input argument file for search6 (RCOMe_R2CO) </summary>
   The file must contain:
 
-  ```--input .\testdata\test\search6.cor 
-     --contact_rp O
-     --central RCOMe
-     --contact R2CO
+  ```
+  --input .\testdata\test\search6.cor 
+  --contact_rp O
+  --central RCOMe
+  --contact R2CO
   ```
 </details>
 
