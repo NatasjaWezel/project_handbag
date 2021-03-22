@@ -45,13 +45,14 @@ Test if everything works with running: ```python .\quantify.py -f .\arg_files\te
 
 * Change to the directory containing the testdata by typing ```cd test```, pressing tab (```cd .\testdata\``` should appear on your command line) and execute the command with pressing enter.
 * Go back to the src folder with using ```cd ../```
+
+> ```../``` means óne folder "up", so: move to the parent directory of the folder you're currently in.
+
 * Press the arrow up key twice to copy the ```cd testdata``` command and execute it again
 * Type ```ls``` to see what testdata is in this folder
   * If you want, ```cd``` to one of those folders and use ```ls``` to see what's in it. (A .cor and a .csv file)
   * To go back to the src folder, use  ```cd ../../``` instead of the next command.
 * Go back to the src folder with using ```cd ../```
-
-> ```../``` means óne folder "up", so: move to the parent directory of the folder you're currently in.
 
 > In windows terminal, filepaths can be with forward slashes ```/```` or backward slashes ```\```. It doesn't matter which one you use when typing a filepath, however, using tab will change all slashes to forward slashes.
 
