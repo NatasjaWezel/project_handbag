@@ -31,7 +31,7 @@ class Settings():
             self.central_name = central
             self.contact_name = contact
 
-            self.set_coordinate_file(name, extra_prefix=central + "_" + contact)
+            self.set_coordinate_file(name, extra_prefix=central + "_" + contact + "_")
 
         self.custom_alignment_file = False
         self.custom_structure_file = False
@@ -41,7 +41,7 @@ class Settings():
     def set_coordinate_file(self, name, extra_prefix=""):
 
         self.output_folder_central_group = self.WORKDIR + "\\results\\pairs\\" + self.central_name + "\\"
-        self.output_folder_specific = self.output_folder_central_group + extra_prefix + "_" + name + "\\"
+        self.output_folder_specific = self.output_folder_central_group + extra_prefix + name + "\\"
 
         if not os.path.exists(self.output_folder_central_group):
             os.mkdir(self.output_folder_central_group)
