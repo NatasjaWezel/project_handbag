@@ -1,44 +1,52 @@
 import os
+import sys
 
 import pandas as pd
 
 
 class Settings():
-    def __init__(self, WORKDIR, coordinate_file):
+    def __init__(self, WORKDIR, coordinate_file, central=False, contact=False):
         self.WORKDIR = WORKDIR
-
         self.coordinate_file = coordinate_file
 
-        name = coordinate_file.rsplit('\\')[-1].rsplit('.', 1)[0]
-        print(name)
+        # setup results files
+        if not os.path.exists(WORKDIR + "\\results"):
+            os.mkdir(WORKDIR + "\\results")
+            os.mkdir(WORKDIR + "\\results\\pairs")
 
-        self.central_name = name.split("_")[0]
-        self.contact_name = name.split("_")[1]
+        if not os.path.exists(WORKDIR + "\\results\\pairs"):
+            os.mkdir(WORKDIR + "\\results\\pairs")
+
+        name = coordinate_file.rsplit('\\')[-1].rsplit('.', 1)[0]
+
+        if central is False and contact is False:
+            self.central_name = name.split("_")[0]
+            self.contact_name = name.split("_")[1]
+
+            self.set_coordinate_file(name)
+        elif central is False or contact is False:
+            print("Please specify both the central name and contact name.")
+            sys.exit(1)
+        else:
+            self.central_name = central
+            self.contact_name = contact
+
+            self.set_coordinate_file(name, extra_prefix=central + "_" + contact)
 
         self.custom_alignment_file = False
         self.custom_structure_file = False
         self.threshold = 0.1
         self.resolution = False
 
-        if 'data' in coordinate_file:
-            # setup results files
-            if not os.path.exists(WORKDIR + "\\results"):
-                os.mkdir(WORKDIR + "\\results")
-                os.mkdir(WORKDIR + "\\results\\pairs")
+    def set_coordinate_file(self, name, extra_prefix=""):
 
-            if not os.path.exists(WORKDIR + "\\results\\pairs"):
-                os.mkdir(WORKDIR + "\\results\\pairs")
+        self.output_folder_central_group = self.WORKDIR + "\\results\\pairs\\" + self.central_name + "\\"
+        self.output_folder_specific = self.output_folder_central_group + extra_prefix + "_" + name + "\\"
 
-            self.output_folder_central_group = WORKDIR + "\\results\\pairs\\" + name.split("_")[0] + "\\"
-            self.output_folder_specific = self.output_folder_central_group + name + "\\"
+        if not os.path.exists(self.output_folder_central_group):
+            os.mkdir(self.output_folder_central_group)
 
-            if not os.path.exists(self.output_folder_central_group):
-                os.mkdir(self.output_folder_central_group)
-            self.outputfile_prefix = self.output_folder_specific + self.central_name + '_' + self.contact_name
-        else:
-            # setup results files
-            self.output_folder_specific = coordinate_file.rsplit('\\', 1)[0] + '\\'
-            self.outputfile_prefix = self.output_folder_specific + name
+        self.outputfile_prefix = self.output_folder_specific + self.central_name + '_' + self.contact_name
 
         if not os.path.exists(self.output_folder_specific):
             os.mkdir(self.output_folder_specific)
@@ -79,6 +87,7 @@ class Settings():
         return self.outputfile_prefix + "_structures.csv"
 
     def get_coordinate_df_filename(self):
+        print(self.outputfile_prefix + "_coordinates_contact.hdf")
         return self.outputfile_prefix + "_coordinates_contact.hdf"
 
     def get_coordinate_df_key(self):
@@ -110,8 +119,8 @@ class Settings():
 
 
 class AlignmentSettings(Settings):
-    def __init__(self, WORKDIR, coordinate_file):
-        Settings.__init__(self, WORKDIR, coordinate_file)
+    def __init__(self, WORKDIR, coordinate_file, central=False, contact=False):
+        Settings.__init__(self, WORKDIR, coordinate_file, central, contact)
 
         self.label_data = coordinate_file.rsplit('.', 1)[0] + '.csv'
         self.alignment = {}

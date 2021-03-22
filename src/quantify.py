@@ -8,10 +8,10 @@
 import argparse
 import sys
 
-sys.path.append(".//scripts")
-
 import pandas as pd
 import numpy as np
+
+sys.path.append(".//scripts")
 
 from classes.LoadArgsFromFile import LoadArgsFromFile
 from classes.Settings import AlignmentSettings
@@ -195,21 +195,24 @@ def print_menu():
 
 
 def make_settings_with_args(args):
-    settings = AlignmentSettings(WORKDIR=WORKDIR_MAIN, coordinate_file=args.input)
-    settings.set_contact_reference_point(args.contact_rp.upper())
-    settings.set_resolution(round(0.3, 2))
-    settings.set_threshold(round(0.1, 2))
 
+    if args.central is None and args.contact is None:
+        settings = AlignmentSettings(WORKDIR=WORKDIR_MAIN, coordinate_file=args.input)
+    if (args.central is not None and args.contact is None) or (args.central is None and args.contact is not None):
+        print("You can only specify no contact/central group, or specify both..")
+        sys.exit(1)
+    if args.central is not None and args.contact is not None:
+        settings = AlignmentSettings(WORKDIR=WORKDIR_MAIN, coordinate_file=args.input, central=args.central, contact=args.contact)
     if args.labels is not None:
         settings.set_label_file(args.labels)
-    if args.central is not None:
-        pass
-    if args.contact is not None:
-        pass
     if args.vanderwaals is not None:
         pass
     if args.output is not None:
         pass
+
+    settings.set_contact_reference_point(args.contact_rp.upper())
+    settings.set_resolution(round(0.3, 2))
+    settings.set_threshold(round(0.1, 2))
 
     settings.prepare_alignment()
 
