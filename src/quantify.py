@@ -138,7 +138,11 @@ def perform_option(option, settings):
 
 
 def ask_bool_input(message, default):
-    option = input(message)
+    try:
+        option = input(message + "\n")
+    except EOFError:
+        print_epilog()
+        exit()
     valid = False
     while(not valid):
         try:
@@ -162,7 +166,11 @@ def ask_bool_input(message, default):
 
 
 def ask_int_input(message, possible_inputs):
-    option = input(message + "\n")
+    try:
+        option = input(message + "\n")
+    except EOFError:
+        print_epilog()
+        exit()
 
     valid = False
     while(not valid):
