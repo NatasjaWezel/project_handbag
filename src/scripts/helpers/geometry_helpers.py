@@ -25,7 +25,7 @@ def make_coordinate_df(df, settings, avg_fragment, radii, again=False):
         print("Atoms in contact group:", len(first_fragment_df), "atom to count: ", settings.contact_rp)
         find_closest_contact_atom = False
 
-        if settings.contact_rp == "centroid":
+        if settings.contact_rp.lower() == "centroid":
             # plot centroids of all contact fragments
             longest_vdw = radii.get_vdw_distance_contact(settings.contact_rp)
             coordinate_df = df.groupby("fragment_id").mean().reset_index()
@@ -112,12 +112,12 @@ def p_dist_calc(closest_atoms_vdw, closest_distances, xcoord, ycoord, zcoord, le
     return closest_atoms_vdw, closest_distances
 
 
-def get_dihedral_and_h(CSV, central_group_name):
+def get_dihedral_and_h(CSV, central_name):
     methyl_model = {}
 
     df = pd.read_csv(CSV, header=0)
 
-    df = df[df.central == central_group_name]
+    df = df[df.central == central_name]
 
     methyl_model["dihedral1"] = df.dihedral1.item()
     methyl_model["dihedral2"] = df.dihedral2.item()
@@ -132,7 +132,7 @@ def get_dihedral_and_h(CSV, central_group_name):
 def add_model_methyl(CSV, fragment, settings, radii):
     print("Adding model CH3 group...", end=" ")
 
-    methyl_model = get_dihedral_and_h(CSV, settings.central_group_name)
+    methyl_model = get_dihedral_and_h(CSV, settings.central_name)
 
     # if labels have been switched by kmeans, look at old labels
     column = "label"
