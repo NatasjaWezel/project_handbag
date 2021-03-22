@@ -1,4 +1,22 @@
 # How to use the Command Line Interface (CLI) of project: Handbag
+- [How to use the Command Line Interface (CLI) of project: Handbag](#how-to-use-the-command-line-interface--cli--of-project--handbag)
+  * [Installing the project](#installing-the-project)
+  * [Setting up a virtual environment and install the dependencies of this project](#setting-up-a-virtual-environment-and-install-the-dependencies-of-this-project)
+  * [Testing the installation](#testing-the-installation)
+  * [Tips for using the terminal](#tips-for-using-the-terminal)
+  * [How the program runs](#how-the-program-runs)
+      - [Question 1: How would you run the program in the same way, without using the argument file?](#question-1--how-would-you-run-the-program-in-the-same-way--without-using-the-argument-file-)
+      - [Question 2: How would you run the program with using the hydrogen atom as reference point, without using the argument file?](#question-2--how-would-you-run-the-program-with-using-the-hydrogen-atom-as-reference-point--without-using-the-argument-file-)
+      - [Question 3: How would you run the program with the NO<sub>3</sub> R<sub>2</sub>CO file, that is also located in test data? Use the oxygen atom of the carbonyl as reference point.](#question-3--how-would-you-run-the-program-with-the-no-sub-3--sub--r-sub-2--sub-co-file--that-is-also-located-in-test-data--use-the-oxygen-atom-of-the-carbonyl-as-reference-point)
+  * [Making your own argument files](#making-your-own-argument-files)
+  * [How to specify labels](#how-to-specify-labels)
+      - [Question: What would you fill in for RC6H5, as shown in the picture above?](#question--what-would-you-fill-in-for-rc6h5--as-shown-in-the-picture-above-)
+      - [Question: How would you run the program with RC6H5, with as contact reference point the oxygen atom of CO?](#question--how-would-you-run-the-program-with-rc6h5--with-as-contact-reference-point-the-oxygen-atom-of-co-)
+  * [What to do when the name of the cor file has the wrong format](#what-to-do-when-the-name-of-the-cor-file-has-the-wrong-format)
+      - [Question: What would you fill in in central_groups.csv for RCOMe, as shown in the picture above?](#question--what-would-you-fill-in-in-central-groupscsv-for-rcome--as-shown-in-the-picture-above-)
+      - [Question: How would you now run this program?](#question--how-would-you-now-run-this-program-)
+
+## Installing the project
 The steps you need to undertake to run the CLI are summarized in bullet points. In the end, some example questions are given so you can get familiar with running the program for your own data. Let's start with obtaining the source code and installing python and a terminal.
 
 * Install python **3.8.8** [here](https://www.python.org/downloads/release/python-388/). Scroll down and click the Windows 64-bit installer.
@@ -11,7 +29,7 @@ The steps you need to undertake to run the CLI are summarized in bullet points. 
 
 ![download button](../figures/tutorial/download_source_code.png)
 
-## First time: Set up a virtual environment and install the dependencies of this project
+## Setting up a virtual environment and install the dependencies of this project
 * Navigate to the src folder in file explorer and open a windows terminal by right clicking the white space in the folder and choosing open Windows Terminal.</br>
 ![open windows terminal](../figures/tutorial/open_terminal.png)
 * Create your virtual environment by typing ```python -m venv handbag-env``` and pressing enter. It might take some time.  
@@ -133,7 +151,7 @@ Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.
   and press enter
 </details>
 
-## Let's take a look at the label specification
+## How to specify labels
 For water and nitrogen, some other pre-work was already done. Open the ```central_groups.csv```, located in the files folder (with any text editor you like - in this case excel might be a good option). First look at what atom has which label.
 ![labels no3 h2o rc6h5](../figures/tutorial/labels_h2o_no3_rc6h5.png)
 
@@ -172,7 +190,7 @@ Now that you've added this line to the central_groups.csv, it is possible to run
   ```python .\quantify.py -f .\arg_files\test_rc6h5_r2co_o.txt```
 </details>
 
-## And what happens when the .cor file doesn't have the right format (CENTRAL_CONTACT_blabla.cor)? 
+## What to do when the name of the cor file has the wrong format
 As a final example, we'll try to run the program for the 'search6' data. Of course, you know what data it contains: you did the conquest search. It contains the data of a carbonyl and a methyl group (let's call it rcome) and an aryl group. However, you didn't give a name in the right format. (In this case, search6 is not that helpful at all to remember what search this was.)
 
 First, add the labels to the central_groups.csv file. We want to ignore the hydrogen atoms of the methyl group. (See thesis/article for the reasoning about this.)
