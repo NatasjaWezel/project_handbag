@@ -58,7 +58,11 @@ def make_density_slider_plot(avg_fragment, settings):
     ax.set_zlim(zlim)
 
     cax = fig.add_axes([0.8, 0.25, 0.03, 0.6])
-    fig.colorbar(p, cax=cax, pad=0.2)
+    cbar = fig.colorbar(p, cax=cax, pad=0.2)
+
+    # format colorbar ticks into percentages
+    cbar.set_ticks(cbar.ax.get_yticks())
+    cbar.ax.set_yticklabels(['{:.2f}%'.format(x * 100) for x in cbar.get_ticks()])
 
     axcolor = 'lightgoldenrodyellow'
     ax_resolution = plt.axes([0.25, 0.15, 0.65, 0.03], facecolor=axcolor)
@@ -100,7 +104,11 @@ def make_density_slider_plot(avg_fragment, settings):
                               settings.threshold * maximum][settings.contact_rp].sum() * 100, 2)
         text_holder.set_text(f"Showing {percentage}% of all data")
 
-        fig.colorbar(p, cax=cax, pad=0.2)
+        cbar = fig.colorbar(p, cax=cax, pad=0.2)
+
+        # format colorbar ticks into percentages
+        cbar.set_ticks(cbar.ax.get_yticks())
+        cbar.ax.set_yticklabels(['{:.2f}%'.format(x * 100) for x in cbar.get_ticks()])
 
     def update_lim(val):
         print("\nChanged threshold too:", round(val, 2))
@@ -136,7 +144,11 @@ def make_density_slider_plot(avg_fragment, settings):
 
         print(f"Volume: {no_bins_cluster*settings.resolution**3 :.2f}")
 
-        fig.colorbar(p, cax=cax, pad=0.2)
+        cbar = fig.colorbar(p, cax=cax, pad=0.2)
+
+        # format colorbar ticks into percentages
+        cbar.set_ticks(cbar.ax.get_yticks())
+        cbar.ax.set_yticklabels(['{:.2f}%'.format(x * 100) for x in cbar.get_ticks()])
 
     resetax = plt.axes([0.8, 0.025, 0.1, 0.04])
     button = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
