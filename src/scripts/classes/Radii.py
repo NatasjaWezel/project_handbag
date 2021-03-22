@@ -30,7 +30,7 @@ class Radii():
         return self.cov_radii[symbol]
 
     def get_vdw_distance_contact(self, contact_rp):
-        if contact_rp == "centroid":
+        if contact_rp.lower() == "centroid":
             return self.get_vdw_radius("C")
 
         # else return vdw radius of the atom the user is interested in
