@@ -41,12 +41,8 @@ def fill_bins(amount, bin_coordinates, contact_coordinates, resolution):
                        (bin_coordinates[z] <= cor[z]) & (cor_res[z] <= bin_coordinates[z]))
 
         if len(idx[0]) > 1:
-            print(idx)
             #  because of floating point imprecision, sometimes bins overlap, so get first bin
             amount[idx[0][0]] += 1
-            print(cor, cor_res)
-            print(bin_coordinates.T[idx])
-            print(type(cor[0]), type(cor_res[0]), type(bin_coordinates.T[idx[0][0]][0]))
         elif len(idx[0]) == 0:
             print("Oh no this is going wrong")
             print(cor, cor_res)
@@ -171,7 +167,7 @@ def find_min_max_bounds(avg_fragment, extra):
     return avg_fragment
 
 
-def count_bins_in_vdw(avg_fragment, extra, resolution):
+def calc_vdw_vol_central(avg_fragment, extra, resolution):
     """ Input: the coordinates of the average fragment, the resolution on which we are calculating and the radius
         of the contact group + 0.5.
 
@@ -230,14 +226,14 @@ def find_available_volume(avg_fragment, extra, total=False, resolution=0.1):
     only_R = avg_fragment[avg_fragment.label.str.contains("R")].copy()
 
     if total:
-        return count_bins_in_vdw(avg_fragment=avg_fragment, extra=extra, resolution=resolution)
+        return calc_vdw_vol_central(avg_fragment=avg_fragment, extra=extra, resolution=resolution)
 
-    volume_central = count_bins_in_vdw(avg_fragment=avg_fragment, extra=0, resolution=resolution)
-    volume_max = count_bins_in_vdw(avg_fragment=avg_fragment_without_R, extra=extra, resolution=resolution)
+    volume_central = calc_vdw_vol_central(avg_fragment=avg_fragment, extra=0, resolution=resolution)
+    volume_max = calc_vdw_vol_central(avg_fragment=avg_fragment_without_R, extra=extra, resolution=resolution)
 
     if len(only_R) == 0:
         volume_R_min = 0
     else:
-        volume_R_min = count_bins_in_vdw(avg_fragment=only_R, extra=0, resolution=resolution)
+        volume_R_min = calc_vdw_vol_central(avg_fragment=only_R, extra=0, resolution=resolution)
 
     return (volume_max) - (volume_central - volume_R_min/2)
