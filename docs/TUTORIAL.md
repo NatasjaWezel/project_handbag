@@ -227,8 +227,10 @@ You can make use of the ```--central/--contact``` input flags. Try to write an i
 
 ## Plotting the first fragment with labels
 Looking at the first fragment with labels can come in handy when you forgot how you specified the labels. A script is provided to make this plot, in the ```tools``` folder. 
+> This action can only be done if the .csv file has the same filename as the .cor file, and have the CENTRAL_CONTACT_blahblah format
+
 * ```cd tools```
-* ```python plot_fragments_with_labels ..\test_data\h2o\H2O_XH_vdw.5_test.cor ..\test_data\h2o\H2O_XH_vdw.5_test.csv```
+* ```python plot_first_fragment_labels.py ..\testdata\h2o\H2O_XH_vdw.5_test.cor```
 
 A plot like the ones above should show.
 
