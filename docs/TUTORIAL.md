@@ -21,7 +21,7 @@ The steps you need to undertake to run the CLI are summarized in bullet points. 
 
 * Install python **3.8.8** [here](https://www.python.org/downloads/release/python-388/). Scroll down and click the Windows 64-bit installer.
 
-> As per writing, 3.8.8 is not the newest python version; however some of the dependencies of this project are not yet implemented in the very new pytho 3.9.
+> As per writing, 3.8.8 is not the newest python version; however some of the dependencies of this project are not yet implemented in the very new python 3.9.
 
 * Install Windows terminal from the Microsoft Marketplace or click [here](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab).
 
