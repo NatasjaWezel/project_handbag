@@ -33,6 +33,8 @@ from density_slider import make_density_slider_plot
 from helpers.density_helpers import make_density_df, find_available_volume
 from helpers.geometry_helpers import make_coordinate_df
 
+from constants.constants import STANDARD_RES, STANDARD_THRESHOLD
+
 
 def main():
 
@@ -130,8 +132,7 @@ def perform_option(option, settings):
                 settings.set_resolution(res)
                 make_density_df(settings, coordinate_df)
 
-            # TODO 0.3 now hardcoded
-            settings.set_resolution(0.3)
+            settings.set_resolution(STANDARD_RES)
             avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
             make_density_slider_plot(avg_fragment, settings)
 
@@ -217,8 +218,8 @@ def make_settings_with_args(args):
         pass
 
     settings.set_contact_reference_point(args.contact_rp.upper())
-    settings.set_resolution(round(0.3, 2))
-    settings.set_threshold(round(0.1, 2))
+    settings.set_resolution(STANDARD_RES)
+    settings.set_threshold(STANDARD_THRESHOLD)
 
     settings.prepare_alignment()
 
