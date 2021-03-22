@@ -12,12 +12,12 @@
 import sys
 import time
 
-
+import numpy as np
 import pandas as pd
 
 from classes.Settings import Settings
 from classes.Radii import Radii
-from helpers.density_helpers import make_density_df, find_available_volume
+from helpers.density_helpers import make_density_df, find_available_volume, calc_distances
 from helpers.geometry_helpers import make_coordinate_df
 
 from constants.paths import WORKDIR
@@ -69,7 +69,30 @@ def main():
     directionality = datafrac / Vcluster * (Vavailable/2)
 
     print(f"Directionality: {directionality}")
-    print(density_df[settings.contact_rp].sum(), datafrac, Vcluster, Vavailable)
+
+    vdw_overlap = calc_vdw_overlap(in_cluster.copy(), settings, avg_frag, contact_group_radius)
+    print(f"Vdw overlap datapoints in cluster: {vdw_overlap :.2f}%")
+
+
+def calc_vdw_overlap(in_cluster, settings, avg_fragment, contact_group_radius):
+    in_cluster['x_center'] = in_cluster.xstart + 0.5 * settings.resolution
+    in_cluster['y_center'] = in_cluster.ystart + 0.5 * settings.resolution
+    in_cluster['z_center'] = in_cluster.zstart + 0.5 * settings.resolution
+
+    bin_coordinates = np.transpose(np.array([in_cluster.x_center, in_cluster.y_center, in_cluster.z_center]))
+    in_vdw_vol = np.zeros(len(in_cluster))
+
+    for i, atom in avg_fragment.iterrows():
+        indices = np.transpose(np.where(in_vdw_vol == 0))
+
+        fragment_point = np.array([atom.x, atom.y, atom.z, atom.vdw_radius])
+
+        in_vdw_vol = calc_distances(in_vdw_vol, bin_coordinates, fragment_point, indices,
+                                    extra=(contact_group_radius))
+
+    in_cluster['in_vdw_vol'] = in_vdw_vol
+
+    return in_cluster[in_cluster.in_vdw_vol != 0].datafrac_normalized.sum() * 100
 
 
 if __name__ == "__main__":
