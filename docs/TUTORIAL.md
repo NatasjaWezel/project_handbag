@@ -1,30 +1,59 @@
 # How to use the Command Line Interface (CLI) of project: Handbag
-Install python 3.8.8 [here](https://www.python.org/downloads/release/python-388/). Scroll down and click the Windows 64-bit installer.
+The steps you need to undertake to run the CLI are summarized in bullet points. In the end, some example questions are given so you can get familiar with running the program for your own data. Let's start with obtaining the source code and installing python and a terminal.
 
-Install Windows terminal from the Microsoft Marketplace or click [here](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab).
+* Install python **3.8.8** [here](https://www.python.org/downloads/release/python-388/). Scroll down and click the Windows 64-bit installer.
 
-Download the source code of this page by using the green download button on the github page.
+> As per writing, 3.8.8 is not the newest python version; however some of the dependencies of this project are not yet implemented in the very new pytho 3.9.
+
+* Install Windows terminal from the Microsoft Marketplace or click [here](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab).
+
+* Download the source code of this page by using the green download button on the github page, as shown below.
+
 ![download button](../figures/tutorial/download_source_code.png)
 
 ## First time: Set up a virtual environment and install the dependencies of this project
-Navigate to the src folder in file explorer and open a windows terminal by right clicking the white space in the folder and choosing open Windows Terminal.
+* Navigate to the src folder in file explorer and open a windows terminal by right clicking the white space in the folder and choosing open Windows Terminal.</br>
 ![open windows terminal](../figures/tutorial/open_terminal.png)
-Create your virtual environment by typing ```python -m venv handbag-env``` and pressing enter. It might take some time.
-Activate the virtual environment with: ```./handbag-env/Scripts/Activate.ps1```. While typing folder names, you can always use 'tab' to let the terminal auto-complete the filepath you're typing. When the virtual environment is activated, this should be visible. 
-![activated venv](../figures/tutorial/activated_venv.png)
-Install dependencies of the project: ```pip install -r requirements.txt```. This can take a bit of time.
-You can deactivate the virtual environment with saying ```deactivate```, but you don't have to: you can always just close the terminal.
+* Create your virtual environment by typing ```python -m venv handbag-env``` and pressing enter. It might take some time.  
 
-> Once you have made a virtual environment, the next time you can open the terminal in the src folder and you only have to activate the virtual environment with ```./handbag-env/Scripts/Activate.ps1```
+> You can always copy the commands in this tutorial and paste them into your terminal using *Cntrl + V* or right-clicking on the command line. However, try to get used to typing on the command line as well with this tutorial.
+
+* Activate the virtual environment with: ```./handbag-env/Scripts/Activate.ps1```. While typing folder names, you can always use 'tab' to let the terminal auto-complete the filepath you're typing. When the virtual environment is activated, this should be visible in green parentheses at the very beginning of your command line, like in the picture below.
+
+> From now on, we will not say "and press enter" everywhere. It is implicit that the commands need to be executed by pressing enter.
+
+![activated venv](../figures/tutorial/activated_venv.png)
+* Install dependencies of the project: ```pip install -r requirements.txt```. This can take a bit of time.
+
+* You can deactivate the virtual environment with saying ```deactivate```.
+
+> It's also okay to just close the terminal once your done using the program.
+
+* Activate the virtual environment again with ```.\handbag-env\Scripts\Activate.ps1```.
+
+> Now that you have created the virtual environment, from now on you can just open the terminal in the src folder and only use this command to activate the virtual environment.
 
 ## Testing the installation
 Test if everything works with running: ```python .\quantify.py -f .\arg_files\test_h2o_xh_o.txt```. If everything worked correctly, the program should now start to run and you should be able to explore all the plots.
 ![working program](../figures/tutorial/working_program.png)
 
 ## Tips for using the terminal
-```cd```: changes directory. Change to directory scripts by typing ```cd scripts```, and back by ```cd ../```, where ```../``` means óne folder "up", so: move to the parent directory of the folder you're currently in.</br>
+```cd```: changes directory. </br>
 ```ls```: list. List all files and directories that are in the current directory. This can help you navigate through the file structure on your computer.</br>
-Arrow up: using the arrow up on your keyboard you can "scroll" through the latest commands you entered, and executing them again by pressing enter.
+```Arrow up```: using the arrow up key on your keyboard you can "scroll" through the latest commands you entered, and executing them again by pressing enter.</br>
+```Tab```: Tab is used for autocompletion, which (together with the up-arrow) can save you a lot of typing :).
+
+* Change to the directory containing the testdata by typing ```cd test```, pressing tab (```cd .\testdata\``` should appear on your command line) and execute the command with pressing enter.
+* Go back to the src folder with using ```cd ../```
+* Press the arrow up key twice to copy the ```cd testdata``` command and execute it again
+* Type ```ls``` to see what testdata is in this folder
+  * If you want, ```cd``` to one of those folders and use ```ls``` to see what's in it. (A .cor and a .csv file)
+  * To go back to the src folder, use  ```cd ../../``` instead of the next command.
+* Go back to the src folder with using ```cd ../```
+
+> ```../``` means óne folder "up", so: move to the parent directory of the folder you're currently in.
+
+> In windows terminal, filepaths can be with forward slashes ```/```` or backward slashes ```\```. It doesn't matter which one you use when typing a filepath, however, using tab will change all slashes to forward slashes.
 
 ## How the program runs
 You tested the program with the command: ```python .\quantify.py -f .\arg_files\test_h2o_xh_o.txt```, but how does this command work? The flag ```-f``` specifies a file that contains the input arguments for the program.
@@ -68,7 +97,7 @@ If we look into the file `.\arg_files\test_h2o_xh_o.txt` (by opening it with any
 </details>
 
 ## Making your own argument files
-Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.txt`.
+Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.txt`. *It is important that the flags are all on their own line!*
 <details>
   <summary>Implementation .\arg_files\test_h2o_xh_h.txt</summary>
   The file has to contain two lines:
