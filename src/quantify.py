@@ -152,6 +152,9 @@ def ask_bool_input(message, default):
             else:
                 raise ValueError
         except ValueError:
+            if (option == "quit") or (option == "exit"):
+                print_epilog()
+                exit()
             option = input("Please type Y or N. \n")
 
     return option
@@ -168,7 +171,10 @@ def ask_int_input(message, possible_inputs):
                 valid = True
             else:
                 raise ValueError
-        except ValueError:
+        except ValueError: 
+            if (option == "quit") or (option == "exit"):
+                print_epilog()
+                exit()
             option = input("Type the integer belonging to your choice.\n")
 
     print()
