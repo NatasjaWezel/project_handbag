@@ -222,3 +222,16 @@ You can make use of the ```--central/--contact``` input flags. Try to write an i
 </details>
 
 > If the .csv containing the parameters from the conquest search has another name, you can specify that as well with using the --labels flag. So say search6.csv was called search6_labels.csv instead, the program is not able to find it automatically. You'd need to specify --labels search6_labels.csv (or rename the file).
+
+
+## Plotting the first fragment with labels
+Looking at the first fragment with labels can come in handy when you forgot how you specified the labels. A script is provided to make this plot, in the ```tools``` folder. 
+* ```cd tools```
+* ```python plot_fragments_with_labels ..\test_data\h2o\H2O_XH_vdw.5_test.cor ..\test_data\h2o\H2O_XH_vdw.5_test.csv
+
+A plot like the ones above should show.
+
+## Building a methyl model
+If you choose to not use the hydrogen atoms from a methyl group for alignment, you can specify where they need to be build back in ```files\methyl_model.csv```. If you do want to use the regular generation of the central group model, do not put the labels in the bin column in ```files\central_groups.csv``` and do not specify the central group name here. The model will be built using K-means. See thesis for pro's/con's of both of these methods.
+
+This is the end of the tutorial, have fun calculating directionalities and inspecting densities around central group models! :)
