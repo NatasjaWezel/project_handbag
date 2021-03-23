@@ -6,6 +6,8 @@ from classes.Radii import Radii
 from helpers.geometry_helpers import average_fragment, add_model_methyl
 from helpers.alignment_helpers import calc_rmse
 
+from constants.constants import RMSE_TEST
+
 from sklearn.cluster import KMeans
 
 from constants.paths import WORKDIR
@@ -42,7 +44,7 @@ def calc_avg_frag(df, avg_frag_settings, radii):
     rmse_avg = calc_avg_rmse(fragment, avg_frag_settings)
 
     # dependent on rmses, do kmeans or not
-    if rmse_avg > 0.1:
+    if rmse_avg > RMSE_TEST:
         print("RMSEs too high. Resetting labels using KMeans")
         df = reset_labels_with_kmeans(df, avg_frag_settings)
 

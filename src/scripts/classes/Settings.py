@@ -35,8 +35,6 @@ class Settings():
 
         self.custom_alignment_file = False
         self.custom_structure_file = False
-        self.threshold = 0.1
-        self.resolution = False
 
     def set_coordinate_file(self, name, extra_prefix=""):
 

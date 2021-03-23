@@ -17,6 +17,7 @@ from helpers.geometry_helpers import (make_coordinate_df)
 from helpers.geometry_helpers import distances_closest_vdw_central
 
 from constants.paths import WORKDIR
+from constants.constants import STANDARD_EXTRA_VDW
 
 
 def main():
@@ -37,12 +38,12 @@ def main():
         print('First align and calculate average fragment.')
         sys.exit(2)
 
-    make_fingerprint_plots(df, avg_frag, settings)
+    make_fingerprint_plots(df, avg_frag, settings, STANDARD_EXTRA_VDW)
     t1 = time.time() - t0
     print("Duration: %.2f s." % t1)
 
 
-def make_fingerprint_plots(df, avg_frag, settings):
+def make_fingerprint_plots(df, avg_frag, settings, STANDARD_EXTRA_VDW):
     fingerprint = Fingerprint(settings)
 
     radii = Radii(settings.get_radii_csv_name())
@@ -51,7 +52,7 @@ def make_fingerprint_plots(df, avg_frag, settings):
         - coordinate_df['longest_vdw']
 
     # make first the fingerprint plot with everything
-    fingerprint.make_plot(coordinate_df)
+    fingerprint.make_plot(coordinate_df, STANDARD_EXTRA_VDW)
     fingerprint.next()
 
     while fingerprint.not_done():

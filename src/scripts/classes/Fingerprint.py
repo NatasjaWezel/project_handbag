@@ -48,7 +48,7 @@ class Fingerprint():
     def next(self):
         self.counter += 1
 
-    def make_plot(self, coordinate_df):
+    def make_plot(self, coordinate_df, STANDARD_EXTRA_VDW):
         fig = plt.figure(figsize=(8, 4))
         fig.subplots_adjust(bottom=0.3)
         plt.title(f"Fingerprint of {self.central} ({self.get_description()})--{self.contact} ({self.contact_rp})")
@@ -72,7 +72,9 @@ class Fingerprint():
         plt.vlines(0, 0, 0.15, color="black", label="VDW radius atom central")
 
         plt.vlines(coordinate_df['vdw_closest_atom'].max(), 0, 0.15, color="lightgreen", label="VDW radii")
-        plt.vlines(coordinate_df['vdw_closest_atom'].max() + 0.5, 0, 0.15, color="green", label="VDW radii + 0.5")
+        plt.vlines(coordinate_df['vdw_closest_atom'].max() + STANDARD_EXTRA_VDW, 0, 0.15,
+                   color="green",
+                   label="VDW radii + " + str(STANDARD_EXTRA_VDW))
 
         heights, bins = np.histogram(coordinate_df.moved, bins='auto')
         heights = (heights/sum(heights))

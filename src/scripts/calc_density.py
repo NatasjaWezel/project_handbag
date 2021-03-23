@@ -20,22 +20,24 @@ from classes.Radii import Radii
 from helpers.density_helpers import make_density_df, find_available_volume, calc_distances
 from helpers.geometry_helpers import make_coordinate_df
 
+from constants.constants import STANDARD_THRESHOLD, STANDARD_RES, STANDARD_EXTRA_VDW
 from constants.paths import WORKDIR
 
 
 def main():
 
-    if len(sys.argv) != 4:
-        print("Usage: python plot_density.py <path/to/inputfile> <resolution> <contact group reference point>")
+    if len(sys.argv) != 3:
+        print("Usage: python plot_density.py <path/to/inputfile> <contact group reference point>")
         sys.exit(1)
 
     t0 = time.time()
 
     settings = Settings(WORKDIR, sys.argv[1])
-    settings.set_contact_reference_point(sys.argv[3])
+    settings.set_contact_reference_point(sys.argv[2])
 
     # resolution of the bins, in Angstrom
-    settings.set_resolution(float(sys.argv[2]))
+    settings.set_resolution(STANDARD_RES)
+    settings.set_threshold(STANDARD_THRESHOLD)
 
     try:
         df = pd.read_csv(settings.get_aligned_csv_filename(), header=0)
@@ -54,7 +56,7 @@ def main():
     print("Duration: %.2f s." % t1)
 
     # find the volume of the central group
-    tolerance = 0.5
+    tolerance = STANDARD_EXTRA_VDW
     contact_group_radius = radii.get_vdw_distance_contact(settings.contact_rp)
     Vavailable = find_available_volume(avg_fragment=avg_frag, extra=(tolerance + contact_group_radius))
     print('Available volume:', Vavailable)
@@ -75,6 +77,8 @@ def main():
 
 
 def calc_vdw_overlap(in_cluster, settings, avg_fragment, contact_group_radius):
+
+    # center of bin is at xstart + a half times the resolution
     in_cluster['x_center'] = in_cluster.xstart + 0.5 * settings.resolution
     in_cluster['y_center'] = in_cluster.ystart + 0.5 * settings.resolution
     in_cluster['z_center'] = in_cluster.zstart + 0.5 * settings.resolution

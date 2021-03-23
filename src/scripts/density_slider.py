@@ -9,6 +9,8 @@ from constants.paths import WORKDIR
 from classes.Settings import Settings
 from helpers.plot_functions import plot_fragment_colored, plot_density
 
+from constants.constants import STANDARD_THRESHOLD, STANDARD_RES
+
 
 def main():
 
@@ -19,8 +21,8 @@ def main():
     settings = Settings(WORKDIR, sys.argv[1])
 
     # resolution of the bins, in Angstrom
-    settings.set_resolution(round(0.2, 2))
-    settings.set_threshold(round(0.1, 2))
+    settings.set_resolution(STANDARD_RES)
+    settings.set_threshold(STANDARD_THRESHOLD)
     settings.set_contact_reference_point(sys.argv[2])
 
     avg_fragment = pd.read_csv(settings.get_avg_frag_filename())

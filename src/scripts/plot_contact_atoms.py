@@ -16,6 +16,8 @@ from classes.Settings import Settings
 from classes.Radii import Radii
 from helpers.geometry_helpers import (make_coordinate_df)
 from constants.colors import AXCOLOR
+from constants.constant import STANDARD_EXTRA_VDW
+
 from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
 
 from constants.paths import WORKDIR
@@ -74,13 +76,13 @@ def make_contact_rps_plot(avg_fragment, coordinate_df, settings):
     ax.set_ylim((minn, maxx))
     ax.set_zlim((minn, maxx))
 
-    points = ax.scatter(list(coordinate_df[coordinate_df.vdw_corr <= 0.5].x),
-                        list(coordinate_df[coordinate_df.vdw_corr <= 0.5].y),
-                        list(coordinate_df[coordinate_df.vdw_corr <= 0.5].z), s=1, c="red")
+    points = ax.scatter(list(coordinate_df[coordinate_df.vdw_corr <= STANDARD_EXTRA_VDW].x),
+                        list(coordinate_df[coordinate_df.vdw_corr <= STANDARD_EXTRA_VDW].y),
+                        list(coordinate_df[coordinate_df.vdw_corr <= STANDARD_EXTRA_VDW].z), s=1, c="red")
 
     vdw_slider_ax = plt.axes([0.25, 0.05, 0.65, 0.03], facecolor=AXCOLOR)
     vdw_slider = Slider(vdw_slider_ax, 'Upper limit', round(coordinate_df.vdw_corr.min(), 2), 0.5,
-                        valinit=0.5, valstep=0.01)
+                        valinit=STANDARD_EXTRA_VDW, valstep=0.01)
 
     vdw_slider_ax_lo = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=AXCOLOR)
     vdw_slider_lo = Slider(vdw_slider_ax_lo, 'Lower limit', round(coordinate_df.vdw_corr.min(), 2), 0.5,
