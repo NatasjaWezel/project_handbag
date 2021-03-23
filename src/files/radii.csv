@@ -1,3 +1,5 @@
+# This file contains the covalent and vanderwaals radii according to bondii
+# If you want to use other radii, change this file or replace it with another one, containing the same columns
 name,symbol,cov_radius,vdw_radius
 Actinium,Ac,2.15,2
 Aluminium,Al,1.21,2

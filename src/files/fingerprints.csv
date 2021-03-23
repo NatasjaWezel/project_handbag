@@ -1,3 +1,12 @@
+# This file contains information about what specific fingerprint plots you want to make.
+# If nothing about a central group is in here, only the "closest atom" plot will be made.
+# Make sure to fill in each column, choosing the labels that you are interesting.
+# If you don't remember the labels that your molecule has, try plotting the model fragment (with labels).
+#
+# The columns are defined as follows:
+# central: the name of the central group
+# description: describe what atoms you have used in this plot
+# labels: labels of the atoms to use, separated by "&"
 central,description,labels
 ArCI,both Qa (H/F),LAB5-R1&LAB6-R2
 H2O,O,LAB2

@@ -1,3 +1,17 @@
+# This file contains information on how to build a methyl model.
+# The dihedral has to be specified, and the place of the first H
+# If you do not specify how to build the methyl model here, but dó bin the atoms in the alignment,
+# your central group will not have a methyl group. If you chose to ignore the hydrogen atoms instead
+# in the alignment, the methyl group will be averaged.
+# 
+# The columns are defined as follows:
+# central: the name of the central group
+# dihedral1: first atom of the dihedral
+# dihedral2: second atom of the dihedral
+# dihedral3: third atom of the dihedral, the hydrogens will be attached to this atom
+# angle: the average angle of dihedral2-dihedral3-hydrogen
+# distance: the average distance of dihedral3-hydrogen
+# first_deg: 0 or 60, is the first atom in a plane with dihedral1 (0) or not (60)
 central,dihedral1,dihedral2,dihedral3,angle,distance,first_deg
 RCOMe,LAB1,LAB2,LAB3,109.6,0.97,0
 REt,LAB8,LAB5,LAB1,109.53,0.97,60
