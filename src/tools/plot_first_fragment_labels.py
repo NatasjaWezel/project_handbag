@@ -88,9 +88,12 @@ def plot_fragment_with_labels(settings):
         elif 'C' in atom:
             color = 'black'
             label = 'C'
+        elif 'I' in atom:
+            color = 'yellow'
+            label = 'I'
         else:
             color = "purple"
-            label = "other then H, O, F, N or C"
+            label = "other then C, O, H, F, N, I"
 
         ax.scatter(x, y, z, s=100, edgecolors="black", color=color, label=label)
         ax.text(x+0.1, y+0.1, z+0.1, labels[i])
