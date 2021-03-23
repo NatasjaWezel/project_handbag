@@ -24,16 +24,19 @@ from helpers.plot_functions import plot_fragments
 
 from align_kabsch import split_file_if_too_big, align_all_fragments
 from plot_density import make_density_plot
-from scripts.plot_avg_fragment_2a import plot_avg_fragment
+from scripts.plot_avg_fragment import plot_avg_fragment
 from calc_avg_fragment import calc_avg_frag
 from plot_contact_atoms import make_contact_rps_plot
+from plot_fingerprint import make_fingerprint_plots
 
 from density_slider import make_density_slider_plot
 
 from helpers.density_helpers import make_density_df, find_available_volume
 from helpers.geometry_helpers import make_coordinate_df
 
-from constants.constants import STANDARD_RES, STANDARD_THRESHOLD
+from constants.constants import STANDARD_RES, STANDARD_THRESHOLD, STANDARD_EXTRA_VDW
+
+# https://stackoverflow.com/questions/36827962/pep8-import-not-at-top-of-file-with-sys-path
 
 
 def main():
@@ -102,9 +105,19 @@ def perform_option(option, settings):
             data = data[data.label != "-"]
         plot_fragments(data, amount, COLORS)
     elif option == 2:
-        plot_avg_fragment(settings)
+        default = "Y"
+        only_central = ask_bool_input("Do you want to plot the labels as well? [Y]\\N\n", default)
+
+        labels = False
+        if "y" in only_central.lower():
+            labels = True
+        
+        plot_avg_fragment(settings, labels)
     elif option == 3:
-        pass
+        df = pd.read_csv(settings.get_aligned_csv_filename(), header=0)
+        avg_frag = pd.read_csv(settings.outputfile_prefix + "_avg_fragment.csv", header=0)
+        make_fingerprint_plots(df, avg_frag, settings, STANDARD_EXTRA_VDW)
+        print()
     elif option == 4:
         avg_fragment = pd.read_csv(settings.get_avg_frag_filename())
         density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
@@ -157,7 +170,7 @@ def ask_bool_input(message, default):
             else:
                 raise ValueError
         except ValueError:
-            if (option == "quit") or (option == "exit"):
+            if "quit" in option or "exit" in option:
                 print_epilog()
                 exit()
             option = input("Please type Y or N. \n")
@@ -200,7 +213,7 @@ def print_menu():
     print("Plots")
     print("\t1 - aligned fragments")
     print("\t2 - model central group")
-    print("\t3 - coordinates contact group")
+    print("\t3 - make fingerprints")
     print("\t4 - density around central group")
     print("Interactive plots")
     print("\t5 - coordinates contact group")
