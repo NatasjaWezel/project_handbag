@@ -28,6 +28,7 @@ class Fingerprint():
 
         # get csv filename from settings object
         self.csv = settings.get_fingerprint_filename()
+        self.WORKDIR = settings.WORKDIR
 
         # initialize with -1 so the first plot can be made if counter == -1
         self.counter = -1
@@ -37,15 +38,15 @@ class Fingerprint():
         self.specific = df[df.central == self.central].reset_index()
 
         # check if the result file folders
-        if not os.path.exists('../../results/'):
-            os.mkdir('../../results')
-            os.mkdir('../../results/pairs')
-            os.mkdir(f'../../results/pairs/{self.central}/')
-        elif not os.path.exists('../../results/pairs'):
-            os.mkdir('../../results/pairs')
-            os.mkdir(f'../../results/pairs/{self.central}/')
-        elif not os.path.exists(f'../../results/pairs/{self.central}/'):
-            os.mkdir(f'../../results/pairs/{self.central}/')
+        if not os.path.exists(self.WORKDIR + '/results/'):
+            os.mkdir(self.WORKDIR + '/results/')
+            os.mkdir(self.WORKDIR + '/results/pairs')
+            os.mkdir(f'{self.WORKDIR}/results/pairs/{self.central}/')
+        elif not os.path.exists(self.WORKDIR + '/results/pairs'):
+            os.mkdir(self.WORKDIR + '/results/pairs')
+            os.mkdir(f'{self.WORKDIR}/results/pairs/{self.central}/')
+        elif not os.path.exists(f'{self.WORKDIR}/results/pairs/{self.central}/'):
+            os.mkdir(f'{self.WORKDIR}/results/pairs/{self.central}/')
 
     def get_labels(self):
         """ Get labels from file, except if the first plot is made. """
@@ -119,7 +120,7 @@ class Fingerprint():
 
         plt.legend()
 
-        title = f'../../results/fingerprints/{self.central}/{self.central}_{self.contact}_{self.contact_rp}'
+        title = f'{self.WORKDIR}/results/pairs/{self.central}/{self.central}_{self.contact}_{self.contact_rp}'
         title += f'_fingerprint_{self.get_labels()}.png'
         plt.savefig(title)
         plt.close(fig)
