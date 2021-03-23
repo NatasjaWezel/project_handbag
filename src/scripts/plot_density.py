@@ -1,13 +1,14 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# This is a script that I wrote for my master thesis
-# It loads the coordinates of the aligned fragments. It then divides the
-# surrounding space into a number of bins, depending on which resolution is
-# set. It counts how many of the contact atoms/ centers of contact groups are
-# are in each bin and normalizes that by the total amount of contact atoms or
-# groups. Then a plot is made that shows the density of the contacts in "4D".
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This script is part of the quantification pipeline of 3D experimental data of crystal structures that I wrote for my
+# thesis in the Master Computational Science, University of Amsterdam, 2021.
+#
+# `plot_density` loads the coordinates of the aligned fragments. It then divides the surrounding space into a number
+# of bins, depending on which resolution is set. It counts how many of the contact atoms/ centers of contact groups are
+# are in each bin and normalizes that by the total amount of contact atoms or groups. Then a plot is made that shows
+# the density of the contacts in "4D".
 #
 # Author: Natasja Wezel
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import sys
 

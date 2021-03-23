@@ -1,3 +1,11 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This script is part of the quantification pipeline of 3D experimental data of crystal structures that I wrote for my
+# thesis in the Master Computational Science, University of Amsterdam, 2021.
+#
+# `density_helpers` contains functions for making bins and calculating the amount of datapoints in the bins
+#
+# Author: Natasja Wezel
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 import math
 
 import numpy as np
@@ -23,8 +31,59 @@ def calculate_no_bins(resolution, limits):
     return no_bins, minimum, maximum
 
 
-# @jit(nopython=True)
+def make_density_df(settings, coordinate_df, again=False):
+    """ Make density df if it doesn't already exists. """
+
+    try:
+        if again:
+            raise KeyError
+        density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
+        print("Density df already existed, loaded from file")
+    except (FileNotFoundError, KeyError):
+
+        # prepare empty df
+        empty_density_df = prepare_df(df=coordinate_df, settings=settings)
+
+        # count data per bin
+        density_df = count_data_points_per_bin(df=empty_density_df, contact_points_df=coordinate_df, settings=settings)
+
+        # normalize
+        density_df['datafrac_normalized'] = (density_df[settings.contact_rp] /
+                                             density_df[settings.contact_rp].sum())
+
+        # save so we can use the data but only change the plot - saves time :)
+        density_df.to_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
+
+    return density_df
+
+
+def count_data_points_per_bin(df, contact_points_df, settings):
+    """ Counts the amount of datapoints that is in a bin. """
+
+    contact_points_df = contact_points_df
+
+    print("Counting points per bin: ")
+    # prepare vector that will contain the amount
+    amount = np.zeros(len(df))
+
+    bin_coordinates = np.array([df.xstart, df.ystart, df.zstart])
+    contact_coordinates = np.transpose(np.array([contact_points_df.x,
+                                                 contact_points_df.y,
+                                                 contact_points_df.z]))
+
+    amount = fill_bins(amount, bin_coordinates, contact_coordinates, settings.resolution)
+
+    assert amount.sum() == len(contact_points_df), "Something went wrong with filling bins" + str(amount.sum())\
+        + " " + str(len(contact_points_df))
+
+    df[settings.contact_rp] = amount
+
+    return df
+
+
 def fill_bins(amount, bin_coordinates, contact_coordinates, resolution):
+    """ Count how many datapoints there are in each bin. """
+
     x, y, z = 0, 1, 2
     i = 0
     total = len(contact_coordinates)
@@ -55,50 +114,9 @@ def fill_bins(amount, bin_coordinates, contact_coordinates, resolution):
     return amount
 
 
-def make_density_df(settings, coordinate_df, again=False):
-    try:
-        if again:
-            raise KeyError
-        density_df = pd.read_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
-        print("Density df already existed, loaded from file")
-    except (FileNotFoundError, KeyError):
-        empty_density_df = prepare_df(df=coordinate_df, settings=settings)
-
-        density_df = count_points_per_square(df=empty_density_df, contact_points_df=coordinate_df, settings=settings)
-
-        # normalize
-        density_df['datafrac_normalized'] = (density_df[settings.contact_rp] /
-                                             density_df[settings.contact_rp].sum())
-
-        # save so we can use the data but only change the plot - saves time :)
-        density_df.to_hdf(settings.get_density_df_filename(), settings.get_density_df_key())
-
-    return density_df
-
-
-def count_points_per_square(df, contact_points_df, settings):
-    contact_points_df = contact_points_df
-
-    print("Counting points per bin: ")
-    # prepare vector that will contain the amount
-    amount = np.zeros(len(df))
-
-    bin_coordinates = np.array([df.xstart, df.ystart, df.zstart])
-    contact_coordinates = np.transpose(np.array([contact_points_df.x,
-                                                 contact_points_df.y,
-                                                 contact_points_df.z]))
-
-    amount = fill_bins(amount, bin_coordinates, contact_coordinates, settings.resolution)
-
-    assert amount.sum() == len(contact_points_df), "Something went wrong with filling bins" + str(amount.sum())\
-        + " " + str(len(contact_points_df))
-
-    df[settings.contact_rp] = amount
-
-    return df
-
-
 def prepare_df(df, settings):
+    """ Prepares an empty df containing the coordinates for all the bins. """
+
     maxx, maxy, maxz = df.x.max(), df.y.max(), df.z.max()
     minx, miny, minz = df.x.min(), df.y.min(), df.z.min()
 
@@ -124,6 +142,8 @@ def prepare_df(df, settings):
 
 
 def add_boundaries_per_bin(bins, indices):
+    """ Adds bins with boundaries to a dataframe. """
+
     bins_x, bins_y, bins_z = bins[0], bins[1], bins[2]
 
     xl, yl, zl = len(bins_x), len(bins_y), len(bins_z)
@@ -143,6 +163,7 @@ def add_boundaries_per_bin(bins, indices):
 
 @jit(nopython=True, parallel=True)
 def calc_distances(in_vdw_volume, bin_coordinates, avg_f_p, indices, extra):
+    """ Calc distances from contact rp's to closest atom from the central group model. """
 
     for i in prange(len(indices)):
         idx = indices[i]
@@ -157,6 +178,8 @@ def calc_distances(in_vdw_volume, bin_coordinates, avg_f_p, indices, extra):
 
 
 def find_min_max_bounds(avg_fragment, extra):
+    """ Find minimum and maximum coordinates of the central model. """
+
     avg_fragment['minx'] = avg_fragment['x'] - avg_fragment['vdw_radius'] - extra
     avg_fragment['miny'] = avg_fragment['y'] - avg_fragment['vdw_radius'] - extra
     avg_fragment['minz'] = avg_fragment['z'] - avg_fragment['vdw_radius'] - extra
@@ -174,8 +197,7 @@ def calc_vdw_vol_central(avg_fragment, extra, resolution):
         Output: dataframe with defined bins and whether they are in the volume or not, and the amount of bins that is
         in the vdw volume.
 
-        0.1 provides an accurate and semi-instantaneous calculation, see thesis
-    """
+        0.1 provides an accurate and semi-instantaneous calculation, see thesis. """
 
     avg_fragment = find_min_max_bounds(avg_fragment, extra)
 
@@ -221,6 +243,8 @@ def calc_vdw_vol_central(avg_fragment, extra, resolution):
 
 
 def find_available_volume(avg_fragment, extra, total=False, resolution=0.1):
+    """ Find the available volume. """
+
     avg_fragment["label"] = avg_fragment["label"].str.upper()
     avg_fragment_without_R = avg_fragment[~avg_fragment.label.str.contains("R")].copy()
     only_R = avg_fragment[avg_fragment.label.str.contains("R")].copy()
@@ -231,9 +255,9 @@ def find_available_volume(avg_fragment, extra, total=False, resolution=0.1):
     volume_central = calc_vdw_vol_central(avg_fragment=avg_fragment, extra=0, resolution=resolution)
     volume_max = calc_vdw_vol_central(avg_fragment=avg_fragment_without_R, extra=extra, resolution=resolution)
 
-    if len(only_R) == 0:
-        volume_R_min = 0
-    else:
+    volume_R_min = 0
+
+    if len(only_R) > 0:
         volume_R_min = calc_vdw_vol_central(avg_fragment=only_R, extra=0, resolution=resolution)
 
     return (volume_max) - (volume_central - volume_R_min/2)

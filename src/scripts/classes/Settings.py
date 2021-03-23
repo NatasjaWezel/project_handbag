@@ -1,3 +1,16 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This script is part of the quantification pipeline of 3D experimental data of crystal structures that I wrote for my
+# thesis in the Master Computational Science, University of Amsterdam, 2021.
+#
+# `Settings` is a class that contains almost all information about where to find datafiles, save result files, and find
+# these result files again. It contains the names of the central and contact groups, and the specified threshold and
+# resolution.
+#
+# It's child `AlignmentSettings` contains a bit more parameters specifically for superimposition.
+#
+# Author: Natasja Wezel
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 import os
 import sys
 
@@ -5,25 +18,31 @@ import pandas as pd
 
 
 class Settings():
+    """ Contains all information for where to find what file. Also contains central and contact names for name
+        specification and parameters for threshold and resolution. """
+
     def __init__(self, WORKDIR, coordinate_file, central=False, contact=False):
+        """ Init takes as input the Work directory so it can work from the main pipeline ánd from the scripts folder.
+            It also takes the name of the coordinate file as input. When the name specifications are met, it can find
+            all other necessary files itself. Else, the central and contact name have to be specified as well. """
+
         self.WORKDIR = WORKDIR
         self.coordinate_file = coordinate_file
 
-        # setup results files
+        # setup results folders
         if not os.path.exists(WORKDIR + "\\results"):
             os.mkdir(WORKDIR + "\\results")
-            os.mkdir(WORKDIR + "\\results\\pairs")
-
         if not os.path.exists(WORKDIR + "\\results\\pairs"):
             os.mkdir(WORKDIR + "\\results\\pairs")
 
         name = coordinate_file.rsplit('\\')[-1].rsplit('.', 1)[0]
 
+        # check whether name specifications are met
         if central is False and contact is False:
             self.central_name = name.split("_")[0]
             self.contact_name = name.split("_")[1]
 
-            self.set_coordinate_file(name)
+            self.set_result_directory(name)
         elif central is False or contact is False:
             print("Please specify both the central name and contact name.")
             sys.exit(1)
@@ -31,23 +50,36 @@ class Settings():
             self.central_name = central
             self.contact_name = contact
 
-            self.set_coordinate_file(name, extra_prefix=central + "_" + contact + "_")
+            # if the name is messy, give it a prefix containing central and group name
+            self.set_result_directory(name, extra_prefix=central + "_" + contact + "_")
 
-        self.custom_alignment_file = False
-        self.custom_structure_file = False
-
-    def set_coordinate_file(self, name, extra_prefix=""):
+    def set_result_directory(self, name, extra_prefix=""):
+        """ Set the results directory for all future generated files. """
 
         self.output_folder_central_group = self.WORKDIR + "\\results\\pairs\\" + self.central_name + "\\"
         self.output_folder_specific = self.output_folder_central_group + extra_prefix + name + "\\"
 
-        if not os.path.exists(self.output_folder_central_group):
-            os.mkdir(self.output_folder_central_group)
-
         self.outputfile_prefix = self.output_folder_specific + self.central_name + '_' + self.contact_name
 
+        if not os.path.exists(self.output_folder_central_group):
+            os.mkdir(self.output_folder_central_group)
         if not os.path.exists(self.output_folder_specific):
             os.mkdir(self.output_folder_specific)
+
+    def set_resolution(self, resolution):
+        self.resolution = round(resolution, 2)
+
+    def set_threshold(self, threshold):
+        self.threshold = round(threshold, 2)
+
+    def get_aligned_csv_filename(self):
+        return self.outputfile_prefix + "_aligned.csv"
+
+    def get_structure_csv_filename(self):
+        return self.outputfile_prefix + "_structures.csv"
+
+    def set_contact_reference_point(self, atom_str):
+        self.contact_rp = atom_str
 
     def get_central_groups_csv_filename(self):
         return self.WORKDIR + "\\src\\files\\central_groups.csv"
@@ -55,7 +87,7 @@ class Settings():
     def get_methyl_csv_filename(self):
         return self.WORKDIR + "\\src\\files\\methylmodel.csv"
 
-    def get_finger_print_filename(self):
+    def get_fingerprint_filename(self):
         return self.WORKDIR + "\\src\\files\\fingerprints.csv"
 
     def get_radii_csv_name(self):
@@ -64,52 +96,23 @@ class Settings():
     def get_directionality_results_filename(self):
         return self.output_folder_central_group + self.central_name + "_directionality_results.csv"
 
-    def set_custom_alignment_filename(self, name):
-        self.custom_alignment_file = self.output_folder_specific + name
-        return self.custom_alignment_file
-
-    def set_custom_structures_filename(self, name):
-        self.custom_structure_file = self.output_folder_specific + name
-        return self.custom_structure_file
-
-    def get_aligned_csv_filename(self):
-        if self.custom_alignment_file:
-            return self.custom_alignment_file
-
-        return self.outputfile_prefix + "_aligned.csv"
-
     def get_structure_csv_filename(self):
-        if self.custom_structure_file:
-            return self.custom_structure_file
-
         return self.outputfile_prefix + "_structures.csv"
 
     def get_coordinate_df_filename(self):
-        print(self.outputfile_prefix + "_coordinates_contact.hdf")
         return self.outputfile_prefix + "_coordinates_contact.hdf"
 
     def get_coordinate_df_key(self):
         return self.contact_rp
 
     def get_density_df_filename(self):
-        density_df_filename = self.outputfile_prefix + "_density.hdf"
-        return density_df_filename
+        return self.outputfile_prefix + "_density.hdf"
 
     def get_density_df_key(self):
         return self.contact_rp + str(self.resolution).rstrip("0").replace(".", "")
 
-    def set_resolution(self, resolution):
-        self.resolution = round(resolution, 2)
-
-    def set_threshold(self, threshold):
-        self.threshold = round(threshold, 2)
-
     def get_density_plotname(self):
-        density_plotname = self.outputfile_prefix + "_" + str(self.resolution) + "_density.svg"
-        return density_plotname
-
-    def set_contact_reference_point(self, atom_str):
-        self.contact_rp = atom_str
+        return self.outputfile_prefix + "_" + str(self.resolution) + "_density.svg"
 
     def get_avg_frag_filename(self):
         avg_fragment_filename = self.outputfile_prefix + "_avg_fragment.csv"
@@ -117,11 +120,18 @@ class Settings():
 
 
 class AlignmentSettings(Settings):
+    """ Alignment Settings contains some extra parameters for superimposition, and inherits all functionality from its
+        parent class Settings. All scripts that do superimposition have to use this class, otherwise only the settings
+        class is necesarry. """
+
     def __init__(self, WORKDIR, coordinate_file, central=False, contact=False):
         Settings.__init__(self, WORKDIR, coordinate_file, central, contact)
 
         self.label_data = coordinate_file.rsplit('.', 1)[0] + '.csv'
         self.alignment = {}
+
+        self.read_coord_file()
+        self.make_alignment_dict()
 
     def set_label_file(self, filename):
         self.label_data = filename
@@ -133,13 +143,7 @@ class AlignmentSettings(Settings):
         return self.no_fragments
 
     def get_aligned_csv_filenames(self):
-        aligned_csv = self.get_aligned_csv_filename()
-        structures_csv = self.get_structure_csv_filename()
-        return aligned_csv, structures_csv
-
-    def prepare_alignment(self):
-        self.read_coord_file()
-        self.make_alignment_dict()
+        return self.get_aligned_csv_filename(), self.get_structure_csv_filename()
 
     def update_coordinate_filename(self):
         # TODO: fix dit met multiple files and original file too big enzo
@@ -155,28 +159,33 @@ class AlignmentSettings(Settings):
 
         translation_dict = self.atoms_to_labels()
 
-        with open(self.coordinate_file) as inputfile:
-            lines = [next(inputfile) for x in range(100)]
-
         self.label_list = []
 
         # count number of atoms in a fragment
         self.no_atoms = 0
         self.no_atoms_central = 0
 
-        # loop through the atoms until next fragment is found
-        for line in lines[1:]:
-            if "FRAG" in line:
-                break
+        with open(self.coordinate_file) as inputfile:
 
-            # append to the label list which label the atom has, if any, else '-'
-            self.label_list.append(translation_dict.get(line.split(' ')[0], '-'))
-            self.no_atoms += 1
+            # skip first row because that definitely contains "FRAG"
+            next(inputfile)
+            line = next(inputfile)
 
-            if translation_dict.get(line.split(' ')[0], '-') != '-':
-                self.no_atoms_central += 1
+            # until the next fragment is found
+            while "FRAG" not in line:
+
+                # append to the label list which label the atom has, if any, else '-'
+                self.label_list.append(translation_dict.get(line.split(' ')[0], '-'))
+                self.no_atoms += 1
+
+                if translation_dict.get(line.split(' ')[0], '-') != '-':
+                    self.no_atoms_central += 1
+
+                line = next(inputfile)
 
     def atoms_to_labels(self):
+        """ Translate each atom its information from the label file to a label in the coordinate file. """
+
         # read the first two lines to figure out the label and atom ordeer
         with open(self.label_data, 'r') as inputfile:
             lines = [next(inputfile) for x in range(2)]
@@ -193,7 +202,8 @@ class AlignmentSettings(Settings):
         return translation_dict
 
     def make_alignment_dict(self):
-        """ """
+        """ Read the csv containing all the labels and make a dict containing new clean and recognizable labels, but
+            also the old labels for backwards compatibility. """
 
         # get alignment info from file
         df = pd.read_csv(self.get_central_groups_csv_filename(), comment="#")
@@ -213,27 +223,22 @@ class AlignmentSettings(Settings):
         self.alignment['R'] = df.R.max()
         self.alignment['r'] = df.treat_as_R.max()
 
-        # rename label for R group to 'Ri'
-        if self.alignment['R'] != '-' and self.alignment['R'] != '':
-            R_atoms = self.alignment['R'].split('-')
+        self.rename_labels('R', '-R')
+        self.rename_labels('r', '-r')
 
+    def rename_labels(self, label, new_label):
+        """ Rename labels to recognizable as R group or treat as R group. """
+
+        # rename label for LABx group to 'LABx-Ri'
+        if self.alignment[label] != '-' and self.alignment[label] != '':
+            R_atoms = self.alignment[label].split('-')
+
+            # for each R label
             for i, Rlabel in enumerate(R_atoms):
-                new_Rlabel = Rlabel + '-R' + str(i + 1)
+
+                # make a new R label and update dict
+                new_Rlabel = Rlabel + new_label + str(i + 1)
                 self.label_list[self.label_list.index(Rlabel)] = new_Rlabel
-
-                self.alignment[Rlabel] = Rlabel
-
-                for key, value in self.alignment.items():
-                    if value == Rlabel:
-                        self.alignment[key] = new_Rlabel
-
-        if self.alignment['r'] != '-' and self.alignment['r'] != '':
-            R_atoms = self.alignment['r'].split('-')
-
-            for i, Rlabel in enumerate(R_atoms):
-                new_Rlabel = Rlabel + '-r' + str(i + 1)
-                self.label_list[self.label_list.index(Rlabel)] = new_Rlabel
-
                 self.alignment[Rlabel] = Rlabel
 
                 for key, value in self.alignment.items():

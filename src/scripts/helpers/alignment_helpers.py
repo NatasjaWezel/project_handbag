@@ -1,3 +1,12 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This script is part of the quantification pipeline of 3D experimental data of crystal structures that I wrote for my
+# thesis in the Master Computational Science, University of Amsterdam, 2021.
+#
+# `alignment_helpers` contains functions for the reading of the data from conquest and the alignment of the structures
+#
+# Author: Natasja Wezel
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 import numpy as np
 import pandas as pd
 
@@ -16,6 +25,7 @@ def read_raw_data(filename, no_atoms):
     # get the actual symbols of each atom
     data['symbol'] = data.apply(lambda row: get_atom_symbol(row), axis=1)
 
+    # use amount of atoms for skiprow function to read only the structures from the data
     structures = pd.read_csv(filename, sep='*', usecols=[0], names=['structure_id'],
                              header=None,
                              skiprows=lambda x: not logic(x, no_atoms))
@@ -33,23 +43,27 @@ def read_raw_data(filename, no_atoms):
 def get_atom_symbol(row):
     """ Regex the row id to get the actual name of the element. """
 
+    # if second symbol is a number, return only first character
     if row._id[1] in '0123456789':
         return row._id[:1]
 
+    # else, its br, cl etc. so return first 2 characters
     return row._id[:2]
 
 
 def logic(index, amount_atoms):
     """ Logic function to skip each header line - or read only the headers for the structure names - when reading
         in the data. """
+
     if index % (amount_atoms + 1) == 0:
         return True
+        
     return False
 
 
 def kabsch_align(A, B, B2, n):
     """ Performs the kabsch algorithm on two central groups, then translates and multiplies the
-        entire fragment with the calculated translation vector and rotation matrix. """\
+        entire fragment with the calculated translation vector and rotation matrix. """
 
     assert len(A) == len(B), "Fragment 1 and fragment to align do not have the same length"
 
@@ -125,6 +139,8 @@ def perform_rotations(fragment, labels):
 
 
 def find_coord_vector(ax, atom):
+    """ Finds the coordinate vector towards the atom and projects it onto a plane. """
+
     coord_vector = np.copy(atom)
     if ax == "x":
         coord_vector[0] = 0
@@ -171,7 +187,9 @@ def find_angles(point_vector, ax):
 
 
 def calculate_rotation(fragment, angle, ax):
-    # rotate all coordinates according to the previously defined rotation angle
+    """ Calculate the actual rotation based on the axis and angle. """
+
+    # get rotation matrix based on angle
     if ax == "x":
         rotation_matrix = rotate_x(angle)
     elif ax == "y":
@@ -179,11 +197,9 @@ def calculate_rotation(fragment, angle, ax):
     else:
         rotation_matrix = rotate_z(angle)
 
-    # TODO: check why this doesn't work in a single dot product
+    # rotate all coordinates with the rotation matrix
     for i in range(len(fragment)):
         fragment[i] = np.dot(fragment[i], rotation_matrix)
-
-    # fragment = np.dot(rotation_matrix, fragment.T).T
 
     return fragment
 

@@ -1,8 +1,11 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# plot_fingerprint.py
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This script is part of the quantification pipeline of 3D experimental data of crystal structures that I wrote for my
+# thesis in the Master Computational Science, University of Amsterdam, 2021.
+#
+# `plot_fingerprint.py`
 #
 # Author: Natasja Wezel
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import sys
 import time

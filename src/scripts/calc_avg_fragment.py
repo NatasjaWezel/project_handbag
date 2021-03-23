@@ -1,3 +1,12 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This script is part of the quantification pipeline of 3D experimental data of crystal structures that I wrote for my
+# thesis in the Master Computational Science, University of Amsterdam, 2021.
+#
+# `calc_avg_fragment`
+#
+# Author: Natasja Wezel
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 import sys
 import pandas as pd
 
@@ -56,7 +65,7 @@ def calc_avg_frag(df, avg_frag_settings, radii):
         rmse_avg = calc_avg_rmse(fragment, avg_frag_settings, df)
 
     if avg_frag_settings.central_name in list(pd.read_csv(avg_frag_settings.get_methyl_csv_filename(),
-                                              header=0).central):
+                                              header=0, comment="#").central):
         fragment = add_model_methyl(CSV=avg_frag_settings.get_methyl_csv_filename(), fragment=fragment,
                                     settings=avg_frag_settings, radii=radii)
 

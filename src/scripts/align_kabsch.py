@@ -1,12 +1,12 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# This script is part of the quantification pipeline of 3D experimental data of crystal structures
-# that I wrote for my thesis in the Master Computational Science, University of Amsterdam, 2021.
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This script is part of the quantification pipeline of 3D experimental data of crystal structures that I wrote for my
+# thesis in the Master Computational Science, University of Amsterdam, 2021.
 #
-# `align_kabsch.py` loads the coordinates of the fragments exported from a conquest query and aligns
-# the central groups with the kabsch algorithm. It then saves the new coordinates in a .csv file.
+# `align_kabsch.py` loads the coordinates of the fragments exported from a conquest query and aligns the central groups
+# with the kabsch algorithm. It then saves the new coordinates in a .csv file.
 #
 # Author: Natasja Wezel
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import sys
 import os
@@ -38,8 +38,6 @@ def main():
     coordinate_file = sys.argv[1]
 
     settings = AlignmentSettings(WORKDIR, coordinate_file)
-
-    settings.prepare_alignment()
 
     split_file_if_too_big(settings.coordinate_file, settings.no_atoms)
     settings.update_coordinate_filename()

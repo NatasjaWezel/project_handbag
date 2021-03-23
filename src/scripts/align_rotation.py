@@ -1,10 +1,12 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# It loads the coordinates of the fragments exported from a conquest query and
-# aligns the central groups by using rotation matrices and other linear algebra.
-# It then saves the new coordinates in a .csv file.
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# This script is part of the quantification pipeline of 3D experimental data of crystal structures that I wrote for my
+# thesis in the Master Computational Science, University of Amsterdam, 2021.
+#
+# `align_rotation` loads the coordinates of the fragments exported from a conquest query and aligns the central groups
+# by using rotation matrices and other linear algebra. It then saves the new coordinates in a .csv file.
 #
 # Author: Natasja Wezel
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import sys
 import os
@@ -36,10 +38,6 @@ def main():
     settings = AlignmentSettings(WORKDIR, coordinate_file, labelfile)
 
     settings.set_central_group_csv(CENTRAL_GROUPS_CSV)
-    settings.prepare_alignment()
-
-    # settings.set_custom_alignment_filename("_rot.csv")
-    # settings.set_custom_structures_filename("_rot_structures.csv")
 
     split_file_if_too_big(settings.coordinate_file, settings.no_atoms)
     settings.update_coordinate_filename()
