@@ -229,8 +229,6 @@ def make_settings_with_args(args):
     settings.set_resolution(STANDARD_RES)
     settings.set_threshold(STANDARD_THRESHOLD)
 
-    settings.prepare_alignment()
-
     split_file_if_too_big(settings.coordinate_file, settings.no_atoms)
     settings.update_coordinate_filename()
 
