@@ -68,7 +68,7 @@ def make_fingerprint_plots(df, avg_frag, settings, STANDARD_EXTRA_VDW):
             - coordinate_df_f['vdw_closest_atom' + labels]\
             - coordinate_df_f['longest_vdw']
 
-        fingerprint.make_plot(coordinate_df_f)
+        fingerprint.make_plot(coordinate_df_f, STANDARD_EXTRA_VDW)
 
         fingerprint.next()
 
