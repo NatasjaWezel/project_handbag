@@ -41,11 +41,14 @@ def plot_density(ax, df, settings):
     return p, ax
 
 
-def plot_fragment_colored(ax, fragment):
+def plot_fragment_colored(ax, fragment, labels=False):
     for _, atom in fragment.iterrows():
         color = get_atom_color(atom)
 
         ax.scatter(atom.x, atom.y, atom.z, c=color, s=atom.cov_radius*500, edgecolor="black")
+
+        if labels:
+            ax.text(atom.x + 0.1, atom.y + 0.1, atom.z + 0.1, atom.label)
 
     return ax
 

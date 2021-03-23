@@ -32,7 +32,7 @@ def main():
     plot_avg_fragment(settings)
 
 
-def plot_avg_fragment(settings):
+def plot_avg_fragment(settings, labels=False):
     fragment = pd.read_csv(settings.get_avg_frag_filename())
 
     fig = plt.figure()
@@ -41,7 +41,7 @@ def plot_avg_fragment(settings):
     ax.set_title(f"Average {settings.central_name}--{settings.contact_name} Fragment")
 
     # plot the (average of the) central group
-    ax = plot_fragment_colored(ax, fragment)
+    ax = plot_fragment_colored(ax, fragment, labels)
 
     xlim, ylim, zlim = list(ax.get_xlim()), list(ax.get_ylim()), list(ax.get_zlim())
     minn = min([xlim[0], ylim[0], zlim[0]]) - 1
