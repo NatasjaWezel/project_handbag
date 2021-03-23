@@ -18,7 +18,7 @@ from classes.Settings import Settings
 from classes.Radii import Radii
 from helpers.geometry_helpers import (make_coordinate_df)
 from constants.colors import AXCOLOR
-from constants.constant import STANDARD_EXTRA_VDW
+from constants.constants import STANDARD_EXTRA_VDW
 
 from helpers.plot_functions import plot_fragment_colored, plot_vdw_spheres
 
