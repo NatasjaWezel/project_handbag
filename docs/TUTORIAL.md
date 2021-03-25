@@ -1,3 +1,4 @@
+# How to use the Command Line Interface (CLI) of project Handbag
 - [Installing the project](#installing-the-project)
 - [Setting up a virtual environment and install the dependencies of this project](#setting-up-a-virtual-environment-and-install-the-dependencies-of-this-project)
 - [Testing the installation](#testing-the-installation)
