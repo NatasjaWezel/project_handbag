@@ -200,6 +200,9 @@ Now that you've added this line to the central_groups.csv, it is possible to run
   ```python .\quantify.py -f .\arg_files\test_rc6h5_r2co_o.txt```
 </details>
 
+## Labels to make specific fingerprint plots
+####TODO: fix this part of tutorial
+
 ## What to do when the name of the cor file has the wrong format
 As a final example, we'll try to run the program for the 'search6' data. Of course, you know what data it contains: you did the conquest search. It contains the data of a carbonyl and a methyl group (let's call it rcome) and an aryl group. However, you didn't give a name in the right format. (In this case, search6 is not that helpful at all to remember what search this was.)
 
