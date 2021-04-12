@@ -1,20 +1,25 @@
-# How to use the Command Line Interface (CLI) of project: Handbag
-- [How to use the Command Line Interface (CLI) of project: Handbag](#how-to-use-the-command-line-interface--cli--of-project--handbag)
-  * [Installing the project](#installing-the-project)
-  * [Setting up a virtual environment and install the dependencies of this project](#setting-up-a-virtual-environment-and-install-the-dependencies-of-this-project)
-  * [Testing the installation](#testing-the-installation)
-  * [Tips for using the terminal](#tips-for-using-the-terminal)
-  * [How the program runs](#how-the-program-runs)
-      - [Question 1: How would you run the program in the same way, without using the argument file?](#question-1--how-would-you-run-the-program-in-the-same-way--without-using-the-argument-file-)
-      - [Question 2: How would you run the program with using the hydrogen atom as reference point, without using the argument file?](#question-2--how-would-you-run-the-program-with-using-the-hydrogen-atom-as-reference-point--without-using-the-argument-file-)
-      - [Question 3: How would you run the program with the NO<sub>3</sub> R<sub>2</sub>CO file, that is also located in test data? Use the oxygen atom of the carbonyl as reference point.](#question-3--how-would-you-run-the-program-with-the-no-sub-3--sub--r-sub-2--sub-co-file--that-is-also-located-in-test-data--use-the-oxygen-atom-of-the-carbonyl-as-reference-point)
-  * [Making your own argument files](#making-your-own-argument-files)
-  * [How to specify labels](#how-to-specify-labels)
-      - [Question: What would you fill in for RC6H5, as shown in the picture above?](#question--what-would-you-fill-in-for-rc6h5--as-shown-in-the-picture-above-)
-      - [Question: How would you run the program with RC6H5, with as contact reference point the oxygen atom of CO?](#question--how-would-you-run-the-program-with-rc6h5--with-as-contact-reference-point-the-oxygen-atom-of-co-)
-  * [What to do when the name of the cor file has the wrong format](#what-to-do-when-the-name-of-the-cor-file-has-the-wrong-format)
-      - [Question: What would you fill in in central_groups.csv for RCOMe, as shown in the picture above?](#question--what-would-you-fill-in-in-central-groupscsv-for-rcome--as-shown-in-the-picture-above-)
-      - [Question: How would you now run this program?](#question--how-would-you-now-run-this-program-)
+# How to use the Command Line Interface (CLI) of project Handbag
+- [Installing the project](#installing-the-project)
+- [Setting up a virtual environment and install the dependencies of this project](#setting-up-a-virtual-environment-and-install-the-dependencies-of-this-project)
+- [Testing the installation](#testing-the-installation)
+- [Tips for using the terminal](#tips-for-using-the-terminal)
+- [How the program runs](#how-the-program-runs)
+    + [Question 1: How would you run the program in the same way, without using the argument file?](#question-1--how-would-you-run-the-program-in-the-same-way--without-using-the-argument-file-)
+    + [Question 2: How would you run the program with using the hydrogen atom as reference point, without using the argument file?](#question-2--how-would-you-run-the-program-with-using-the-hydrogen-atom-as-reference-point--without-using-the-argument-file-)
+    + [Question 3: How would you run the program with the NO<sub>3</sub> R<sub>2</sub>CO file, that is also located in test data? Use the oxygen atom of the carbonyl as reference point.](#question-3--how-would-you-run-the-program-with-the-no-sub-3--sub--r-sub-2--sub-co-file--that-is-also-located-in-test-data--use-the-oxygen-atom-of-the-carbonyl-as-reference-point)
+- [Making your own argument files](#making-your-own-argument-files)
+    + [Question 4: Implementation of argument file for H2O--XH (H)](#question-4--implementation-of-argument-file-for-h2o--xh--h-)
+    + [Question 5: How to run using this argument file?](#question-5--how-to-run-using-this-argument-file-)
+    + [Question 6: Implementation of argument file for NO3--R2CO (O)](#question-6--implementation-of-argument-file-for-no3--r2co--o-)
+    + [Question 7: How to run using this argument file?](#question-7--how-to-run-using-this-argument-file-)
+- [How to specify labels](#how-to-specify-labels)
+    + [Question 8: What would you fill in for RC6H5, as shown in the picture above?](#question-8--what-would-you-fill-in-for-rc6h5--as-shown-in-the-picture-above-)
+    + [Question 9: How would you run the program with RC6H5, with as contact reference point the oxygen atom of CO?](#question-9--how-would-you-run-the-program-with-rc6h5--with-as-contact-reference-point-the-oxygen-atom-of-co-)
+- [What to do when the name of the cor file has the wrong format](#what-to-do-when-the-name-of-the-cor-file-has-the-wrong-format)
+    + [Question 10: What would you fill in in central_groups.csv for RCOMe, as shown in the picture above?](#question-10--what-would-you-fill-in-in-central-groupscsv-for-rcome--as-shown-in-the-picture-above-)
+    + [Question 11: How would you now run this program?](#question-11--how-would-you-now-run-this-program-)
+- [Plotting the first fragment with labels](#plotting-the-first-fragment-with-labels)
+- [Building a methyl model](#building-a-methyl-model)
 
 ## Installing the project
 The steps you need to undertake to run the CLI are summarized in bullet points. In the end, some example questions are given so you can get familiar with running the program for your own data. Let's start with obtaining the source code and installing python and a terminal.
@@ -117,6 +122,8 @@ If we look into the file `.\arg_files\test_h2o_xh_o.txt` (by opening it with any
 
 ## Making your own argument files
 Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.txt`. *It is important that the flags are all on their own line!*
+
+#### Question 4: Implementation of argument file for H2O--XH (H)
 <details>
   <summary>Implementation .\arg_files\test_h2o_xh_h.txt</summary>
   The file has to contain two lines:
@@ -125,14 +132,7 @@ Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.
   --contact_rp H`
 </details>
 
-<details>
-  <summary>Implementation .\arg_files\test_no3_r2co_o.txt</summary>
-  The file has to contain two lines:
-
-  `--input .\testdata\NO3\NO3_R2CO_vdw.5_test.cor 
-  --contact_rp O`
-</details>
-
+#### Question 5: How to run using this argument file?
 <details>
   <summary>Running water XH, with hydrogen as reference point, with input argument file </summary>
   On the command line, type:
@@ -142,6 +142,16 @@ Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.
   and press enter
 </details>
 
+#### Question 6: Implementation of argument file for NO3--R2CO (O)
+<details>
+  <summary>Implementation .\arg_files\test_no3_r2co_o.txt</summary>
+  The file has to contain two lines:
+
+  `--input .\testdata\NO3\NO3_R2CO_vdw.5_test.cor 
+  --contact_rp O`
+</details>
+
+#### Question 7: How to run using this argument file?
 <details>
   <summary>Running nitrogen with input argument file </summary>
   On the command line, type:
@@ -165,7 +175,7 @@ Then look at the entries in the file. Underneath, a table is given to show the r
 | H2O  | LAB1  | LAB2 | LAB3 | - | - | - |
 | NO3  | LAB3  | LAB2 | LAB1 | - | - | - |
 
-#### Question: What would you fill in for RC6H5, as shown in the picture above?
+#### Question 8: What would you fill in for RC6H5, as shown in the picture above?
 
 <details>
   <summary>Labels RC6H5</summary>
@@ -178,7 +188,7 @@ Note: multiple answers are correct. As long as the first three atoms are not on 
 
 Now that you've added this line to the central_groups.csv, it is possible to run the program with this central group as well.
 
-#### Question: How would you run the program with RC6H5, with as contact reference point the oxygen atom of CO?
+#### Question 9: How would you run the program with RC6H5, with as contact reference point the oxygen atom of CO?
 <details>
   <summary>How would you </summary>
   On the command line, run:
@@ -190,13 +200,16 @@ Now that you've added this line to the central_groups.csv, it is possible to run
   ```python .\quantify.py -f .\arg_files\test_rc6h5_r2co_o.txt```
 </details>
 
+## Labels to make specific fingerprint plots
+####TODO: fix this part of tutorial
+
 ## What to do when the name of the cor file has the wrong format
 As a final example, we'll try to run the program for the 'search6' data. Of course, you know what data it contains: you did the conquest search. It contains the data of a carbonyl and a methyl group (let's call it rcome) and an aryl group. However, you didn't give a name in the right format. (In this case, search6 is not that helpful at all to remember what search this was.)
 
 First, add the labels to the central_groups.csv file. We want to ignore the hydrogen atoms of the methyl group. (See thesis/article for the reasoning about this.)
 ![labels rcome](../figures/tutorial/labels_rcome.png)
 
-#### Question: What would you fill in in central_groups.csv for RCOMe, as shown in the picture above?
+#### Question 10: What would you fill in in central_groups.csv for RCOMe, as shown in the picture above?
 Tip: You can fill in multiple labels in a single column by separating them with a dash: '-'.
 <details>
   <summary>Labels RCOMe</summary>
@@ -207,7 +220,7 @@ Tip: You can fill in multiple labels in a single column by separating them with 
 Note: multiple answers are correct. As long as the first three atoms are not on a line, and LAB1 is in the column 'R'.
 </details>
 
-#### Question: How would you now run this program?
+#### Question 11: How would you now run this program?
 You can make use of the ```--central/--contact``` input flags. Try to write an input argument file named ```.\arg_files\test_rcome_r2co_o.txt```.
 
 <details>
@@ -223,7 +236,6 @@ You can make use of the ```--central/--contact``` input flags. Try to write an i
 </details>
 
 > If the .csv containing the parameters from the conquest search has another name, you can specify that as well with using the --labels flag. So say search6.csv was called search6_labels.csv instead, the program is not able to find it automatically. You'd need to specify --labels search6_labels.csv (or rename the file).
-
 
 ## Plotting the first fragment with labels
 Looking at the first fragment with labels can come in handy when you forgot how you specified the labels. A script is provided to make this plot, in the ```tools``` folder. 
