@@ -1,1 +1,1 @@
-# walkthrough tutorial to add arguments to this file (DELETE THIS LINE)
+# see tutorial to add arguments to this file (DELETE THIS LINE)
