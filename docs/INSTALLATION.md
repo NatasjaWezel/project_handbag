@@ -15,7 +15,7 @@ Start your virtual environment ```python venv handbag```
 Activate the environment
 Install dependencies of the project: ```pip install -r docs/requirements.txt```
 
-Specify the labels from your central groups in the central groups [file](./src/files/central_groups.csv). You can open this file and adjust it with any code editor you like, notepad, excel, etc.
+Specify the labels from your central groups in the central groups [file](../src/files/central_groups.csv). You can open this file and adjust it with any code editor you like, notepad, excel, etc.
 
 If your files have the nameformat CENTRAL_CONTACT.cor and CENTRAL_CONTACT.csv, you can now run the program with: ```python quantify.py --input INPUTFILE --crp CONTACT_RP```
 Else, you can specify the names with the extra options.
