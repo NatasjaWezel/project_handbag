@@ -4,10 +4,6 @@ data/
 # ignore results - this is also too big for git
 results/
 
-# ignore some old files
-old_method/
-bak/
-
 # local backups
 __pycache__/
 .ipynb_checkpoints/
@@ -16,13 +12,8 @@ __pycache__/
 handbag-env/
 test-env/
 
-# ignore personal changes in central_group csv
-src/files/central_groups.csv
+# ignore personal changes in labels, etc.
+src/files/
 
+# ignore local vs code settings
 .vscode
-
-*.pptx
-*.xlsx
-
-src/notebooks/directionalities_10_03_rcome_ret_kmeans.csv
-src/files/central_groups.csv
