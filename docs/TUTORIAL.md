@@ -162,9 +162,18 @@ Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.
   and press enter
 </details>
 
-## How to specify labels
-For water and nitrogen, some other pre-work was already done. Open the ```central_groups.csv```, located in the files folder (with any text editor you like - in this case excel might be a good option, but watch out that you can't change anything from column). First look at what atom has which label.
+## Plotting the first fragment with labels
+Looking at the first fragment with labels can come in handy when you forgot how you specified the labels. A script is provided to make this plot, in the ```tools``` folder. 
+> This action can only be done if the .csv file has the same filename as the .cor file, and have the CENTRALNAME_CONTACTNAME_blahblah format
+
+* ```cd tools```
+* ```python plot_first_fragment_labels.py ..\testdata\h2o\H2O_XH_vdw.5_test.cor```
+
 ![labels no3 h2o rc6h5](../figures/tutorial/labels_h2o_no3_rc6h5.png)
+A plot like the one on the left in the picture above should show.
+
+## How to specify labels
+For water and nitrogen, some other pre-work was already done. Open the ```central_groups.csv```, located in the files folder (with any text editor you like - in this case excel might be a good option, but watch out that you can't change anything from column). First look at what atom has which label, and see the previous label picture to see what atom it corresponds to.
 
 Then look at the entries in the file. Underneath, a table is given to show the rows that the file contains. The first three atoms, center_label, y_axis_laben and xy_plane_label are the atoms that is aligned on. The first one goes on the origin (0,0,0), the second one goes on the y_axis (0,1.45,0) and the last one goes on the xy-plane (2.45, 1.56, 0). This is mostly for the visual aspect of looking at the structures later. The first structure is rotated into this position, and then is a base fragment to align all the other fragments on. For this, it is important that the three atoms have an angle with each other (they can not be on a line).
 
@@ -239,7 +248,7 @@ Try adding this, and test if it works and produces three fingerprint graphs for 
 ## What to do when the name of the cor file has the wrong format
 As a final example, we'll try to run the program for the 'search6' data. Of course, you know what data it contains: you did the conquest search. It contains the data of a carbonyl and a methyl group (let's call it rcome) and an aryl group. However, you didn't give a name in the right format. (In this case, search6 is not that helpful at all to remember what search this was.)
 
-First, add the labels to the central_groups.csv file. We want to ignore the hydrogen atoms of the methyl group. (See thesis/article for the reasoning about this.)
+First, add the labels to the central_groups.csv file. We want to ignore the hydrogen atoms of the methyl group. (See thesis/article for the reasoning about this.) You can look at the following figure to know which atom has which label. You can also make this plot by using the plot first fragment with labels fuction, as described earlier in this tutorial.
 ![labels rcome](../figures/tutorial/labels_rcome.png)
 
 #### Question 10: What would you fill in in central_groups.csv for RCOMe, as shown in the picture above?
@@ -269,15 +278,6 @@ You can make use of the ```--central/--contact``` input flags. Try to write an i
 </details>
 
 > If the .csv containing the parameters from the conquest search has another name, you can specify that as well with using the --labels flag. So say search6.csv was called search6_labels.csv instead, the program is not able to find it automatically. You'd need to specify --labels search6_labels.csv (or rename the file).
-
-## Plotting the first fragment with labels
-Looking at the first fragment with labels can come in handy when you forgot how you specified the labels. A script is provided to make this plot, in the ```tools``` folder. 
-> This action can only be done if the .csv file has the same filename as the .cor file, and have the CENTRAL_CONTACT_blahblah format
-
-* ```cd tools```
-* ```python plot_first_fragment_labels.py ..\testdata\h2o\H2O_XH_vdw.5_test.cor```
-
-A plot like the ones above should show.
 
 ## Building a methyl model
 If you choose to not use the hydrogen atoms from a methyl group for alignment, you can specify where they need to be build back in ```files\methyl_model.csv```. If you do want to use the regular generation of the central group model, do not put the labels of the hydrogens in the bin column in ```files\central_groups.csv``` and do not specify the central group name in ```files\methyl_model.csv```. The model will be built using K-means. See thesis for pro's/con's of both of these methods.
