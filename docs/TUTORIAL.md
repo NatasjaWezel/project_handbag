@@ -125,16 +125,16 @@ Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.
 
 #### Question 4: Implementation of argument file for H2O--XH (H)
 <details>
-  <summary>Implementation .\arg_files\test_h2o_xh_h.txt</summary>
-  The file has to contain two lines:
+  <summary>Answer question 4</summary>
+  Implementation of .\arg_files\test_h2o_xh_h.txt. The file has to contain two lines:
 
   `--input .\testdata\H2O\H2O_XH_vdw.5_test.cor
   --contact_rp H`
 </details>
 
-#### Question 5: How to run using this argument file?
+#### Question 5: How to run H2O--XH (H) using this argument file?
 <details>
-  <summary>Running water XH, with hydrogen as reference point, with input argument file </summary>
+  <summary>Answer question 5</summary>
   On the command line, type:
 
   ```python .\quantify.py -f .\arg_files\test_h2o_xh_h.txt```
@@ -144,16 +144,17 @@ Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.
 
 #### Question 6: Implementation of argument file for NO3--R2CO (O)
 <details>
-  <summary>Implementation .\arg_files\test_no3_r2co_o.txt</summary>
+  <summary>Answer question 6</summary>
+   Implementation .\arg_files\test_no3_r2co_o.txt
   The file has to contain two lines:
 
   `--input .\testdata\NO3\NO3_R2CO_vdw.5_test.cor 
   --contact_rp O`
 </details>
 
-#### Question 7: How to run using this argument file?
+#### Question 7: How to run NO3--R2CO (O) using this argument file?
 <details>
-  <summary>Running nitrogen with input argument file </summary>
+  <summary>Answer question 7</summary>
   On the command line, type:
 
   ```python .\quantify.py -f .\arg_files\test_no3_r2co_o.txt```
@@ -162,7 +163,7 @@ Implement both `.\arg_files\test_h2o_xh_h.txt` and `.\arg_files\test_no3_r2co_o.
 </details>
 
 ## How to specify labels
-For water and nitrogen, some other pre-work was already done. Open the ```central_groups.csv```, located in the files folder (with any text editor you like - in this case excel might be a good option). First look at what atom has which label.
+For water and nitrogen, some other pre-work was already done. Open the ```central_groups.csv```, located in the files folder (with any text editor you like - in this case excel might be a good option, but watch out that you can't change anything from column). First look at what atom has which label.
 ![labels no3 h2o rc6h5](../figures/tutorial/labels_h2o_no3_rc6h5.png)
 
 Then look at the entries in the file. Underneath, a table is given to show the rows that the file contains. The first three atoms, center_label, y_axis_laben and xy_plane_label are the atoms that is aligned on. The first one goes on the origin (0,0,0), the second one goes on the y_axis (0,1.45,0) and the last one goes on the xy-plane (2.45, 1.56, 0). This is mostly for the visual aspect of looking at the structures later. The first structure is rotated into this position, and then is a base fragment to align all the other fragments on. For this, it is important that the three atoms have an angle with each other (they can not be on a line).
@@ -178,7 +179,7 @@ Then look at the entries in the file. Underneath, a table is given to show the r
 #### Question 8: What would you fill in for RC6H5, as shown in the picture above?
 
 <details>
-  <summary>Labels RC6H5</summary>
+  <summary>Answer question 8</summary>
   In raw text format: 
 
   ```RC6H5,LAB2,LAB4,LAB6,-,LAB1,-```
@@ -190,7 +191,7 @@ Now that you've added this line to the central_groups.csv, it is possible to run
 
 #### Question 9: How would you run the program with RC6H5, with as contact reference point the oxygen atom of CO?
 <details>
-  <summary>How would you </summary>
+  <summary>Answer question 9</summary>
   On the command line, run:
 
   ```python .\quantify.py -i .\testdata\RC6H5\RC6H5_R2CO_vdw.5_test.cor -crp O```
@@ -201,7 +202,39 @@ Now that you've added this line to the central_groups.csv, it is possible to run
 </details>
 
 ## Labels to make specific fingerprint plots
-####TODO: fix this part of tutorial
+The program has an option that lets you make a fingerprint plot (option 3). If you choose this option, without specifying any fingerprint plot labels, it will make the standard fingerprint plot, which is the shortest distance from any atom of the central group to any atom of the contact group. 
+
+![H2O_ArCH_H_fingerprint_](https://user-images.githubusercontent.com/31653745/126157976-cf713027-0b14-4e5f-b872-f771eb6a7b84.png)
+
+By adding a line to the ```.\files\fingerprints.csv``` like the following, you can specify for example to calculate only the distance of the oxygen atom of a water molecule to the nearest point in the contact group, or to the nearest hydrogen.
+
+| central  | description    | labels | 
+| ----- | ---- |  ---- |
+| H2O      | O              | LAB2 |
+| H2O      | H              | LAB1&LAB3 |
+
+Try adding this, and test if it works and produces three fingerprint graphs for H2O!
+![H2O_ArCH_H_fingerprint_LAB2](https://user-images.githubusercontent.com/31653745/126157973-1b47c6bb-7118-49b9-9ec9-d5f13db42184.png)
+![H2O_ArCH_H_fingerprint_LAB1 LAB3](https://user-images.githubusercontent.com/31653745/126157978-12af17cb-4725-4f7e-bcac-efec3cb60735.png)
+
+<details>
+  <summary>I need more help</summary>
+  In `.\files\fingerprints.csv` add two lines with raw text: 
+
+    H2O,O,LAB2
+    H2O,H,LAB1&LAB3
+    
+  and run:
+    
+  ```python quantify.py --input .\testdata\H2O\H2O_XH_vdw.5_test.cor --contact_rp H```
+
+  on the command line, and press the third option. Look in the results/fingerprints folder for the results
+</details>  
+
+
+> The 'description' part here uses a MarkUp language, in which you can define subscript and superscript. You can do this by putting dollarsigns and using an ^ for superscript (${^3}$) and instead of the ^ an underscore for subscript  (${\_3}$).
+
+
 
 ## What to do when the name of the cor file has the wrong format
 As a final example, we'll try to run the program for the 'search6' data. Of course, you know what data it contains: you did the conquest search. It contains the data of a carbonyl and a methyl group (let's call it rcome) and an aryl group. However, you didn't give a name in the right format. (In this case, search6 is not that helpful at all to remember what search this was.)
@@ -212,23 +245,23 @@ First, add the labels to the central_groups.csv file. We want to ignore the hydr
 #### Question 10: What would you fill in in central_groups.csv for RCOMe, as shown in the picture above?
 Tip: You can fill in multiple labels in a single column by separating them with a dash: '-'.
 <details>
-  <summary>Labels RCOMe</summary>
+  <summary>Answer question 10</summary>
   In raw text format: 
 
   ```RCOMe,LAB1,LAB2,LAB3,-,LAB4,LAB5-LAB6-LAB7```
 
-Note: multiple answers are correct. As long as the first three atoms are not on a line, and LAB1 is in the column 'R'.
+Note: multiple answers are correct. As long as the first three atoms are not on a line, and LAB4 is in the column 'R'.
 </details>
 
 #### Question 11: How would you now run this program?
 You can make use of the ```--central/--contact``` input flags. Try to write an input argument file named ```.\arg_files\test_rcome_r2co_o.txt```.
 
 <details>
-  <summary>Input argument file for search6 (RCOMe_R2CO) </summary>
+  <summary>Answer question 11</summary>
   The file must contain:
 
   ```
-  --input .\testdata\test\search6.cor 
+  --input .\testdata\test_messy_names\search6.cor 
   --contact_rp O
   --central RCOMe
   --contact R2CO
@@ -247,6 +280,6 @@ Looking at the first fragment with labels can come in handy when you forgot how 
 A plot like the ones above should show.
 
 ## Building a methyl model
-If you choose to not use the hydrogen atoms from a methyl group for alignment, you can specify where they need to be build back in ```files\methyl_model.csv```. If you do want to use the regular generation of the central group model, do not put the labels in the bin column in ```files\central_groups.csv``` and do not specify the central group name here. The model will be built using K-means. See thesis for pro's/con's of both of these methods.
+If you choose to not use the hydrogen atoms from a methyl group for alignment, you can specify where they need to be build back in ```files\methyl_model.csv```. If you do want to use the regular generation of the central group model, do not put the labels of the hydrogens in the bin column in ```files\central_groups.csv``` and do not specify the central group name in ```files\methyl_model.csv```. The model will be built using K-means. See thesis for pro's/con's of both of these methods.
 
 This is the end of the tutorial, have fun calculating directionalities and inspecting densities around central group models! :)
