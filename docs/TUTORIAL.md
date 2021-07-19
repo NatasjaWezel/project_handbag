@@ -12,13 +12,13 @@
     + [Question 5: How to run using this argument file?](#question-5--how-to-run-using-this-argument-file-)
     + [Question 6: Implementation of argument file for NO3--R2CO (O)](#question-6--implementation-of-argument-file-for-no3--r2co--o-)
     + [Question 7: How to run using this argument file?](#question-7--how-to-run-using-this-argument-file-)
+- [Plotting the first fragment with labels](#plotting-the-first-fragment-with-labels)
 - [How to specify labels](#how-to-specify-labels)
     + [Question 8: What would you fill in for RC6H5, as shown in the picture above?](#question-8--what-would-you-fill-in-for-rc6h5--as-shown-in-the-picture-above-)
     + [Question 9: How would you run the program with RC6H5, with as contact reference point the oxygen atom of CO?](#question-9--how-would-you-run-the-program-with-rc6h5--with-as-contact-reference-point-the-oxygen-atom-of-co-)
 - [What to do when the name of the cor file has the wrong format](#what-to-do-when-the-name-of-the-cor-file-has-the-wrong-format)
     + [Question 10: What would you fill in in central_groups.csv for RCOMe, as shown in the picture above?](#question-10--what-would-you-fill-in-in-central-groupscsv-for-rcome--as-shown-in-the-picture-above-)
     + [Question 11: How would you now run this program?](#question-11--how-would-you-now-run-this-program-)
-- [Plotting the first fragment with labels](#plotting-the-first-fragment-with-labels)
 - [Building a methyl model](#building-a-methyl-model)
 
 ## Installing the project
