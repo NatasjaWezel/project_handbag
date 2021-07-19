@@ -30,7 +30,7 @@ This is a GIF showing one of the 4D density plots made with this program:
 For installation guidelines, click [here](INSTALLATION.md).
 
 ## Replicating experiments
-The code for easily running the pipeline on lots of contact pairs is found in the [jupyter notebooks](src/notebooks).
+The code for easily running the pipeline on lots of contact pairs is found in the [jupyter notebooks](./src/notebooks).
 
 The original data is found here # TODO: where to store the data so it can be downloaded?
 
