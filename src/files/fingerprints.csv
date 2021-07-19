@@ -6,7 +6,7 @@
 # The columns are defined as follows:
 # central: the name of the central group
 # description: describe what atoms you have used in this plot
-# labels: labels of the atoms to use, separated by '&'
+# labels: labels of the atoms to use separated by '&'
 central,description,labels
 ArCI,both Qa (H/F),LAB5-R1&LAB6-R2
 H2O,O,LAB2
