@@ -8,30 +8,3 @@
 # description: describe what atoms you have used in this plot
 # labels: labels of the atoms to use separated by '&'
 central,description,labels
-ArCI,both Qa (H/F),LAB5-R1&LAB6-R2
-H2O,O,LAB2
-H2O,H,LAB1&LAB3
-NO3,N,LAB2
-NO3,O,LAB1&LAB3&LAB4
-RCOMe,R,LAB4-R1
-RCOMe,C in C=O,LAB1
-RCOMe,C in CH${_3}$,LAB3
-RC6H5,R,LAB1
-RC6F5,R,LAB12
-RC6F5,any F,LAB7&LAB8&LAB9&LAB10&LAB11
-RC6F5,ortho F,LAB11&LAB8
-RC6F5,meta F,LAB7&LAB10
-RC6F5,para F,LAB9
-RC6F5,any C,LAB1&LAB2&LAB3&LAB4&LAB5&LAB6
-RNO2,R,LAB1
-RNO2,O's,LAB3&LAB4
-RNO2,N,LAB2
-REt,R,LAB8
-REt,C in CH${_3}$,LAB1
-REt,C in CH${_2}$,LAB5
-RC6H5,R,LAB1
-RC6H5,any H,LAB12&LAB8&LAB9&LAB10&LAB11
-RC6H5,ortho H,LAB12&LAB8
-RC6H5,meta H,LAB9&LAB11
-RC6H5,para H,LAB10
-RC6H5,any C,LAB7&LAB2&LAB3&LAB4&LAB5&LAB6
