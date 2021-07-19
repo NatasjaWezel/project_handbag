@@ -1,5 +1,5 @@
 # This file contains information about what specific fingerprint plots you want to make.
-# If nothing about a central group is in here only the "closest atom" plot will be made.
+# If nothing about a central group is in here only the 'closest atom' plot will be made.
 # Make sure to fill in each column, choosing the labels that you are interesting.
 # If you don't remember the labels that your molecule has: try plotting the model fragment (with labels).
 #
