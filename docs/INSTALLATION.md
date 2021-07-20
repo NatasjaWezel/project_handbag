@@ -3,7 +3,7 @@ Install python 3.8.8 [here](https://www.python.org/downloads/release/python-388/
 Windows 64-bit installer.
 Install Windows terminal from the Microsoft Marketplace or click [here](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab).
 
-Follow the detailed tutorial [here](docs/TUTORIAL.md) if you're not used to working with terminal.
+Follow the detailed tutorial [here](./TUTORIAL.md) if you're not used to working with terminal.
 
 Download the source code from GitHub, open a terminal in the src folder
 
