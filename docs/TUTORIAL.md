@@ -34,6 +34,8 @@ The steps you need to undertake to run the CLI are summarized in bullet points. 
 
 ![download button](../figures/tutorial/download_source_code.png)
 
+* Unzip the folder
+
 ## Setting up a virtual environment and install the dependencies of this project
 * Navigate to the src folder in file explorer and open a windows terminal by right clicking the white space in the folder and choosing open Windows Terminal.</br>
 ![open windows terminal](../figures/tutorial/open_terminal.png)
